@@ -25,6 +25,12 @@ $ fciv -sha1 example.txt
 // File Checksum Integrity Verifier version 2.05.
 //
 25e64db6d4d1d6116ffe0b317918c98f3624cbed example.txt&lt;/code&gt;&lt;/pre&gt;
+ &lt;pre&gt;&lt;code&gt;$ echo "Hello world" &amp;gt; example.txt
+$ fciv -sha1 example.txt
+//
+// File Checksum Integrity Verifier version 2.05.
+//
+25e64db6d4d1d6116ffe0b317918c98f3624cbed example.txt&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;Most software you download from the internet should provide a hash that you can verify to make sure the file was not corrupted or altered. For example, Multibit provides SHA256 hashes &lt;a href="https://multibit.org/releases/multibit-0.5.17/release.txt" title="MultiBit 0.5.17 release notes"&gt;here&lt;/a&gt;.&lt;/p&gt;
  &lt;p&gt;Even though the tutorial suggests downloading getting Microsoft&amp;rsquo;s FCIV tool, it only has SHA1, and I need SHA256, so I&lt;/p&gt;
  &lt;h1 id="verifying-signatures"&gt;Verifying Signatures&lt;/h1&gt;&lt;/html&gt;</description></item>

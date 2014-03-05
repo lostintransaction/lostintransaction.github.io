@@ -23,6 +23,15 @@ A hash function maps its input to a number. The SHA-1 function maps
 inputs to 160-bit (40 hexadecial digit) numbers. Here's the Hello
 World example from the MultiBit tutorial:
 
+```
+$ echo "Hello world" > example.txt
+$ fciv -sha1 example.txt
+//
+// File Checksum Integrity Verifier version 2.05.
+//
+25e64db6d4d1d6116ffe0b317918c98f3624cbed example.txt
+```
+
     $ echo "Hello world" > example.txt
     $ fciv -sha1 example.txt
     //

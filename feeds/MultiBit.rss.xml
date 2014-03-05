@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <rss version="2.0">
  <channel>
-  <title>My Awesome Blog: Posts tagged 'signatures'</title>
-  <description>My Awesome Blog: Posts tagged 'signatures'</description>
-  <link>http://www.example.com/tags/signatures.html</link>
+  <title>My Awesome Blog: Posts tagged 'MultiBit'</title>
+  <description>My Awesome Blog: Posts tagged 'MultiBit'</description>
+  <link>http://www.example.com/tags/MultiBit.html</link>
   <lastBuildDate>Wed, 05 Mar 2014 06:44:02 UTC</lastBuildDate>
   <pubDate>Wed, 05 Mar 2014 06:44:02 UTC</pubDate>
   <ttl>1800</ttl>
   <item>
    <title>Verifying Hashes and Signatures</title>
-   <link>http://www.example.com/blog/2014/03/05/verifying-hashes-and-signatures/?utm_source=signatures&amp;utm_medium=RSS</link>
+   <link>http://www.example.com/blog/2014/03/05/verifying-hashes-and-signatures/?utm_source=MultiBit&amp;utm_medium=RSS</link>
    <guid>urn:http-www-example-com:-blog-2014-03-05-verifying-hashes-and-signatures</guid>
    <pubDate>Wed, 05 Mar 2014 06:44:02 UTC</pubDate>
    <description>
-&lt;html&gt;&lt;img src="http://www.example.com/img/1x1.gif?utm_source=signatures&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
+&lt;html&gt;&lt;img src="http://www.example.com/img/1x1.gif?utm_source=MultiBit&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
  &lt;p&gt;&lt;em&gt;Replace this with your post text. Add one or more comma-separated Tags above. The special tag &lt;code&gt;DRAFT&lt;/code&gt; will prevent the post from being published.&lt;/em&gt;&lt;/p&gt;
  &lt;p&gt;Security is really important when handling bitcoins. One easy safeguard is to make sure the programs you download are actually what you think they are using hashes and signatures.&lt;/p&gt;
  &lt;p&gt;In this post, I&amp;rsquo;m using Windows 7 (64-bit), and I essentially follow &lt;a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures"&gt;the MultiBit tutorial&lt;/a&gt;.&lt;/p&gt;

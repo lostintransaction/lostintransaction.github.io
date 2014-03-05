@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?> 
-<rss version="2.0">
- <channel>
-  <title>My Awesome Blog: Posts tagged 'signatures'</title>
-  <description>My Awesome Blog: Posts tagged 'signatures'</description>
-  <link>http://www.example.com/tags/signatures.html</link>
-  <lastBuildDate>Wed, 05 Mar 2014 06:44:02 UTC</lastBuildDate>
-  <pubDate>Wed, 05 Mar 2014 06:44:02 UTC</pubDate>
-  <ttl>1800</ttl>
-  <item>
-   <title>Verifying Hashes and Signatures</title>
-   <link>http://www.example.com/blog/2014/03/05/verifying-hashes-and-signatures/?utm_source=signatures&amp;utm_medium=RSS</link>
-   <guid>urn:http-www-example-com:-blog-2014-03-05-verifying-hashes-and-signatures</guid>
-   <pubDate>Wed, 05 Mar 2014 06:44:02 UTC</pubDate>
-   <description>
-&lt;html&gt;&lt;img src="http://www.example.com/img/1x1.gif?utm_source=signatures&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+ <title type="text">My Awesome Blog: Posts tagged 'MultiBit'</title>
+ <link rel="self" href="http://www.example.com/feeds/MultiBit.atom.xml" />
+ <link href="http://www.example.com/tags/MultiBit.html" />
+ <id>urn:http-www-example-com:-tags-MultiBit-html</id>
+ <updated>2014-03-05T06:44:02Z</updated>
+ <entry>
+  <title type="text">Verifying Hashes and Signatures</title>
+  <link rel="alternate" href="http://www.example.com/blog/2014/03/05/verifying-hashes-and-signatures/?utm_source=MultiBit&amp;utm_medium=Atom" />
+  <id>urn:http-www-example-com:-blog-2014-03-05-verifying-hashes-and-signatures</id>
+  <published>2014-03-05T06:44:02Z</published>
+  <updated>2014-03-05T06:44:02Z</updated>
+  <author>
+   <name>The Unknown Author</name></author>
+  <content type="html">
+&lt;html&gt;&lt;img src="http://www.example.com/img/1x1.gif?utm_source=MultiBit&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
  &lt;p&gt;&lt;em&gt;Replace this with your post text. Add one or more comma-separated Tags above. The special tag &lt;code&gt;DRAFT&lt;/code&gt; will prevent the post from being published.&lt;/em&gt;&lt;/p&gt;
  &lt;p&gt;Security is really important when handling bitcoins. One easy safeguard is to make sure the programs you download are actually what you think they are using hashes and signatures.&lt;/p&gt;
  &lt;p&gt;In this post, I&amp;rsquo;m using Windows 7 (64-bit), and I essentially follow &lt;a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures"&gt;the MultiBit tutorial&lt;/a&gt;.&lt;/p&gt;
@@ -27,4 +28,4 @@ $ fciv -sha1 example.txt
 25e64db6d4d1d6116ffe0b317918c98f3624cbed example.txt&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;Most software you download from the internet should provide a hash that you can verify to make sure the file was not corrupted or altered. For example, Multibit provides SHA256 hashes &lt;a href="https://multibit.org/releases/multibit-0.5.17/release.txt" title="MultiBit 0.5.17 release notes"&gt;here&lt;/a&gt;.&lt;/p&gt;
  &lt;p&gt;Even though the tutorial suggests downloading getting Microsoft&amp;rsquo;s FCIV tool, it only has SHA1, and I need SHA256, so I&lt;/p&gt;
- &lt;h1 id="verifying-signatures"&gt;Verifying Signatures&lt;/h1&gt;&lt;/html&gt;</description></item></channel></rss>
+ &lt;h1 id="verifying-signatures"&gt;Verifying Signatures&lt;/h1&gt;&lt;/html&gt;</content></entry></feed>

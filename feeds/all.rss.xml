@@ -14,7 +14,12 @@
    <pubDate>Wed, 05 Mar 2014 06:44:02 UTC</pubDate>
    <description>
 &lt;html&gt;&lt;img src="http://www.example.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
- &lt;p&gt;&lt;em&gt;Replace this with your post text. Add one or more comma-separated Tags above. The special tag &lt;code&gt;DRAFT&lt;/code&gt; will prevent the post from being published.&lt;/em&gt;&lt;/p&gt;&lt;/html&gt;</description></item>
+ &lt;p&gt;&lt;em&gt;Replace this with your post text. Add one or more comma-separated Tags above. The special tag &lt;code&gt;DRAFT&lt;/code&gt; will prevent the post from being published.&lt;/em&gt;&lt;/p&gt;
+ &lt;p&gt;Security is really important when handling bitcoins. One easy safeguard is to make sure the programs you download are actually what you think they are using hashes and signatures.&lt;/p&gt;
+ &lt;p&gt;In this post, I essentially follow &lt;a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures"&gt;the MultiBit tutorial&lt;/a&gt;. I&amp;rsquo;m using 64-bit Windows 7.&lt;/p&gt;
+ &lt;h1 id="verifying-hashes"&gt;Verifying Hashes&lt;/h1&gt;
+ &lt;p&gt;Most software you download from the internet should provide a hash that you can verify to make sure the file was not corrupted or altered. Multibit provides SHA256 hashes &lt;a href="https://multibit.org/releases/multibit-0.5.17/release.txt" title="MultiBit 0.5.17 release notes"&gt;here&lt;/a&gt;.&lt;/p&gt;
+ &lt;h1 id="verifying-signatures"&gt;Verifying Signatures&lt;/h1&gt;&lt;/html&gt;</description></item>
   <item>
    <title>A 2012 blog post</title>
    <link>http://www.example.com/blog/2012/01/01/a-2012-blog-post/?utm_source=all&amp;utm_medium=RSS</link>

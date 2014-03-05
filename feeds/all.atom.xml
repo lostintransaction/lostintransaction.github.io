@@ -4,7 +4,18 @@
  <link rel="self" href="http://www.example.com/feeds/all.atom.xml" />
  <link href="http://www.example.com/index.html" />
  <id>urn:http-www-example-com:-index-html</id>
- <updated>2012-01-01T00:00:00Z</updated>
+ <updated>2014-03-05T06:44:02Z</updated>
+ <entry>
+  <title type="text">Verifying Hashes and Signatures</title>
+  <link rel="alternate" href="http://www.example.com/blog/2014/03/05/verifying-hashes-and-signatures/?utm_source=all&amp;utm_medium=Atom" />
+  <id>urn:http-www-example-com:-blog-2014-03-05-verifying-hashes-and-signatures</id>
+  <published>2014-03-05T06:44:02Z</published>
+  <updated>2014-03-05T06:44:02Z</updated>
+  <author>
+   <name>The Unknown Author</name></author>
+  <content type="html">
+&lt;html&gt;&lt;img src="http://www.example.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
+ &lt;p&gt;&lt;em&gt;Replace this with your post text. Add one or more comma-separated Tags above. The special tag &lt;code&gt;DRAFT&lt;/code&gt; will prevent the post from being published.&lt;/em&gt;&lt;/p&gt;&lt;/html&gt;</content></entry>
  <entry>
   <title type="text">A 2012 blog post</title>
   <link rel="alternate" href="http://www.example.com/blog/2012/01/01/a-2012-blog-post/?utm_source=all&amp;utm_medium=Atom" />

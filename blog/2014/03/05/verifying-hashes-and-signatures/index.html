@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Verifying Hashes and Signatures</title>
-    <meta name="description" content="_Replace this with your post text. Add one or more comma-separated Tags above. The special tag `DRAFT` will prevent the post from being published._ Security is really important when handling bitcoins. One easy safeguard is to make sure you're downloading what you think you're downloading using hashes and signatures. In this post, I essentially follow the MultiBit tutorial on hashes and signatures. All examples are run in Windows 7 (64-bit). ...">
+    <meta name="description" content="_Replace this with your post text. Add one or more comma-separated Tags above. The special tag `DRAFT` will prevent the post from being published._ Security is really important when handling bitcoins. One easy safeguard is to make sure you're downloading what you think you're downloading using hashes and signatures. In this post, I check the hash and signature of MultiBit, essentially following the MultiBit tutorial on hashes and signatures. All examples are run in Windows 7 (64-bit). ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="hashes, signatures, MultiBit">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -116,7 +116,7 @@
  <p>Security is really important when handling bitcoins. One easy safeguard is to make sure you&rsquo;re downloading what you think you&rsquo;re downloading using hashes and signatures.</p>
 
 
- <p>In this post, I essentially follow <a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures">the MultiBit tutorial on hashes and signatures</a>. All examples are run in Windows 7 (64-bit).</p>
+ <p>In this post, I check the hash and signature of MultiBit, essentially following <a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures">the MultiBit tutorial on hashes and signatures</a>. All examples are run in Windows 7 (64-bit).</p>
 
 
  <h2 id="verifying-hashes">Verifying Hashes</h2>
@@ -136,16 +136,19 @@ $ fciv -sha1 example.txt
  <p>Note that when using Windows, the resulting hash is not the same as in the tutorial (ie, when using Linux) because the <code>examples.txt</code> file has extra quotes, an extra space, and uses the windows <code>\r\n</code> end-of-line instead of <code>\n</code>. We can simulate the Linux version of the example with a quick <a href="http://racket-lang.org">Racket</a> script:</p>
 
 
- <pre><code>$ del example.txt
+ <pre><code>```racket
+$ del example.txt
 $ racket
 Welcome to Racket v6.0.0.3
-&gt; (with-output-to-file "example.txt" (lambda () (display "Hello world\n")))
+&gt; (with-output-to-file "example.txt" (lambda () (display "Hello world\n")) #:exists 'replace)
 &gt; (exit)
 $ fciv -sha1 example.txt
 //
 // File Checksum Integrity Verifier version 2.05.
 //
-33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d example.txt</code></pre>
+33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d example.txt
+```
+</code></pre>
 
 
  <p><a href="http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in" title="Bitcoin StackExchange">It looks like I&rsquo;m not the only person that noticed the discrepancy</a>.</p>

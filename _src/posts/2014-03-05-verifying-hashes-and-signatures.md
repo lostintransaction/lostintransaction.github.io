@@ -10,7 +10,8 @@ Security is really important when handling bitcoins. One easy
 safeguard is to make sure you're downloading what you think you're
 downloading using hashes and signatures.
 
-In this post, I essentially follow
+In this post, I check the hash and signature of
+MultiBit, essentially following
 [the MultiBit tutorial on hashes and signatures][1]. All examples are
 run in Windows 7 (64-bit).
 
@@ -41,17 +42,19 @@ has extra quotes, an extra space, and uses the windows `\r\n`
 end-of-line instead of `\n`. We can simulate the Linux version of the
 example with a quick [Racket](http://racket-lang.org) script:
 
+    ```racket
     $ del example.txt
     $ racket
     Welcome to Racket v6.0.0.3
-    > (with-output-to-file "example.txt" (lambda () (display "Hello world\n")))
+    > (with-output-to-file "example.txt" (lambda () (display "Hello world\n")) #:exists 'replace)
     > (exit)
     $ fciv -sha1 example.txt
     //
     // File Checksum Integrity Verifier version 2.05.
     //
     33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d example.txt
-
+	```
+	
 [It looks like I'm not the only person that noticed the discrepancy][so].
 
 [so]: http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in

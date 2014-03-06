@@ -42,18 +42,22 @@ has extra quotes, an extra space, and uses the windows `\r\n`
 end-of-line instead of `\n`. We can simulate the Linux version of the
 example with a quick [Racket](http://racket-lang.org) script:
 
-    ```racket
-    $ del example.txt
-    $ racket
-    Welcome to Racket v6.0.0.3
-    > (with-output-to-file "example.txt" (lambda () (display "Hello world\n")) #:exists 'replace)
-    > (exit)
-    $ fciv -sha1 example.txt
-    //
-    // File Checksum Integrity Verifier version 2.05.
-    //
-    33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d example.txt
-	```
+```racket
+(with-output-to-file "example.txt" (lambda () (display "Hello world\n")) #:exists 'replace)
+```
+
+```racket
+$ del example.txt
+$ racket
+Welcome to Racket v6.0.0.3
+> (with-output-to-file "example.txt" (lambda () (display "Hello world\n")) #:exists 'replace)
+> (exit)
+$ fciv -sha1 example.txt
+//
+// File Checksum Integrity Verifier version 2.05.
+//
+33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d example.txt
+```
 	
 [It looks like I'm not the only person that noticed the discrepancy][so].
 

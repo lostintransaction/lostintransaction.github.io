@@ -40,7 +40,7 @@ $ fciv -sha1 example.txt
 33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d example.txt
 &lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;&lt;a href="http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in" title="Bitcoin StackExchange"&gt;It looks like I&amp;rsquo;m not the only person that noticed the discrepancy&lt;/a&gt;.&lt;/p&gt;
- &lt;h4 id="computing-sha256"&gt;&lt;em&gt;Computing SHA&amp;ndash;256&lt;/em&gt;_&lt;/h4&gt;
+ &lt;h4 id="computing-sha256"&gt;&lt;em&gt;Computing SHA&amp;ndash;256&lt;/em&gt;&lt;/h4&gt;
  &lt;p&gt;Most software you download from the internet should provide a hash that you can verify to make sure the file was not corrupted or altered. For example, Multibit provides &lt;a href="http://en.wikipedia.org/wiki/SHA-2" title="SHA-256 Wikipedia entry"&gt;SHA&amp;ndash;256 hashes&lt;/a&gt; (256-bits) in &lt;a href="https://multibit.org/releases/multibit-0.5.17/release.txt" title="MultiBit 0.5.17 release notes"&gt;the release notes&lt;/a&gt; (SHA&amp;ndash;256 is also the main hash function used in the &lt;a href="https://en.bitcoin.it/wiki/Protocol_specification#Common_standards"&gt;Bitcoin protocol&lt;/a&gt;.&lt;/p&gt;
  &lt;p&gt;&amp;ldquo;Bitcoin protocol&amp;rdquo;&lt;/p&gt;
  &lt;p&gt;Since FCIV only does SHA&amp;ndash;1, we need something else that computes SHA&amp;ndash;256. A quick Google search finds the &lt;a href="http://md5deep.sourceforge.net/"&gt;&lt;code&gt;md5deep&lt;/code&gt; library&lt;/a&gt;.&lt;/p&gt;
@@ -55,7 +55,7 @@ eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha1deep64.exe
  &lt;p&gt;[samehash][http://sourceforge.net/projects/md5deep/reviews/?offset=25]  &amp;ldquo;explanation of identical hash&amp;rdquo;&lt;/p&gt;
  &lt;h4 id="checking-multibits-hash"&gt;&lt;em&gt;Checking MultiBit&amp;rsquo;s hash&lt;/em&gt;&lt;/h4&gt;
  &lt;p&gt;Now we&amp;rsquo;re finally ready to check the hash of MultiBit 0.5.17 for Windows.&lt;/p&gt;
- &lt;p&gt;From the [release file][2]:&lt;/p&gt;
+ &lt;p&gt;From the &lt;a href="https://multibit.org/releases/multibit-0.5.17/release.txt" title="MultiBit 0.5.17 release notes"&gt;release notes&lt;/a&gt;:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;SHA256 hashes for files:
 90506bf43a64986ce8219ca0fb18a5e1f0776cfeb31043ca848cea7f71eda45d  multibit-0.5.17-windows-setup.exe&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;Computing the hash of the downloaded file:&lt;/p&gt;

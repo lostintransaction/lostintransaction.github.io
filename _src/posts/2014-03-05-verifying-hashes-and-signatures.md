@@ -63,7 +63,7 @@ a quick [Racket](http://racket-lang.org) script:
 [so]: http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in
 "Bitcoin StackExchange"
 
-#### _Computing SHA-256__ ####
+#### _Computing SHA-256_ ####
 
 Most software you download from the internet should provide a hash
 that you can verify to make sure the file was not corrupted or
@@ -111,7 +111,7 @@ filename.
 
 Now we're finally ready to check the hash of MultiBit 0.5.17 for Windows.
 
-From the [release file][2]:
+From the [release notes][0517notes]:
 
     SHA256 hashes for files:
     90506bf43a64986ce8219ca0fb18a5e1f0776cfeb31043ca848cea7f71eda45d  multibit-0.5.17-windows-setup.exe

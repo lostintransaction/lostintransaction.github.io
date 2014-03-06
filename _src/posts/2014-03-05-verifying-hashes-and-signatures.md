@@ -22,7 +22,7 @@ run in Windows 7 (64-bit).
 
 ### Verifying Hashes ###
 
-##### A hash function #####
+#### _A first example_ ####
 
 A hash function maps its input to a number. The [SHA-1][sha1] hash
 function maps inputs to 160-bit numbers (40 hexadecial digits). Here's
@@ -63,7 +63,7 @@ a quick [Racket](http://racket-lang.org) script:
 [so]: http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in
 "Bitcoin StackExchange"
 
-##### Checking downloaded files #####
+#### _Computing SHA-256__ ####
 
 Most software you download from the internet should provide a hash
 that you can verify to make sure the file was not corrupted or
@@ -77,11 +77,13 @@ in [the release notes][0517notes] (SHA-256 is also the main hash function used i
 [protocol]: https://en.bitcoin.it/wiki/Protocol_specification#Common_standards 
 "Bitcoin protocol"
 
-Since FCIV only does SHA-1, I needed something else that computes SHA-256. A quick Google search turned up the [`md5deep` library][md5deep].
+Since FCIV only does SHA-1, we need something else that computes
+SHA-256. A quick Google search finds the [`md5deep` library][md5deep].
 
 [md5deep]: http://md5deep.sourceforge.net/
 
-Since we are being paranoid here, let's just make sure the program we need is virus free by [uploading to VirusTotal][vt1].
+Since we are focusing on security, let's make sure the program we just
+got is virus-free by [uploading to VirusTotal][vt1].
 
 [vt1]: https://www.virustotal.com/en/file/eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29/analysis/
 "sha256deep64.exe on virustotal"
@@ -99,11 +101,13 @@ Interestingly, `sha256deep64.exe` and `sha1deep64.exe` produce the same SHA-256 
     eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha1deep64.exe
 
 No cause for concern though. Apparently this is
-[intentional][samehash] and the file behaves differently based on its
-name.
+[intentional][samehash] and the file determines its behavior based on its
+filename.
 
 [samehash][http://sourceforge.net/projects/md5deep/reviews/?offset=25] 
 "explanation of identical hash"
+
+#### _Checking MultiBit's hash_ ####
 
 Now we're finally ready to check the hash of MultiBit 0.5.17 for Windows.
 
@@ -119,4 +123,4 @@ Computing the hash of the downloaded file:
 
 And it matches!
 
-# Verifying Signatures #
+### Verifying Signatures ###

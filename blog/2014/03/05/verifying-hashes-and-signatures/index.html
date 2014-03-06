@@ -122,7 +122,7 @@
  <h3 id="verifying-hashes">Verifying Hashes</h3>
 
 
- <h5 id="a-hash-function">A hash function</h5>
+ <h4 id="a-first-example"><em>A first example</em></h4>
 
 
  <p>A hash function maps its input to a number. The <a href="http://en.wikipedia.org/wiki/SHA-1" title="SHA-1 Wikipedia entry">SHA&ndash;1</a> hash function maps inputs to 160-bit numbers (40 hexadecial digits). Here&rsquo;s the SHA&ndash;1 hash (computed with Microsoft&rsquo;s FCIV program) of the <code>"Hello
@@ -179,7 +179,7 @@ $ fciv -sha1 example.txt
  <p><a href="http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in" title="Bitcoin StackExchange">It looks like I&rsquo;m not the only person that noticed the discrepancy</a>.</p>
 
 
- <h5 id="checking-downloaded-files">Checking downloaded files</h5>
+ <h4 id="computing-sha256"><em>Computing SHA&ndash;256</em>_</h4>
 
 
  <p>Most software you download from the internet should provide a hash that you can verify to make sure the file was not corrupted or altered. For example, Multibit provides <a href="http://en.wikipedia.org/wiki/SHA-2" title="SHA-256 Wikipedia entry">SHA&ndash;256 hashes</a> (256-bits) in <a href="https://multibit.org/releases/multibit-0.5.17/release.txt" title="MultiBit 0.5.17 release notes">the release notes</a> (SHA&ndash;256 is also the main hash function used in the <a href="https://en.bitcoin.it/wiki/Protocol_specification#Common_standards">Bitcoin protocol</a>.</p>
@@ -188,10 +188,10 @@ $ fciv -sha1 example.txt
  <p>&ldquo;Bitcoin protocol&rdquo;</p>
 
 
- <p>Since FCIV only does SHA&ndash;1, I needed something else that computes SHA&ndash;256. A quick Google search turned up the <a href="http://md5deep.sourceforge.net/"><code>md5deep</code> library</a>.</p>
+ <p>Since FCIV only does SHA&ndash;1, we need something else that computes SHA&ndash;256. A quick Google search finds the <a href="http://md5deep.sourceforge.net/"><code>md5deep</code> library</a>.</p>
 
 
- <p>Since we are being paranoid here, let&rsquo;s just make sure the program we need is virus free by <a href="https://www.virustotal.com/en/file/eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29/analysis/" title="sha256deep64.exe on virustotal">uploading to VirusTotal</a>.</p>
+ <p>Since we are focusing on security, let&rsquo;s make sure the program we just got is virus-free by <a href="https://www.virustotal.com/en/file/eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29/analysis/" title="sha256deep64.exe on virustotal">uploading to VirusTotal</a>.</p>
 
 
  <p>VirusTotal also uses SHA&ndash;1, to track which files it has seen, and we can check that the file we uploaded, <code>sha256deep64.exe</code>, matches the file for which VirusTotal is reporting results:</p>
@@ -208,10 +208,13 @@ eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha256deep64.e
 eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha1deep64.exe</code></pre>
 
 
- <p>No cause for concern though. Apparently this is [intentional][samehash] and the file behaves differently based on its name.</p>
+ <p>No cause for concern though. Apparently this is [intentional][samehash] and the file determines its behavior based on its filename.</p>
 
 
  <p>[samehash][http://sourceforge.net/projects/md5deep/reviews/?offset=25]  &ldquo;explanation of identical hash&rdquo;</p>
+
+
+ <h4 id="checking-multibits-hash"><em>Checking MultiBit&rsquo;s hash</em></h4>
 
 
  <p>Now we&rsquo;re finally ready to check the hash of MultiBit 0.5.17 for Windows.</p>
@@ -234,7 +237,7 @@ eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha1deep64.exe
  <p>And it matches!</p>
 
 
- <h1 id="verifying-signatures">Verifying Signatures</h1>
+ <h3 id="verifying-signatures">Verifying Signatures</h3>
 
  <footer>
 

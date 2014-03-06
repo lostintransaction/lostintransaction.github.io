@@ -20,12 +20,14 @@ run in Windows 7 (64-bit).
 
 <!-- more -->
 
-## Verifying Hashes ##
+### Verifying Hashes ###
 
-A hash function maps its input to a number. The [SHA-1][sha1] function
-maps inputs to 160-bit numbers (40 hexadecial digits). Here's the SHA-1
-(using Microsoft's FCIV program) of the Hello World example from the
-MultiBit tutorial:
+##### A hash function #####
+
+A hash function maps its input to a number. The [SHA-1][sha1] hash
+function maps inputs to 160-bit numbers (40 hexadecial digits). Here's
+the SHA-1 hash (computed with Microsoft's FCIV program) of the `"Hello
+world"` example from the MultiBit tutorial:
 
 [sha1]: http://en.wikipedia.org/wiki/SHA-1 "SHA-1 Wikipedia entry"
 
@@ -36,33 +38,32 @@ MultiBit tutorial:
     //
     25e64db6d4d1d6116ffe0b317918c98f3624cbed example.txt
 
-Note that when using Windows, the resulting hash is not the same as in
-the tutorial (ie, when using Linux) because the `examples.txt` file
-has extra quotes, an extra space, and uses the windows `\r\n`
-end-of-line instead of `\n`. We can simulate the Linux version of the
-example with a quick [Racket](http://racket-lang.org) script:
+Note that in Windows, the resulting hash differs from the tutorial
+(ie, when using Linux) because the Windows `examples.txt` file has
+extra quotes, an extra space, and uses the windows `\r\n` end-of-line
+instead of `\n`. We can simulate the Linux version of the example with
+a quick [Racket](http://racket-lang.org) script:
 
 ```racket
 (with-output-to-file "example.txt" (lambda () (display "Hello world\n")) #:exists 'replace)
 ```
 
-```racket
-$ del example.txt
-$ racket
-Welcome to Racket v6.0.0.3
-> (with-output-to-file "example.txt" (lambda () (display "Hello world\n")) #:exists 'replace)
-> (exit)
-$ fciv -sha1 example.txt
-//
-// File Checksum Integrity Verifier version 2.05.
-//
-33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d example.txt
-```
+    $ racket
+    Welcome to Racket v6.0.0.3
+    > (with-output-to-file "example.txt" (lambda () (display "Hello world\n")) #:exists 'replace)
+    > (exit)
+    $ fciv -sha1 example.txt
+    //
+    // File Checksum Integrity Verifier version 2.05.
+    //
+    33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d example.txt
 	
 [It looks like I'm not the only person that noticed the discrepancy][so].
 
 [so]: http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in
 "Bitcoin StackExchange"
+
+##### Checking downloaded files #####
 
 Most software you download from the internet should provide a hash
 that you can verify to make sure the file was not corrupted or

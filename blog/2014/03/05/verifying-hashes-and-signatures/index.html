@@ -119,10 +119,14 @@
  <p>In this post, I check the hash and signature of MultiBit, essentially following <a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures">the MultiBit tutorial on hashes and signatures</a>. All examples are run in Windows 7 (64-bit).</p>
 
 
- <h2 id="verifying-hashes">Verifying Hashes</h2>
+ <h3 id="verifying-hashes">Verifying Hashes</h3>
 
 
- <p>A hash function maps its input to a number. The <a href="http://en.wikipedia.org/wiki/SHA-1" title="SHA-1 Wikipedia entry">SHA&ndash;1</a> function maps inputs to 160-bit numbers (40 hexadecial digits). Here&rsquo;s the SHA&ndash;1 (using Microsoft&rsquo;s FCIV program) of the Hello World example from the MultiBit tutorial:</p>
+ <h5 id="a-hash-function">A hash function</h5>
+
+
+ <p>A hash function maps its input to a number. The <a href="http://en.wikipedia.org/wiki/SHA-1" title="SHA-1 Wikipedia entry">SHA&ndash;1</a> hash function maps inputs to 160-bit numbers (40 hexadecial digits). Here&rsquo;s the SHA&ndash;1 hash (computed with Microsoft&rsquo;s FCIV program) of the <code>"Hello
+world"</code> example from the MultiBit tutorial:</p>
 
 
  <pre><code>$ echo "Hello world" &gt; example.txt
@@ -133,7 +137,7 @@ $ fciv -sha1 example.txt
 25e64db6d4d1d6116ffe0b317918c98f3624cbed example.txt</code></pre>
 
 
- <p>Note that when using Windows, the resulting hash is not the same as in the tutorial (ie, when using Linux) because the <code>examples.txt</code> file has extra quotes, an extra space, and uses the windows <code>\r\n</code> end-of-line instead of <code>\n</code>. We can simulate the Linux version of the example with a quick <a href="http://racket-lang.org">Racket</a> script:</p>
+ <p>Note that in Windows, the resulting hash differs from the tutorial (ie, when using Linux) because the Windows <code>examples.txt</code> file has extra quotes, an extra space, and uses the windows <code>\r\n</code> end-of-line instead of <code>\n</code>. We can simulate the Linux version of the example with a quick <a href="http://racket-lang.org">Racket</a> script:</p>
 
 
  <div class="brush: racket">
@@ -160,49 +164,22 @@ $ fciv -sha1 example.txt
 </div>
 
 
- <div class="brush: racket">
-
-  <table class="sourcetable">
-
-   <tbody>
-
-    <tr>
-
-     <td class="linenos">
-
-      <div class="linenodiv">
-
-       <pre> 1
- 2
- 3
- 4
- 5
- 6
- 7
- 8
- 9
-10</pre></div></td>
-
-     <td class="code">
-
-      <div class="source">
-
-       <pre><span class="nv">$</span> <span class="nv">del</span> <span class="nv">example</span><span class="o">.</span><span class="nv">txt</span>
-<span class="nv">$</span> <span class="nv"><a href="http://docs.racket-lang.org/scribble/scribble_manual_code.html#(form._((lib._scribble/manual..rkt)._racket))" style="color: inherit">racket</a></span>
-<span class="nv">Welcome</span> <span class="nv">to</span> <span class="nv">Racket</span> <span class="nv">v6</span><span class="o">.</span><span class="mf">0.0</span><span class="o">.</span><span class="mi">3</span>
-<span class="nv"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3e))" style="color: inherit">&gt;</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/file-ports.html#(def._((lib._racket/private/base..rkt)._with-output-to-file))" style="color: inherit">with-output-to-file</a> </span><span class="s">"example.txt"</span> <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/lambda.html#(form._((lib._racket/private/base..rkt)._lambda))" style="color: inherit">lambda</a> </span><span class="p">()</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/Writing.html#(def._((quote._~23~25kernel)._display))" style="color: inherit">display</a> </span><span class="s">"Hello world\n"</span><span class="p">))</span> <span class="kd">#:exists</span> <span class="ss">'replace</span><span class="p">)</span>
-<span class="nv"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3e))" style="color: inherit">&gt;</a></span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/Exiting.html#(def._((quote._~23~25kernel)._exit))" style="color: inherit">exit</a></span><span class="p">)</span>
-<span class="nv">$</span> <span class="nv">fciv</span> <span class="nv">-sha1</span> <span class="nv">example</span><span class="o">.</span><span class="nv">txt</span>
-<span class="nv">//</span>
-<span class="nv">//</span> <span class="nv">File</span> <span class="nv">Checksum</span> <span class="nv">Integrity</span> <span class="nv">Verifier</span> <span class="nv"><a href="http://docs.racket-lang.org/reference/runtime.html#(def._((quote._~23~25kernel)._version))" style="color: inherit">version</a></span> <span class="mf">2.05</span><span class="o">.</span>
-<span class="nv">//</span>
-<span class="mi">33</span><span class="nv">ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d</span> <span class="nv">example</span><span class="o">.</span><span class="nv">txt</span>
-</pre></div>
-</td></tr></tbody></table>
-</div>
+ <pre><code>$ racket
+Welcome to Racket v6.0.0.3
+&gt; (with-output-to-file "example.txt" (lambda () (display "Hello world\n")) #:exists 'replace)
+&gt; (exit)
+$ fciv -sha1 example.txt
+//
+// File Checksum Integrity Verifier version 2.05.
+//
+33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d example.txt
+</code></pre>
 
 
  <p><a href="http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in" title="Bitcoin StackExchange">It looks like I&rsquo;m not the only person that noticed the discrepancy</a>.</p>
+
+
+ <h5 id="checking-downloaded-files">Checking downloaded files</h5>
 
 
  <p>Most software you download from the internet should provide a hash that you can verify to make sure the file was not corrupted or altered. For example, Multibit provides <a href="http://en.wikipedia.org/wiki/SHA-2" title="SHA-256 Wikipedia entry">SHA&ndash;256 hashes</a> (256-bits) in <a href="https://multibit.org/releases/multibit-0.5.17/release.txt" title="MultiBit 0.5.17 release notes">the release notes</a> (SHA&ndash;256 is also the main hash function used in the <a href="https://en.bitcoin.it/wiki/Protocol_specification#Common_standards">Bitcoin protocol</a>.</p>

@@ -15,18 +15,19 @@
    <description>
 &lt;html&gt;&lt;img src="http://www.example.com/img/1x1.gif?utm_source=hashes&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
  &lt;p&gt;&lt;em&gt;Replace this with your post text. Add one or more comma-separated Tags above. The special tag &lt;code&gt;DRAFT&lt;/code&gt; will prevent the post from being published.&lt;/em&gt;&lt;/p&gt;
- &lt;p&gt;Security is really important when handling bitcoins. One easy safeguard is to make sure the programs you download are actually what you think they are using hashes and signatures.&lt;/p&gt;
- &lt;p&gt;In this post, I essentially follow &lt;a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures"&gt;the MultiBit tutorial&lt;/a&gt;. I&amp;rsquo;m using Windows 7 (64-bit).&lt;/p&gt;
- &lt;h1 id="verifying-hashes"&gt;Verifying Hashes&lt;/h1&gt;
- &lt;p&gt;A hash function maps its input to a number. The &lt;a href="http://en.wikipedia.org/wiki/SHA-1" title="SHA-1 Wikipedia entry"&gt;SHA&amp;ndash;1&lt;/a&gt; function maps inputs to 160-bit (40 hexadecial digit) numbers. Here&amp;rsquo;s the SHA&amp;ndash;1 (using Microsoft&amp;rsquo;s FCIV program) of the Hello World example from the MultiBit tutorial:&lt;/p&gt;
+ &lt;p&gt;Security is really important when handling bitcoins. One easy safeguard is to make sure you&amp;rsquo;re downloading what you think you&amp;rsquo;re downloading using hashes and signatures.&lt;/p&gt;
+ &lt;p&gt;In this post, I essentially follow &lt;a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures"&gt;the MultiBit tutorial on hashes and signatures&lt;/a&gt;. All examples are run in Windows 7 (64-bit).&lt;/p&gt;
+ &lt;h2 id="verifying-hashes"&gt;Verifying Hashes&lt;/h2&gt;
+ &lt;p&gt;A hash function maps its input to a number. The &lt;a href="http://en.wikipedia.org/wiki/SHA-1" title="SHA-1 Wikipedia entry"&gt;SHA&amp;ndash;1&lt;/a&gt; function maps inputs to 160-bit numbers (40 hexadecial digits). Here&amp;rsquo;s the SHA&amp;ndash;1 (using Microsoft&amp;rsquo;s FCIV program) of the Hello World example from the MultiBit tutorial:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ echo "Hello world" &amp;gt; example.txt
 $ fciv -sha1 example.txt
 //
 // File Checksum Integrity Verifier version 2.05.
 //
 25e64db6d4d1d6116ffe0b317918c98f3624cbed example.txt&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Note that when using Windows, the resulting hash is not the same as in the tutorial (ie, when using Linux) because the &lt;code&gt;examples.txt&lt;/code&gt; file has extra quotes, an extra space, and uses the windows &lt;code&gt;\r\n&lt;/code&gt; end-of-line instead of &lt;code&gt;\n&lt;/code&gt;. I simulated the Linux version of the example with a quick &lt;a href="http://racket-lang.org"&gt;Racket&lt;/a&gt; script:&lt;/p&gt;
- &lt;pre&gt;&lt;code&gt;$ racket
+ &lt;p&gt;Note that when using Windows, the resulting hash is not the same as in the tutorial (ie, when using Linux) because the &lt;code&gt;examples.txt&lt;/code&gt; file has extra quotes, an extra space, and uses the windows &lt;code&gt;\r\n&lt;/code&gt; end-of-line instead of &lt;code&gt;\n&lt;/code&gt;. We can simulate the Linux version of the example with a quick &lt;a href="http://racket-lang.org"&gt;Racket&lt;/a&gt; script:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ del example.txt
+$ racket
 Welcome to Racket v6.0.0.3
 &amp;gt; (with-output-to-file "example.txt" (lambda () (display "Hello world\n")))
 &amp;gt; (exit)
@@ -35,15 +36,24 @@ $ fciv -sha1 example.txt
 // File Checksum Integrity Verifier version 2.05.
 //
 33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d example.txt&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;I found other people discussing the discrepancy &lt;a href="http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in" title="Bitcoin StackExchange"&gt;here&lt;/a&gt;.&lt;/p&gt;
- &lt;p&gt;Most software you download from the internet should provide a hash that you can verify to make sure the file was not corrupted or altered. For example, Multibit provides SHA256 hashes &lt;a href="https://multibit.org/releases/multibit-0.5.17/release.txt" title="MultiBit 0.5.17 release notes"&gt;here&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;&lt;a href="http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in" title="Bitcoin StackExchange"&gt;It looks like I&amp;rsquo;m not the only person that noticed the discrepancy&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;Most software you download from the internet should provide a hash that you can verify to make sure the file was not corrupted or altered. For example, Multibit provides &lt;a href="http://en.wikipedia.org/wiki/SHA-2" title="SHA-256 Wikipedia entry"&gt;SHA&amp;ndash;256 hashes&lt;/a&gt; (256-bits) in &lt;a href="https://multibit.org/releases/multibit-0.5.17/release.txt" title="MultiBit 0.5.17 release notes"&gt;the release notes&lt;/a&gt; (SHA&amp;ndash;256 is also the main hash function used in the &lt;a href="https://en.bitcoin.it/wiki/Protocol_specification#Common_standards"&gt;Bitcoin protocol&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;&amp;ldquo;Bitcoin protocol&amp;rdquo;&lt;/p&gt;
  &lt;p&gt;Since FCIV only does SHA&amp;ndash;1, I needed something else that computes SHA&amp;ndash;256. A quick Google search turned up the &lt;a href="http://md5deep.sourceforge.net/"&gt;&lt;code&gt;md5deep&lt;/code&gt; library&lt;/a&gt;.&lt;/p&gt;
- &lt;p&gt;Since we are being paranoid here, let&amp;rsquo;s just make sure the program we need is &lt;a href="https://www.virustotal.com/en/file/eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29/analysis/" title="sha256deep64.exe on virustotal"&gt;legit&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;Since we are being paranoid here, let&amp;rsquo;s just make sure the program we need is virus free by &lt;a href="https://www.virustotal.com/en/file/eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29/analysis/" title="sha256deep64.exe on virustotal"&gt;uploading to VirusTotal&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;VirusTotal also uses SHA&amp;ndash;1, to track which files it has seen, and we can check that the file we uploaded, &lt;code&gt;sha256deep64.exe&lt;/code&gt;, matches the file for which VirusTotal is reporting results:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ sha256deep64 sha256deep64.exe
+eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha256deep64.exe&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Interestingly, &lt;code&gt;sha256deep64.exe&lt;/code&gt; and &lt;code&gt;sha1deep64.exe&lt;/code&gt; produce the same SHA&amp;ndash;256 hash:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ sha256deep64 sha1deep64.exe
+eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha1deep64.exe&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;No cause for concern though. Apparently this is [intentional][samehash] and the file behaves differently based on its name.&lt;/p&gt;
+ &lt;p&gt;[samehash][http://sourceforge.net/projects/md5deep/reviews/?offset=25]  &amp;ldquo;explanation of identical hash&amp;rdquo;&lt;/p&gt;
  &lt;p&gt;Now we&amp;rsquo;re finally ready to check the hash of MultiBit 0.5.17 for Windows.&lt;/p&gt;
- &lt;p&gt;From the &lt;a href="https://multibit.org/releases/multibit-0.5.17/release.txt" title="MultiBit 0.5.17 release notes"&gt;release file&lt;/a&gt;:&lt;/p&gt;
+ &lt;p&gt;From the [release file][2]:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;SHA256 hashes for files:
 90506bf43a64986ce8219ca0fb18a5e1f0776cfeb31043ca848cea7f71eda45d  multibit-0.5.17-windows-setup.exe&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Computing the hash:&lt;/p&gt;
+ &lt;p&gt;Computing the hash of the downloaded file:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ sha256deep64.exe multibit-0.5.17-windows-setup.exe
 90506bf43a64986ce8219ca0fb18a5e1f0776cfeb31043ca848cea7f71eda45d  multibit-0.5.17-windows-setup.exe&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;And it matches!&lt;/p&gt;

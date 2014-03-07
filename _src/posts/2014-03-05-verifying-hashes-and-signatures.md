@@ -3,13 +3,13 @@
     Tags: hashes, signatures, MultiBit
 
 Security is really important when handling bitcoins. Hashes and
-signatures can help ensure that you're downloading what you think
-you're downloading.
+signatures can help by verifying that you're downloading what you
+think you're downloading.
 
-In this post, I check the hash and signature of
-MultiBit, essentially following
-[the MultiBit tutorial on hashes and signatures][1]. All examples are
-run in Windows 7 (64-bit).
+In this post, I briefly explain hashes and signatures, and then check
+the hash and signature of the MultiBit wallet program, essentially
+following [the MultiBit tutorial on hashes and signatures][1]. All
+examples are run in Windows 7 (64-bit).
 
 [1]: https://multibit.org/blog/2013/07/24/how-to-check-signatures.html
 "MultiBit tutorial on hashes and signatures"

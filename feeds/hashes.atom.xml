@@ -15,8 +15,8 @@
    <name>The Unknown Author</name></author>
   <content type="html">
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=hashes&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
- &lt;p&gt;Security is really important when handling bitcoins. Hashes and signatures can help ensure that you&amp;rsquo;re downloading what you think you&amp;rsquo;re downloading.&lt;/p&gt;
- &lt;p&gt;In this post, I check the hash and signature of MultiBit, essentially following &lt;a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures"&gt;the MultiBit tutorial on hashes and signatures&lt;/a&gt;. All examples are run in Windows 7 (64-bit).&lt;/p&gt;
+ &lt;p&gt;Security is really important when handling bitcoins. Hashes and signatures can help by verifying that you&amp;rsquo;re downloading what you think you&amp;rsquo;re downloading.&lt;/p&gt;
+ &lt;p&gt;In this post, I briefly explain hashes and signatures, and then check the hash and signature of the MultiBit wallet program, essentially following &lt;a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures"&gt;the MultiBit tutorial on hashes and signatures&lt;/a&gt;. All examples are run in Windows 7 (64-bit).&lt;/p&gt;
  &lt;h3 id="verifying-hashes"&gt;Verifying Hashes&lt;/h3&gt;
  &lt;h4 id="a-first-example"&gt;&lt;em&gt;A first example&lt;/em&gt;&lt;/h4&gt;
  &lt;p&gt;A hash function maps its input to a number. The &lt;a href="http://en.wikipedia.org/wiki/SHA-1" title="SHA-1 Wikipedia entry"&gt;SHA&amp;ndash;1&lt;/a&gt; hash function maps inputs to 160-bit numbers (40 hexadecial digits). Here&amp;rsquo;s the SHA&amp;ndash;1 hash (computed with Microsoft&amp;rsquo;s FCIV program) of the &lt;code&gt;"Hello

@@ -30,9 +30,7 @@ hexadecial digits). Here's the SHA-1 hash (computed with Microsoft's
 FCIV program) of the `"Hello world"` example from the MultiBit
 tutorial:
 
-
-[cryhash]: http://en.wikipedia.org/wiki/Cryptographic_hash_function 
-"cryptographic hash function Wikipedia entry"
+[cryhash]: http://en.wikipedia.org/wiki/Cryptographic_hash_function "cryptographic hash function Wikipedia entry"
 
 [sha1]: http://en.wikipedia.org/wiki/SHA-1 "SHA-1 Wikipedia entry"
 

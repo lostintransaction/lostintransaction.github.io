@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8">
+    <title>Verifying a Signed Message</title>
+    <meta name="description" content="Today, Andreas M. Antonopoulos, Chief Security Officer of Blockchain.info, started a fundraiser for Dorian Nakamoto, the guy who's being harassed by the media due to Newsweek's article about Satoshi Nakamoto. To prove that the message is not fake, Andreas signed the message with his public key. Since I just recently learned about digital signatures, this seems like a great chance to explore some more. Let's try to to verify the message. ...">
+    <meta name="author"      content="The Unknown Blogger">
+    <meta name="keywords"    content="Andreas Antonopoulos, signatures">
+    <meta name="viewport"    content="width=device-width, initial-scale=1.0">
+    <link rel="icon"      href="/favicon.ico">
+    <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/03/07/verifying-a-signed-message/">
+    <link rel="next" href="/blog/2014/03/05/verifying-hashes-and-signatures/">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/pygments.css">
+    <link rel="stylesheet" type="text/css" href="/css/scribble.css">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
+    <!-- Feeds -->
+    <link ref="alternate" type="application/atom+xml"
+          href="/feeds/all.atom.xml" title="Atom Feed">
+    <link ref="alternate" type="application/rss+xml"
+          href="/feeds/all.rss.xml" title="RSS Feed">
+    <!-- JS -->
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-48721117-3']);
+      _gaq.push(['_setDomainName', 'www.lostintransaction.com']);
+      _gaq.push(['_trackPageview']);
+      setTimeout(function(){_gaq.push(['_trackEvent', '30_seconds', 'read'])}, 30000); // http://drawingablank.me/blog/fix-your-bounce-rate.html
+      (function() {
+          var ga = document.createElement('script');
+          ga.type = 'text/javascript'; ga.async = true;
+          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- A standard Twitter Bootstrap nav bar -->
+    <header class="navbar navbar-default navbar-inverse"
+            role="banner">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button"
+                  class="navbar-toggle"
+                  data-toggle="collapse"
+                  data-target=".our-nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a href="/index.html" class="navbar-brand">Lost in Transaction</a>
+        </div>
+        <div class="collapse navbar-collapse our-nav-collapse"
+             role="navigation">
+          <ul class="nav navbar-nav">
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                Tags <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="/index.html">All Posts</a></li>
+
+<li><a href="/tags/Andreas-Antonopoulos.html">Andreas Antonopoulos</a></li>
+
+<li><a href="/tags/bar.html">bar</a></li>
+
+<li><a href="/tags/baz.html">baz</a></li>
+
+<li><a href="/tags/foo.html">foo</a></li>
+
+<li><a href="/tags/hashes.html">hashes</a></li>
+
+<li><a href="/tags/MultiBit.html">MultiBit</a></li>
+
+<li><a href="/tags/signatures.html">signatures</a></li>
+
+<li><a href="/tags/tag-with-spaces.html">tag with spaces</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="/About.html">About</a>
+            </li> 
+            <li><a href="/feeds/all.atom.xml">Atom</a></li>
+            <li><a href="/feeds/all.rss.xml">RSS</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+
+        <!-- Main column -->
+        <div id="content" class="col-md-12">
+
+
+
+
+
+
+<article>
+
+ <header>
+
+  <h1>Verifying a Signed Message</h1>
+
+  <p class="date-and-tags">
+   <time datetime="2014-03-07" pubdate="true">2014-03-07</time> :: <span class="tags"><a href="/tags/Andreas-Antonopoulos.html">Andreas Antonopoulos</a>, <a href="/tags/signatures.html">signatures</a></span></p>
+  </header>
+
+
+ <p>Today, Andreas M. Antonopoulos, Chief Security Officer of Blockchain.info, started a <a href="http://www.reddit.com/r/Bitcoin/comments/1ztjmg/andreas_im_fundraising_for_dorian_nakamoto/" title="Dorian fundraiser message on Reddit">fundraiser</a> for Dorian Nakamoto, the guy who&rsquo;s being harassed by the media due to Newsweek&rsquo;s article about Satoshi Nakamoto. To prove that the message is not fake, Andreas <a href="http://pastebin.com/4MHvpaeN" title="Dorian fundraiser message on Pastebin">signed the message</a> with his public key. Since I just <a href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/" title="Post: Verifying Hashes and Signatures">recently learned about digital signatures</a>, this seems like a great chance to explore some more. Let&rsquo;s try to to verify the message.</p>
+
+
+ <p>First, we need Andreas&rsquo;s public key. I went to the <a href="http://pgp.mit.edu/">MIT PGP Public Key Server</a> and searched for <code>"Andreas M. Antonopoulos"</code>. There were several, so I arbitrarily chose one:</p>
+
+
+ <pre><code>pub  4096R/2878DE4F 2013-12-14 Andreas M. Antonopoulos &lt;andreas@antonopoulos.com&gt;</code></pre>
+
+
+ <p>I then added the key to my database:</p>
+
+
+ <pre><code>$ gpg2.exe" --keyserver pgp.mit.edu --recv-keys 0x2878DE4F
+gpg: requesting key 2878DE4F from hkp server pgp.mit.edu
+gpg: key 2878DE4F: public key "Andreas M. Antonopoulos &lt;andreas@antonopoulos.com&gt;" imported
+gpg: Total number processed: 1
+gpg:               imported: 1  (RSA: 1)</code></pre>
+
+
+ <p>Next, I downloaded the <a href="http://pastebin.com/4MHvpaeN" title="Dorian fundraiser message on Pastebin">message from Pastebin</a> and tried to verify it:</p>
+
+
+ <pre><code>$gpg2.exe" --verify andreas_fundraising_for_dorian.txt
+gpg: Signature made 03/07/14 12:26:34 Eastern Standard Time using RSA key ID B1632E74
+gpg: Can't check signature: No public key</code></pre>
+
+
+ <p>Oops, I got the wrong key. The message is signed with key <code>B1632E74</code> so let&rsquo;s get it:</p>
+
+
+ <pre><code>$ gpg2.exe" --keyserver pgp.mit.edu --recv-keys 0xB1632E74
+gpg: requesting key B1632E74 from hkp server pgp.mit.edu
+gpg: key B1632E74: public key "Andreas M. Antonopoulos (Blockchain.info CSO) &lt;andreas@blockchain.info&gt;" imported
+gpg: no ultimately trusted keys found
+gpg: Total number processed: 1
+gpg:               imported: 1  (RSA: 1)</code></pre>
+
+
+ <p>And now let&rsquo;s try to verify:</p>
+
+
+ <pre><code>$ gpg2.exe" --verify andreas_fundraising_for_dorian.txt
+gpg: Signature made 03/07/14 12:26:34 Eastern Standard Time using RSA key ID B1632E74
+gpg: Good signature from "Andreas M. Antonopoulos (Blockchain.info CSO) &lt;andreas@blockchain.info&gt;"
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: B40F E0EB 4316 82F5 A7BD  5B3B 339B 0210 B163 2E74</code></pre>
+
+
+ <p>Success!</p>
+
+
+ <p>One final issue. How do we know that <em>the</em> Andreas Antonopoulos actually controls the <code>B1632E74</code> key, and not someone posing as him or someone else with the same name. As I mentioned in my <a href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/" title="Post: Verifying Hashes and Signatures">previous post</a>, there&rsquo;s a few options:</p>
+
+
+ <ol>
+
+  <li>
+
+   <p>We can look in a central place that we trust. I checked <a href="bitcoin.org">bitcoin.org</a> and found the <a href="https://bitcoin.org/en/development">PGP keys for several important people</a> in the Bitcoin community. But no Andreas! I could not find anything on <a href="blockchain.info">blockchain.info</a> either.</p></li>
+
+  <li>
+
+   <p>We can do an informal verification by &ldquo;public consensus&rdquo; by looking at <a href="(http://pgp.mit.edu/pks/lookup?op=vindex&amp;search=0x339B0210B1632E74)" title="Andreas Antonopoulos public key signatures">who else signed Andreas&rsquo;s key</a>. Unfortunately, there are not too many other signatures at the moment:</p>
+
+   <p>uid Andreas M. Antonopoulos (Blockchain.info CSO) <a href="mailto:andreas@blockchain.info">andreas@blockchain.info</a> sig sig3 B1632E74 2014&ndash;01&ndash;22 __________ 2015&ndash;01&ndash;22 [selfsig] sig sig 2878DE4F 2014&ndash;01&ndash;22 __________ __________ Andreas M. Antonopoulos <a href="mailto:andreas@antonopoulos.com">andreas@antonopoulos.com</a> sig sig CF8338F5 2014&ndash;03&ndash;07 __________ __________ Christopher David Howie <a href="mailto:me@chrishowie.com">me@chrishowie.com</a></p></li></ol>
+
+
+ <p>Other than Andreas himself, there&rsquo;s only one other person that is vouching for the key.</p>
+
+
+ <ol>
+
+  <li>Luckily, Andreas anticipated this issue, and <a href="http://www.youtube.com/watch?v=JCF1u1Wqfv0" title="Andreas PGP key YouTube video">issued a statement on YouTube</a>. That confirms it! Now we are assued that the message is authentic.</li></ol>
+
+ <footer>
+
+  <script type="text/javascript">
+      !function(d,s,id){
+          var js,fjs=d.getElementsByTagName(s)[0];
+          if(!d.getElementById(id)){
+              js=d.createElement(s);
+              js.id=id;
+              js.src="//platform.twitter.com/widgets.js";
+              fjs.parentNode.insertBefore(js,fjs);
+          }
+      }(document,"script","twitter-wjs");
+    </script>
+    <a class="twitter-share-button" data-dnt="true" data-url="http://www.lostintransaction.com/blog/2014/03/07/verifying-a-signed-message/" href="https://twitter.com/share">
+      "Tweet"</a>
+
+  <script src="https://apis.google.com/js/plusone.js" type="text/javascript"></script>
+
+  <g:plusone href="http://www.lostintransaction.com/blog/2014/03/07/verifying-a-signed-message/" size="medium"></g:plusone>
+
+  <script type="text/javascript">
+      var disqus_shortname = 'lostintransaction';
+      (function() {
+          var dsq = document.createElement('script');
+          dsq.type = 'text/javascript';
+          dsq.async = true;
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+
+  <div id="disqus_thread"></div>
+
+  <ul class="pager">
+
+
+   <li class="next">
+      <a href="/blog/2014/03/05/verifying-hashes-and-signatures/"><em>Verifying Hashes and Signatures</em> &rarr;</a>
+    </li>
+    </ul>
+  </footer>
+</article>
+        </div>
+      </div>
+      <footer>
+        <hr />
+        <p>Lost in Transaction: A neophyte explores Bitcoin.</p>
+        <p><a href="https://twitter.com/sixconfirms"
+              class="twitter-follow-button"
+              data-show-count="false"
+              data-lang="en">
+             "Follow sixconfirms"
+           </a>
+           <script type="text/javascript">
+             !function(d,s,id){
+                 var js,fjs=d.getElementsByTagName(s)[0];
+                 if(!d.getElementById(id)){
+                     js=d.createElement(s);
+                     js.id=id;
+                     js.src="//platform.twitter.com/widgets.js";
+                     fjs.parentNode.insertBefore(js,fjs);
+                 }
+             }(document,"script","twitter-wjs");
+           </script></p>
+        <p>Site generated
+        by <a href="https://github.com/greghendershott/frog">Frog</a>,
+        the <strong>fr</strong>ozen bl<strong>og</strong> tool.</p>
+        <p>Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
+<!--        <p><em>Your legal notice here</em>.</p>-->
+        <p><em>Don't believe anything you read here</em>.</p>
+      </footer>
+    </div>
+    <!-- </body> JS -->
+    <script type="text/javascript" src="//code.jquery.com/jquery.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+  </body>
+</html>

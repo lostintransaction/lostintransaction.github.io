@@ -83,8 +83,8 @@ are not too many other signatures at the moment:
 Other than Andreas himself, there's only one other person that is vouching for the key.
 
 3. Luckily, Andreas anticipated this issue, and
-[issued a statement on YouTube][youtube], confirming his key. That
-confirms it! Now we are assured that the message is authentic.
+[issued a statement on YouTube][youtube], confirming his key. It's a
+match! Now we are assured that the message is authentic.
 
 [andreaskey]: http://pgp.mit.edu/pks/lookup?op=vindex&search=0x339B0210B1632E74 "Andreas Antonopoulos public key signatures"
 [youtube]: http://www.youtube.com/watch?v=JCF1u1Wqfv0 "Andreas PGP key YouTube video"

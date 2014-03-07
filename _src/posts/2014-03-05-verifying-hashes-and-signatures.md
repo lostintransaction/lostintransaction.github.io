@@ -176,8 +176,8 @@ verify MultiBit's signature.
 1. First we download [GnuPG][gnupg], [for Windows][gpgwin],
 specifically Gpg4win-Vanilla 2.2.1. Of course we first check the hash for a match.
 
-       $ sha1deep64 gpg4win-vanilla-2.2.1.exe
-       6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac  gpg4win-vanilla-2.2.1.exe
+        $ sha1deep64 gpg4win-vanilla-2.2.1.exe
+        6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac  gpg4win-vanilla-2.2.1.exe
 	
 [pgp]: http://en.wikipedia.org/wiki/Pretty_Good_Privacy "PGP Wikipedia entry"
 [gnupg]: http://www.gnupg.org/ "GnuPG"
@@ -187,13 +187,13 @@ specifically Gpg4win-Vanilla 2.2.1. Of course we first check the hash for a matc
 2. Then, following the MultiBit tutorial, we get the public key for
 Jim Burton, MultiBit developer, from a known key server.
 
-    $ gpg2.exe" --keyserver pgp.mit.edu -- recv-keys 0x79F7C572
-     gpg: requesting key 79F7C572 from hkp server pgp.mit.edu
-     gpg: .../AppData/Roaming/gnupg/trustdb.gpg: trustdb created
-     gpg: key 79F7C572: public key "Jim Burton (multibit.org developer) <jim618@fastmail.co.uk>" imported
-     gpg: no ultimately trusted keys found
-     gpg: Total number processed: 1
-     gpg:               imported: 1  (RSA: 1)
+        $ gpg2.exe" --keyserver pgp.mit.edu -- recv-keys 0x79F7C572
+        gpg: requesting key 79F7C572 from hkp server pgp.mit.edu
+        gpg: .../AppData/Roaming/gnupg/trustdb.gpg: trustdb created
+        gpg: key 79F7C572: public key "Jim Burton (multibit.org developer) <jim618@fastmail.co.uk>" imported
+        gpg: no ultimately trusted keys found
+        gpg: Total number processed: 1
+        gpg:               imported: 1  (RSA: 1)
 
 3. Then we download the [signature file][multibitsig].
 
@@ -202,13 +202,13 @@ Jim Burton, MultiBit developer, from a known key server.
 4. Finally, we can verify that Jim signed the file we're downloading
 and that it hasn't been tampered with.
 
-    $ gpg2.exe" --verify multibit-0.5.17-windows-setup.exe.asc
-    gpg: Signature made 03/03/14 06:09:34 Eastern Standard Time using RSA key ID 23F7FB7B
-    gpg: Good signature from "Jim Burton (multibit.org developer) <jim618@fastmail.co.uk>"
-    gpg: WARNING: This key is not certified with a trusted signature!
-    gpg:          There is no indication that the signature belongs to the owner.
-    Primary key fingerprint: 299C 423C 672F 47F4 756A  6BA4 C197 2AED 79F7 C572
-         Subkey fingerprint: 4A71 A836 F572 01B4 D088  7D60 0820 A658 23F7 FB7B
+        $ gpg2.exe" --verify multibit-0.5.17-windows-setup.exe.asc
+        gpg: Signature made 03/03/14 06:09:34 Eastern Standard Time using RSA key ID 23F7FB7B
+        gpg: Good signature from "Jim Burton (multibit.org developer) <jim618@fastmail.co.uk>"
+        gpg: WARNING: This key is not certified with a trusted signature!
+        gpg:          There is no indication that the signature belongs to the owner.
+        Primary key fingerprint: 299C 423C 672F 47F4 756A  6BA4 C197 2AED 79F7 C572
+             Subkey fingerprint: 4A71 A836 F572 01B4 D088  7D60 0820 A658 23F7 FB7B
 	 
 The warning means that we have never seen Jim's public key, and nor
 has anyone that we trust (the `gpg` program keeps track of people we

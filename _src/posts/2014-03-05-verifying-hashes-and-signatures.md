@@ -176,8 +176,8 @@ verify MultiBit's signature.
 1. First we download [GnuPG][gnupg], [for Windows][gpgwin],
 specifically Gpg4win-Vanilla 2.2.1. Of course we first check the hash for a match.
 
-    $ sha1deep64 gpg4win-vanilla-2.2.1.exe
-    6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac  gpg4win-vanilla-2.2.1.exe
+       $ sha1deep64 gpg4win-vanilla-2.2.1.exe
+       6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac  gpg4win-vanilla-2.2.1.exe
 	
 [pgp]: http://en.wikipedia.org/wiki/Pretty_Good_Privacy "PGP Wikipedia entry"
 [gnupg]: http://www.gnupg.org/ "GnuPG"

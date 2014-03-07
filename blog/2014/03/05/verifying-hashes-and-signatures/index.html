@@ -261,17 +261,14 @@ eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha1deep64.exe
 
   <li>
 
-   <p>First we download <a href="http://www.gnupg.org/" title="GnuPG">GnuPG</a>, <a href="http://www.gnupg.org/" title="GnuPG for Windows">for Windows</a>, specifically Gpg4win-Vanilla 2.2.1. Of course we first check the hash for a match.</p>
+   <p>First we download <a href="http://www.gnupg.org/" title="GnuPG">GnuPG</a>, <a href="http://www.gnupg.org/" title="GnuPG for Windows">for Windows</a>,  specifically Gpg4win-Vanilla, version 2.2.1. Of course we first  check the hash for a match.</p>
 
    <pre><code>$ sha1deep64 gpg4win-vanilla-2.2.1.exe
-6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac  gpg4win-vanilla-2.2.1.exe</code></pre></li></ol>
-
-
- <ol>
+6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac  gpg4win-vanilla-2.2.1.exe</code></pre></li>
 
   <li>
 
-   <p>Then, following the MultiBit tutorial, we get the public key for Jim Burton, MultiBit developer, from a known key server.</p>
+   <p>Then, following the MultiBit tutorial, we get the public key for  Jim Burton, MultiBit developer, from a known key server.</p>
 
    <pre><code>$ gpg2.exe" --keyserver pgp.mit.edu -- recv-keys 0x79F7C572
 gpg: requesting key 79F7C572 from hkp server pgp.mit.edu
@@ -281,14 +278,13 @@ gpg: no ultimately trusted keys found
 gpg: Total number processed: 1
 gpg:               imported: 1  (RSA: 1)</code></pre></li>
 
-  <li>Then we download the <a href="https://multibit.org/releases/multibit-0.5.17/multibit-0.5.17-windows-setup.exe.asc" title="MultiBit signature file">signature file</a>.</li></ol>
+  <li>
 
-
- <ol>
+   <p>Then we download the <a href="https://multibit.org/releases/multibit-0.5.17/multibit-0.5.17-windows-setup.exe.asc" title="MultiBit signature file">signature file</a>.</p></li>
 
   <li>
 
-   <p>Finally, we can verify that Jim signed the file we&rsquo;re downloading and that it hasn&rsquo;t been tampered with.</p>
+   <p>Finally, we can verify that Jim signed the file we&rsquo;re downloading  and that it hasn&rsquo;t been tampered with.</p>
 
    <pre><code>$ gpg2.exe" --verify multibit-0.5.17-windows-setup.exe.asc
 gpg: Signature made 03/03/14 06:09:34 Eastern Standard Time using RSA key ID 23F7FB7B

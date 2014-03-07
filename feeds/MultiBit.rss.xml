@@ -70,12 +70,11 @@ eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha1deep64.exe
  &lt;p&gt;&lt;a href="http://en.wikipedia.org/wiki/Pretty_Good_Privacy" title="PGP Wikipedia entry"&gt;PGP&lt;/a&gt; is a well-known signature system, which we&amp;rsquo;ll use to check verify MultiBit&amp;rsquo;s signature.&lt;/p&gt;
  &lt;ol&gt;
   &lt;li&gt;
-   &lt;p&gt;First we download &lt;a href="http://www.gnupg.org/" title="GnuPG"&gt;GnuPG&lt;/a&gt;, &lt;a href="http://www.gnupg.org/" title="GnuPG for Windows"&gt;for Windows&lt;/a&gt;, specifically Gpg4win-Vanilla 2.2.1. Of course we first check the hash for a match.&lt;/p&gt;
+   &lt;p&gt;First we download &lt;a href="http://www.gnupg.org/" title="GnuPG"&gt;GnuPG&lt;/a&gt;, &lt;a href="http://www.gnupg.org/" title="GnuPG for Windows"&gt;for Windows&lt;/a&gt;,  specifically Gpg4win-Vanilla, version 2.2.1. Of course we first  check the hash for a match.&lt;/p&gt;
    &lt;pre&gt;&lt;code&gt;$ sha1deep64 gpg4win-vanilla-2.2.1.exe
-6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac  gpg4win-vanilla-2.2.1.exe&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;&lt;/ol&gt;
- &lt;ol&gt;
+6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac  gpg4win-vanilla-2.2.1.exe&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
   &lt;li&gt;
-   &lt;p&gt;Then, following the MultiBit tutorial, we get the public key for Jim Burton, MultiBit developer, from a known key server.&lt;/p&gt;
+   &lt;p&gt;Then, following the MultiBit tutorial, we get the public key for  Jim Burton, MultiBit developer, from a known key server.&lt;/p&gt;
    &lt;pre&gt;&lt;code&gt;$ gpg2.exe" --keyserver pgp.mit.edu -- recv-keys 0x79F7C572
 gpg: requesting key 79F7C572 from hkp server pgp.mit.edu
 gpg: .../AppData/Roaming/gnupg/trustdb.gpg: trustdb created
@@ -83,10 +82,10 @@ gpg: key 79F7C572: public key "Jim Burton (multibit.org developer) &amp;lt;jim61
 gpg: no ultimately trusted keys found
 gpg: Total number processed: 1
 gpg:               imported: 1  (RSA: 1)&lt;/code&gt;&lt;/pre&gt;&lt;/li&gt;
-  &lt;li&gt;Then we download the &lt;a href="https://multibit.org/releases/multibit-0.5.17/multibit-0.5.17-windows-setup.exe.asc" title="MultiBit signature file"&gt;signature file&lt;/a&gt;.&lt;/li&gt;&lt;/ol&gt;
- &lt;ol&gt;
   &lt;li&gt;
-   &lt;p&gt;Finally, we can verify that Jim signed the file we&amp;rsquo;re downloading and that it hasn&amp;rsquo;t been tampered with.&lt;/p&gt;
+   &lt;p&gt;Then we download the &lt;a href="https://multibit.org/releases/multibit-0.5.17/multibit-0.5.17-windows-setup.exe.asc" title="MultiBit signature file"&gt;signature file&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+  &lt;li&gt;
+   &lt;p&gt;Finally, we can verify that Jim signed the file we&amp;rsquo;re downloading  and that it hasn&amp;rsquo;t been tampered with.&lt;/p&gt;
    &lt;pre&gt;&lt;code&gt;$ gpg2.exe" --verify multibit-0.5.17-windows-setup.exe.asc
 gpg: Signature made 03/03/14 06:09:34 Eastern Standard Time using RSA key ID 23F7FB7B
 gpg: Good signature from "Jim Burton (multibit.org developer) &amp;lt;jim618@fastmail.co.uk&amp;gt;"

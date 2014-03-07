@@ -174,18 +174,14 @@ lot more difficult to fool.
 verify MultiBit's signature.
 
 1. First we download [GnuPG][gnupg], [for Windows][gpgwin],
-specifically Gpg4win-Vanilla 2.2.1. Of course we first check the hash for a match.
+   specifically Gpg4win-Vanilla, version 2.2.1. Of course we first
+   check the hash for a match.
 
         $ sha1deep64 gpg4win-vanilla-2.2.1.exe
         6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac  gpg4win-vanilla-2.2.1.exe
 	
-[pgp]: http://en.wikipedia.org/wiki/Pretty_Good_Privacy "PGP Wikipedia entry"
-[gnupg]: http://www.gnupg.org/ "GnuPG"
-[gpgwin]: http://www.gnupg.org/ "GnuPG for Windows"
-[gpghash]: http://gpg4win.org/download.html "Gpg4win download and hashes"
-
 2. Then, following the MultiBit tutorial, we get the public key for
-Jim Burton, MultiBit developer, from a known key server.
+   Jim Burton, MultiBit developer, from a known key server.
 
         $ gpg2.exe" --keyserver pgp.mit.edu -- recv-keys 0x79F7C572
         gpg: requesting key 79F7C572 from hkp server pgp.mit.edu
@@ -197,10 +193,8 @@ Jim Burton, MultiBit developer, from a known key server.
 
 3. Then we download the [signature file][multibitsig].
 
-[multibitsig]: https://multibit.org/releases/multibit-0.5.17/multibit-0.5.17-windows-setup.exe.asc "MultiBit signature file"
-
 4. Finally, we can verify that Jim signed the file we're downloading
-and that it hasn't been tampered with.
+   and that it hasn't been tampered with.
 
         $ gpg2.exe" --verify multibit-0.5.17-windows-setup.exe.asc
         gpg: Signature made 03/03/14 06:09:34 Eastern Standard Time using RSA key ID 23F7FB7B
@@ -220,4 +214,9 @@ still be that lots of people have teamed up to deceive you, and have
 signed a fake version of Jim's key. As the key accumulates more
 signatures, however, the likelihood that it is fake does down.
 
+[pgp]: http://en.wikipedia.org/wiki/Pretty_Good_Privacy "PGP Wikipedia entry"
+[gnupg]: http://www.gnupg.org/ "GnuPG"
+[gpgwin]: http://www.gnupg.org/ "GnuPG for Windows"
+[gpghash]: http://gpg4win.org/download.html "Gpg4win download and hashes"
+[multibitsig]: https://multibit.org/releases/multibit-0.5.17/multibit-0.5.17-windows-setup.exe.asc "MultiBit signature file"
 [wot]: http://en.wikipedia.org/wiki/Web_of_trust "web of trust Wikipedia entry"

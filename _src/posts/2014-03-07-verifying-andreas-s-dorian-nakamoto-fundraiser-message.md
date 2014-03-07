@@ -77,7 +77,7 @@ are not too many other signatures at the moment:
         sig  sig   2878DE4F 2014-01-22 __________ __________ Andreas M. Antonopoulos <andreas@antonopoulos.com>
         sig  sig   CF8338F5 2014-03-07 __________ __________ Christopher David Howie <me@chrishowie.com>
 
-Other than Andreas himself, there's only one other person that is vouching for the key.
+  Other than Andreas himself, there's only one other person that is vouching for the key.
 
 3. Luckily, Andreas anticipated this issue, and
 [issued a statement on YouTube][youtube], confirming his key. That

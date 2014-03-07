@@ -17,7 +17,7 @@ message.
 
 <!-- more -->
 
-Unlike, [when we wanted to verify the Multibit signature][sigs], Andreas posted a [clearsigned][clearsign] message, where the content and signature are in the same document. However, we can still use [GnuPG][gnup] to verify the message.
+Unlike, [when we wanted to verify the Multibit signature][sigs], Andreas posted a [clearsigned][clearsign] message, where the content and signature are in the same document. However, we can still use [GnuPG][gnupg] to verify the message.
 
 First, we need Andreas's public key. I went to the [MIT PGP Public Key Server](http://pgp.mit.edu/) and [searched for `"Andreas M. Antonopoulos"`][searchres]. There were several results, so I arbitrarily chose the one associated with his domain name:
 

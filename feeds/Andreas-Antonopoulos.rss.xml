@@ -8,12 +8,12 @@
   <pubDate>Fri, 07 Mar 2014 18:52:52 UTC</pubDate>
   <ttl>1800</ttl>
   <item>
-   <title>Verifying a Signed Message</title>
-   <link>http://www.lostintransaction.com/blog/2014/03/07/verifying-a-signed-message/?utm_source=Andreas-Antonopoulos&amp;utm_medium=RSS</link>
-   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-07-verifying-a-signed-message</guid>
+   <title>Verifying Andreas's Dorian Nakamoto Fundraiser Message</title>
+   <link>http://www.lostintransaction.com/blog/2014/03/07/verifying-andreas-s-dorian-nakamoto-fundraiser-message/?utm_source=Andreas-Antonopoulos&amp;utm_medium=RSS</link>
+   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-07-verifying-andreas-s-dorian-nakamoto-fundraiser-message</guid>
    <pubDate>Fri, 07 Mar 2014 18:52:52 UTC</pubDate>
    <description>
-&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=Andreas-Antonopoulos&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F07%2Fverifying-a-signed-message%2F" height="1" width="1" /&gt;
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=Andreas-Antonopoulos&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F07%2Fverifying-andreas-s-dorian-nakamoto-fundraiser-message%2F" height="1" width="1" /&gt;
  &lt;p&gt;Today, Andreas M. Antonopoulos, Chief Security Officer of Blockchain.info, started a &lt;a href="http://www.reddit.com/r/Bitcoin/comments/1ztjmg/andreas_im_fundraising_for_dorian_nakamoto/" title="Dorian fundraiser message on Reddit"&gt;fundraiser&lt;/a&gt; for Dorian Nakamoto, the guy who&amp;rsquo;s being harassed by the media due to Newsweek&amp;rsquo;s article about Satoshi Nakamoto. To prove that the message is not fake, Andreas &lt;a href="http://pastebin.com/4MHvpaeN" title="Dorian fundraiser message on Pastebin"&gt;signed the message&lt;/a&gt; with his public key. Since I just &lt;a href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/" title="Post: Verifying Hashes and Signatures"&gt;recently learned about digital signatures&lt;/a&gt;, this seems like a great chance to explore some more. Let&amp;rsquo;s try to to verify the message.&lt;/p&gt;
  &lt;p&gt;First, we need Andreas&amp;rsquo;s public key. I went to the &lt;a href="http://pgp.mit.edu/"&gt;MIT PGP Public Key Server&lt;/a&gt; and searched for &lt;code&gt;"Andreas M. Antonopoulos"&lt;/code&gt;. There were several, so I arbitrarily chose one:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;pub  4096R/2878DE4F 2013-12-14 Andreas M. Antonopoulos &amp;lt;andreas@antonopoulos.com&amp;gt;&lt;/code&gt;&lt;/pre&gt;

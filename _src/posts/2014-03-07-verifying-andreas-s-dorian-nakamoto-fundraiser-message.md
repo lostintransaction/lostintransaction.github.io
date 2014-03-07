@@ -17,13 +17,17 @@ message.
 
 <!-- more -->
 
+Unlike, [when we wanted to verify the Multibit signature][sigs], Andreas posted a [clearsigned][clearsign] message, where the content and signature are in the same document. However, we can still use [GnuPG][gnup] to verify the message.
+
 First, we need Andreas's public key. I went to the [MIT PGP Public Key Server](http://pgp.mit.edu/) and [searched for `"Andreas M. Antonopoulos"`][searchres]. There were several results, so I arbitrarily chose the one associated with his domain name:
 
+[clearsign]: http://gnupg.org/gph/en/manual/x135.html "GnuPG docs"
+[gnupg]: http://www.gnupg.org/: "GnuPG"
 [searchres]: http://pgp.mit.edu/pks/lookup?search=%22Andreas+M.+Antonopoulos%22&op=index "Andreas PGP key search results"
 
     pub  4096R/2878DE4F 2013-12-14 Andreas M. Antonopoulos <andreas@antonopoulos.com>
 
-I then added the key to my database using [GnuPG](http://www.gnupg.org/):
+I then added the key to my database using [GnuPG][gnupg]:
 
     $ gpg2.exe" --keyserver pgp.mit.edu --recv-keys 0x2878DE4F
     gpg: requesting key 2878DE4F from hkp server pgp.mit.edu

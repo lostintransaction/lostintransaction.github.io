@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Verifying Andreas's Dorian Nakamoto Fundraiser Message</title>
-    <meta name="description" content="Today, Andreas M. Antonopoulos, Chief Security Officer of Blockchain.info, started a fundraiser for Dorian Nakamoto, the guy who's being harassed by the media due to Newsweek's article about Satoshi Nakamoto. To prove that the message is not fake, Andreas signed the message with his public key. Since I've recently been playing with digital signatures, this seemed like a great chance to explore some more. Let's try to to verify the message. ...">
+    <meta name="description" content="Today, Andreas M. Antonopoulos, Chief Security Officer of Blockchain.info, started a fundraiser for Dorian Nakamoto, the guy who's being harassed by the media due to Newsweek's recent article about Satoshi Nakamoto. To prove that the message is not fake, Andreas signed the message with his public key. Since I've recently been playing with digital signatures, this seemed like a great chance to explore some more. Let's try to to verify the message. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="Andreas Antonopoulos, signatures">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -112,10 +112,10 @@
   </header>
 
 
- <p>Today, Andreas M. Antonopoulos, Chief Security Officer of Blockchain.info, started a <a href="http://www.reddit.com/r/Bitcoin/comments/1ztjmg/andreas_im_fundraising_for_dorian_nakamoto/" title="Dorian fundraiser message on Reddit">fundraiser</a> for Dorian Nakamoto, the guy who&rsquo;s being harassed by the media due to Newsweek&rsquo;s article about Satoshi Nakamoto. To prove that the message is not fake, Andreas <a href="http://pastebin.com/4MHvpaeN" title="Dorian fundraiser message on Pastebin">signed the message</a> with his public key. Since I&rsquo;ve <a href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/" title="Post: Verifying Hashes and Signatures">recently been playing with digital signatures</a>, this seemed like a great chance to explore some more. Let&rsquo;s try to to verify the message.</p>
+ <p>Today, Andreas M. Antonopoulos, Chief Security Officer of Blockchain.info, started a <a href="http://www.reddit.com/r/Bitcoin/comments/1ztjmg/andreas_im_fundraising_for_dorian_nakamoto/" title="Dorian fundraiser message on Reddit">fundraiser</a> for Dorian Nakamoto, the guy who&rsquo;s being harassed by the media due to Newsweek&rsquo;s recent article about Satoshi Nakamoto. To prove that the message is not fake, Andreas <a href="http://pastebin.com/4MHvpaeN" title="Dorian fundraiser message on Pastebin">signed the message</a> with his public key. Since I&rsquo;ve <a href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/" title="Post: Verifying Hashes and Signatures">recently been playing with digital signatures</a>, this seemed like a great chance to explore some more. Let&rsquo;s try to to verify the message.</p>
 
 
- <p>First, we need Andreas&rsquo;s public key. I went to the <a href="http://pgp.mit.edu/">MIT PGP Public Key Server</a> and <a href="http://pgp.mit.edu/pks/lookup?search=%22Andreas+M.+Antonopoulos%22&amp;op=index" title="Andreas PGP key search results">searched for <code>"Andreas M. Antonopoulos"</code></a>. There were several results, so I arbitrarily chose the one from his domain name:</p>
+ <p>First, we need Andreas&rsquo;s public key. I went to the <a href="http://pgp.mit.edu/">MIT PGP Public Key Server</a> and <a href="http://pgp.mit.edu/pks/lookup?search=%22Andreas+M.+Antonopoulos%22&amp;op=index" title="Andreas PGP key search results">searched for <code>"Andreas M. Antonopoulos"</code></a>. There were several results, so I arbitrarily chose the one associated with his domain name:</p>
 
 
  <pre><code>pub  4096R/2878DE4F 2013-12-14 Andreas M. Antonopoulos &lt;andreas@antonopoulos.com&gt;</code></pre>
@@ -139,7 +139,7 @@ gpg: Signature made 03/07/14 12:26:34 Eastern Standard Time using RSA key ID B16
 gpg: Can't check signature: No public key</code></pre>
 
 
- <p>Oops, I got the wrong key. The message is signed with key <code>B1632E74</code> so let&rsquo;s get that one:</p>
+ <p>Oops, I got the wrong key. The message is signed with key <code>B1632E74</code> (Andreas&rsquo;s Blockchain.info key) so let&rsquo;s get that one:</p>
 
 
  <pre><code>$ gpg2.exe" --keyserver pgp.mit.edu --recv-keys 0xB1632E74
@@ -164,18 +164,18 @@ Primary key fingerprint: B40F E0EB 4316 82F5 A7BD  5B3B 339B 0210 B163 2E74</cod
  <p>Success!</p>
 
 
- <p>One final issue. How do we know that <em>the</em> Andreas Antonopoulos actually controls the <code>B1632E74</code> key, and not someone posing as him or someone else with the same name. As I mentioned in my <a href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/" title="Post: Verifying Hashes and Signatures">previous post</a>, there&rsquo;s a few options:</p>
+ <p>One final issue. How do we know that <em>the</em> Andreas Antonopoulos actually controls the <code>B1632E74</code> key, and not someone posing as him, or someone else with the same name. As I mentioned in a <a href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/" title="Post: Verifying Hashes and Signatures">previous post</a>, there&rsquo;s a few options:</p>
 
 
  <ol>
 
   <li>
 
-   <p>We can look in a central place that we trust. I checked <a href="http://bitcoin.org">bitcoin.org</a> and found the <a href="https://bitcoin.org/en/development">PGP keys for several important people</a> in the Bitcoin community. But no Andreas! I could not find anything on <a href="http://blockchain.info">blockchain.info</a> either.</p></li>
+   <p>We can look in a central place that we trust. I checked <a href="https://bitcoin.org/en">bitcoin.org</a> and found the <a href="https://bitcoin.org/en/development">PGP keys for several important people</a> in the Bitcoin community. But no Andreas! I could not find anything on <a href="https://blockchain.info">blockchain.info</a> either.</p></li>
 
   <li>
 
-   <p>We can do an informal verification by &ldquo;public consensus&rdquo; by looking at <a href="http://pgp.mit.edu/pks/lookup?op=vindex&amp;search=0x339B0210B1632E74" title="Andreas Antonopoulos public key signatures">who else signed Andreas&rsquo;s key</a>. Unfortunately, there are not too many other signatures at the moment:</p>
+   <p>We can do an informal verification via &ldquo;public consensus&rdquo; by looking at <a href="http://pgp.mit.edu/pks/lookup?op=vindex&amp;search=0x339B0210B1632E74" title="Andreas Antonopoulos public key signatures">who else signed Andreas&rsquo;s key</a>. Unfortunately, there are not too many other signatures at the moment:</p>
 
    <pre><code>uid Andreas M. Antonopoulos (Blockchain.info CSO) &lt;andreas@blockchain.info&gt;
 sig  sig3  B1632E74 2014-01-22 __________ 2015-01-22 [selfsig]
@@ -188,7 +188,7 @@ sig  sig   CF8338F5 2014-03-07 __________ __________ Christopher David Howie &lt
 
  <ol>
 
-  <li>Luckily, Andreas anticipated this issue, and <a href="http://www.youtube.com/watch?v=JCF1u1Wqfv0" title="Andreas PGP key YouTube video">issued a statement on YouTube</a>. That confirms it! Now we are assured that the message is authentic.</li></ol>
+  <li>Luckily, Andreas anticipated this issue, and <a href="http://www.youtube.com/watch?v=JCF1u1Wqfv0" title="Andreas PGP key YouTube video">issued a statement on YouTube</a>, confirming his key. That confirms it! Now we are assured that the message is authentic.</li></ol>
 
  <footer>
 

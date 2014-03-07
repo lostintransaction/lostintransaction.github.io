@@ -213,11 +213,13 @@ and that it hasn't been tampered with.
          Subkey fingerprint: 4A71 A836 F572 01B4 D088  7D60 0820 A658 23F7 FB7B
 	 
 The warning means that we have never seen Jim's public key, and nor
-has anyone that we trust. This key server uses the public-based key
-confirmation strategy described above. A person's public keys can be
+has anyone that we trust. This key server uses the [public-based key
+confirmation strategy][wot] described above. A person's public keys can be
 signed by other people and in this way, each of these people are
 vouching that this is Jim's key. Of course, it could still be that
 lots of people have teamed up to deceive you. As the key accumulates
 more signatures, however, the likelihood that it is fake does
 down. Also, the GnuPG program keeps track of keys of people you trust
 and lets you know if one of these people have signed Jim's key.
+
+[wot]: http://en.wikipedia.org/wiki/Web_of_trust "web of trust Wikipedia entry"

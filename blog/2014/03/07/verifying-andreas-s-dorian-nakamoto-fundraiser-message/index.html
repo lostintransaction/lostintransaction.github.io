@@ -115,7 +115,7 @@
  <p>Today, Andreas M. Antonopoulos, Chief Security Officer of Blockchain.info, started a <a href="http://www.reddit.com/r/Bitcoin/comments/1ztjmg/andreas_im_fundraising_for_dorian_nakamoto/" title="Dorian fundraiser message on Reddit">fundraiser</a> for Dorian Nakamoto, the guy who&rsquo;s being harassed by the media due to Newsweek&rsquo;s recent article about Satoshi Nakamoto. To prove that the message is not fake, Andreas <a href="http://pastebin.com/4MHvpaeN" title="Dorian fundraiser message on Pastebin">signed the message</a> with his public key. Since I&rsquo;ve <a href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/" title="Post: Verifying Hashes and Signatures">recently been playing with digital signatures</a>, this seemed like a great chance to explore some more. Let&rsquo;s try to to verify the message.</p>
 
 
- <p>Unlike, <a href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/" title="Post: Verifying Hashes and Signatures">when we wanted to verify the Multibit signature</a>, Andreas posted a <a href="http://gnupg.org/gph/en/manual/x135.html" title="GnuPG docs">clearsigned</a> message, where the content and signature are in the same document. However, we can still use <a href="http://www.gnupg.org/:" title="GnuPG">GnuPG</a> to verify the message.</p>
+ <p>Unlike, <a href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/" title="Post: Verifying Hashes and Signatures">when we wanted to verify the Multibit signature</a>, Andreas posted a <a href="http://gnupg.org/gph/en/manual/x135.html" title="GnuPG docs">clearsigned</a> message, where the content and signature are in the same document. However, we can still use <a href="http://www.gnupg.org/" title="GnuPG">GnuPG</a> to verify the message.</p>
 
 
  <p>First, we need Andreas&rsquo;s public key. I went to the <a href="http://pgp.mit.edu/">MIT PGP Public Key Server</a> and <a href="http://pgp.mit.edu/pks/lookup?search=%22Andreas+M.+Antonopoulos%22&amp;op=index" title="Andreas PGP key search results">searched for <code>"Andreas M. Antonopoulos"</code></a>. There were several results, so I arbitrarily chose the one associated with his domain name:</p>
@@ -124,7 +124,7 @@
  <pre><code>pub  4096R/2878DE4F 2013-12-14 Andreas M. Antonopoulos &lt;andreas@antonopoulos.com&gt;</code></pre>
 
 
- <p>I then added the key to my database using <a href="http://www.gnupg.org/:" title="GnuPG">GnuPG</a>:</p>
+ <p>I then added the key to my database:</p>
 
 
  <pre><code>$ gpg2.exe" --keyserver pgp.mit.edu --recv-keys 0x2878DE4F

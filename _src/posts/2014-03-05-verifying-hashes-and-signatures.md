@@ -20,11 +20,18 @@ examples are run in Windows 7 (64-bit).
 
 #### _A first example_ ####
 
-A hash function maps its input to a number. The [SHA-1][sha1] hash
-function maps inputs to 160-bit numbers (40 hexadecial digits). Here's
-the SHA-1 hash (computed with Microsoft's FCIV program) of the `"Hello
-world"` example from the MultiBit tutorial:
+A hash function maps its input to a number. Any hash function may map
+various different inputs to the same number, but for certain
+[_cryptographic_ hash functions][cryhash], the probability of
+collision is so small that we can treat the hash function's output as
+a unique identifier for the given input. The [SHA-1][sha1]
+cryptographic hash function maps inputs to 160-bit numbers (40
+hexadecial digits). Here's the SHA-1 hash (computed with Microsoft's
+FCIV program) of the `"Hello world"` example from the MultiBit
+tutorial:
 
+[cryhash]: http://en.wikipedia.org/wiki/Cryptographic_hash_function 
+"cryptographic hash function Wikipedia entry"
 [sha1]: http://en.wikipedia.org/wiki/SHA-1 "SHA-1 Wikipedia entry"
 
     $ echo "Hello world" > example.txt

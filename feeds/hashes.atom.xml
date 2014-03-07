@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
- <title type="text">My Awesome Blog: Posts tagged 'hashes'</title>
- <link rel="self" href="http://www.example.com/feeds/hashes.atom.xml" />
- <link href="http://www.example.com/tags/hashes.html" />
- <id>urn:http-www-example-com:-tags-hashes-html</id>
+ <title type="text">Lost in Transaction: Posts tagged 'hashes'</title>
+ <link rel="self" href="http://www.lostintransaction.com/feeds/hashes.atom.xml" />
+ <link href="http://www.lostintransaction.com/tags/hashes.html" />
+ <id>urn:http-www-lostintransaction-com:-tags-hashes-html</id>
  <updated>2014-03-05T06:44:02Z</updated>
  <entry>
   <title type="text">Verifying Hashes and Signatures</title>
-  <link rel="alternate" href="http://www.example.com/blog/2014/03/05/verifying-hashes-and-signatures/?utm_source=hashes&amp;utm_medium=Atom" />
-  <id>urn:http-www-example-com:-blog-2014-03-05-verifying-hashes-and-signatures</id>
+  <link rel="alternate" href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/?utm_source=hashes&amp;utm_medium=Atom" />
+  <id>urn:http-www-lostintransaction-com:-blog-2014-03-05-verifying-hashes-and-signatures</id>
   <published>2014-03-05T06:44:02Z</published>
   <updated>2014-03-05T06:44:02Z</updated>
   <author>
    <name>The Unknown Author</name></author>
   <content type="html">
-&lt;html&gt;&lt;img src="http://www.example.com/img/1x1.gif?utm_source=hashes&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=hashes&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
  &lt;p&gt;&lt;em&gt;Replace this with your post text. Add one or more comma-separated Tags above. The special tag &lt;code&gt;DRAFT&lt;/code&gt; will prevent the post from being published.&lt;/em&gt;&lt;/p&gt;
  &lt;p&gt;Security is really important when handling bitcoins. One easy safeguard is to make sure you&amp;rsquo;re downloading what you think you&amp;rsquo;re downloading using hashes and signatures.&lt;/p&gt;
  &lt;p&gt;In this post, I check the hash and signature of MultiBit, essentially following &lt;a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures"&gt;the MultiBit tutorial on hashes and signatures&lt;/a&gt;. All examples are run in Windows 7 (64-bit).&lt;/p&gt;

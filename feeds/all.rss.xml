@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <rss version="2.0">
  <channel>
-  <title>My Awesome Blog: All Posts</title>
-  <description>My Awesome Blog: All Posts</description>
-  <link>http://www.example.com/index.html</link>
+  <title>Lost in Transaction: All Posts</title>
+  <description>Lost in Transaction: All Posts</description>
+  <link>http://www.lostintransaction.com/index.html</link>
   <lastBuildDate>Wed, 05 Mar 2014 06:44:02 UTC</lastBuildDate>
   <pubDate>Wed, 05 Mar 2014 06:44:02 UTC</pubDate>
   <ttl>1800</ttl>
   <item>
    <title>Verifying Hashes and Signatures</title>
-   <link>http://www.example.com/blog/2014/03/05/verifying-hashes-and-signatures/?utm_source=all&amp;utm_medium=RSS</link>
-   <guid>urn:http-www-example-com:-blog-2014-03-05-verifying-hashes-and-signatures</guid>
+   <link>http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/?utm_source=all&amp;utm_medium=RSS</link>
+   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-05-verifying-hashes-and-signatures</guid>
    <pubDate>Wed, 05 Mar 2014 06:44:02 UTC</pubDate>
    <description>
-&lt;html&gt;&lt;img src="http://www.example.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F05%2Fverifying-hashes-and-signatures%2F" height="1" width="1" /&gt;
  &lt;p&gt;&lt;em&gt;Replace this with your post text. Add one or more comma-separated Tags above. The special tag &lt;code&gt;DRAFT&lt;/code&gt; will prevent the post from being published.&lt;/em&gt;&lt;/p&gt;
  &lt;p&gt;Security is really important when handling bitcoins. One easy safeguard is to make sure you&amp;rsquo;re downloading what you think you&amp;rsquo;re downloading using hashes and signatures.&lt;/p&gt;
  &lt;p&gt;In this post, I check the hash and signature of MultiBit, essentially following &lt;a href="https://multibit.org/blog/2013/07/24/how-to-check-signatures.html" title="MultiBit tutorial on hashes and signatures"&gt;the MultiBit tutorial on hashes and signatures&lt;/a&gt;. All examples are run in Windows 7 (64-bit).&lt;/p&gt;
@@ -65,11 +65,11 @@ eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha1deep64.exe
  &lt;h3 id="verifying-signatures"&gt;Verifying Signatures&lt;/h3&gt;&lt;/html&gt;</description></item>
   <item>
    <title>A 2012 blog post</title>
-   <link>http://www.example.com/blog/2012/01/01/a-2012-blog-post/?utm_source=all&amp;utm_medium=RSS</link>
-   <guid>urn:http-www-example-com:-blog-2012-01-01-a-2012-blog-post</guid>
+   <link>http://www.lostintransaction.com/blog/2012/01/01/a-2012-blog-post/?utm_source=all&amp;utm_medium=RSS</link>
+   <guid>urn:http-www-lostintransaction-com:-blog-2012-01-01-a-2012-blog-post</guid>
    <pubDate>Sun, 01 Jan 2012 00:00:00 UTC</pubDate>
    <description>
-&lt;html&gt;&lt;img src="http://www.example.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2012%2F01%2F01%2Fa-2012-blog-post%2F" height="1" width="1" /&gt;
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2012%2F01%2F01%2Fa-2012-blog-post%2F" height="1" width="1" /&gt;
  &lt;p&gt;Here is an example blog post.&lt;/p&gt;
  &lt;p&gt;Everything after this paragraph &amp;ldquo;after the break&amp;rdquo;. On index pages and Atom feeds, it will become &amp;ldquo;Continue reading&amp;hellip;&amp;rdquo;, if you configure them to include only the summary &amp;ldquo;blurb&amp;rdquo; before the break.&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;some code&lt;/code&gt;&lt;/pre&gt;

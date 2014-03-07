@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
- <title type="text">My Awesome Blog: Posts tagged 'bar'</title>
- <link rel="self" href="http://www.example.com/feeds/bar.atom.xml" />
- <link href="http://www.example.com/tags/bar.html" />
- <id>urn:http-www-example-com:-tags-bar-html</id>
+ <title type="text">Lost in Transaction: Posts tagged 'bar'</title>
+ <link rel="self" href="http://www.lostintransaction.com/feeds/bar.atom.xml" />
+ <link href="http://www.lostintransaction.com/tags/bar.html" />
+ <id>urn:http-www-lostintransaction-com:-tags-bar-html</id>
  <updated>2012-01-01T00:00:00Z</updated>
  <entry>
   <title type="text">A 2012 blog post</title>
-  <link rel="alternate" href="http://www.example.com/blog/2012/01/01/a-2012-blog-post/?utm_source=bar&amp;utm_medium=Atom" />
-  <id>urn:http-www-example-com:-blog-2012-01-01-a-2012-blog-post</id>
+  <link rel="alternate" href="http://www.lostintransaction.com/blog/2012/01/01/a-2012-blog-post/?utm_source=bar&amp;utm_medium=Atom" />
+  <id>urn:http-www-lostintransaction-com:-blog-2012-01-01-a-2012-blog-post</id>
   <published>2012-01-01T00:00:00Z</published>
   <updated>2012-01-01T00:00:00Z</updated>
   <author>
    <name>The Unknown Author</name></author>
   <content type="html">
-&lt;html&gt;&lt;img src="http://www.example.com/img/1x1.gif?utm_source=bar&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2012%2F01%2F01%2Fa-2012-blog-post%2F" height="1" width="1" /&gt;
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=bar&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2012%2F01%2F01%2Fa-2012-blog-post%2F" height="1" width="1" /&gt;
  &lt;p&gt;Here is an example blog post.&lt;/p&gt;
  &lt;p&gt;Everything after this paragraph &amp;ldquo;after the break&amp;rdquo;. On index pages and Atom feeds, it will become &amp;ldquo;Continue reading&amp;hellip;&amp;rdquo;, if you configure them to include only the summary &amp;ldquo;blurb&amp;rdquo; before the break.&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;some code&lt;/code&gt;&lt;/pre&gt;

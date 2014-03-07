@@ -1,3 +1,3 @@
-http://www.example.com/blog/2014/03/05/verifying-hashes-and-signatures/
-http://www.example.com/blog/2012/01/01/a-2012-blog-post/
-http://www.example.com/About.html
+http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/
+http://www.lostintransaction.com/blog/2012/01/01/a-2012-blog-post/
+http://www.lostintransaction.com/About.html

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <rss version="2.0">
  <channel>
-  <title>Lost in Transaction: Posts tagged 'foo'</title>
-  <description>Lost in Transaction: Posts tagged 'foo'</description>
+  <title>Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'foo'</title>
+  <description>Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'foo'</description>
   <link>http://www.lostintransaction.com/tags/foo.html</link>
   <lastBuildDate>Sun, 01 Jan 2012 00:00:00 UTC</lastBuildDate>
   <pubDate>Sun, 01 Jan 2012 00:00:00 UTC</pubDate>

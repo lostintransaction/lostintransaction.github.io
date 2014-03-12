@@ -1,8 +1,6 @@
-# About page
+### Lost in Transaction: A neophyte explores Bitcoin.
 
-## Lost in Transaction: A neophyte explores Bitcoin.
-
-This blog documents my adventures with Bitcoin. It's primarily for my
-own educational purposes, as there's no better motivation to learn
-than to expose one's ignorance to the world. If others find my
-mumbling interesting, then that's a bonus!
+I am completely new to Bitcoin, and even unfamiliar with many crypto
+concepts. This blog documents my journey into Bitcoin. After all, there's
+no better motivation to learn than to expose one's ignorance to the
+world! And maybe others can benefit from my dumb questions as well.

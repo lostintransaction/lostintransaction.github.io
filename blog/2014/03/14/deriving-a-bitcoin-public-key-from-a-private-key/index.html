@@ -154,7 +154,7 @@
  <p>The <code>priv_key</code> is known and the <code>pub_key</code> is an output parameter, so we just need to pass in the appropriate group as the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a> (in <code>crypto/objects/obj_mac.h</code>), so it&rsquo;s just a matter of finding the right calls. In this case, we want <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"><code>EC_GROUP_new_by_curve_name</code></a>.</p>
 
 
- <p>Here&rsquo;s what my public-from-private-key function looks like:</p>
+ <p>Here&rsquo;s what my the complete code for computing a public key from a private looks like:</p>
 
 
  <div class="brush: c">

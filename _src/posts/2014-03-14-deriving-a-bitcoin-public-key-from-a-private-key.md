@@ -38,7 +38,8 @@ right calls. In this case, we want [`EC_GROUP_new_by_curve_name`][ec_curve].
 [obj_mac]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385 "crypto/objects/obj_mac.h"
 [ec_curve]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057 "crypco/ec/ec_curve.c"
 
-Here's what my public-from-private-key function looks like:
+Here's what my the complete code for computing a public key from a
+private looks like:
 
 ```c
 #include <stdlib.h>

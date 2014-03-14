@@ -36,7 +36,7 @@ parameter, so I just need the appropriate group for the first
 parameter. OpenSSL has
 [already defined the `secp256k1` curve][obj_mac], so it's just a
 matter of getting the right data representation. Here is the
-[header for `EC_POINT_mul`][openssl:ech]:
+[header for `EC_POINT_mul`][openssl:ech] from the OpenSSL library:
 
 ```c
 /** Computes r = generator * n + q * m

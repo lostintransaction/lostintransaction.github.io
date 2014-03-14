@@ -153,7 +153,7 @@
 </div>
 
 
- <p>In my case, I&rsquo;m supplying <code>priv_key</code> and <code>pub_key</code> is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a>, so it&rsquo;s just a matter of getting the right data representation. Here is the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h">header for <code>EC_POINT_mul</code></a>:</p>
+ <p>In my case, I&rsquo;m supplying <code>priv_key</code> and <code>pub_key</code> is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a>, so it&rsquo;s just a matter of getting the right data representation. Here is the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h">header for <code>EC_POINT_mul</code></a> from the OpenSSL library:</p>
 
 
  <div class="brush: c">

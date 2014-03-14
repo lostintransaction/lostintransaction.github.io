@@ -59,7 +59,7 @@ $ ./a.out
 0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;Success!&lt;/p&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
- &lt;p&gt;In this post, I&amp;rsquo;m using OpenSSL 1.0.1e and running Debian 7.0.&lt;/p&gt;&lt;/html&gt;</content></entry>
+ &lt;p&gt;In this post, I&amp;rsquo;m using OpenSSL 1.0.1e, gcc 4.7.2, and running Debian 7.0. I had to also install the &lt;code&gt;libssl-dev&lt;/code&gt; package to get the proper header files.&lt;/p&gt;&lt;/html&gt;</content></entry>
  <entry>
   <title type="text">Verifying Andreas's "Fundraising for Dorian" Message</title>
   <link rel="alternate" href="http://www.lostintransaction.com/blog/2014/03/07/verifying-andreas-s-fundraising-for-dorian-message/?utm_source=all&amp;utm_medium=Atom" />

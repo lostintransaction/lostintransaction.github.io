@@ -98,4 +98,6 @@ Success!
 
 ### Software ###
 
-In this post, I'm using OpenSSL 1.0.1e and running Debian 7.0.
+In this post, I'm using OpenSSL 1.0.1e, gcc 4.7.2, and running Debian
+7.0. I had to also install the `libssl-dev` package to get the proper
+header files.

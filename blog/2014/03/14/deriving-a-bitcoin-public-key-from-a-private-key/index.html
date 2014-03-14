@@ -262,7 +262,11 @@
 44
 45
 46
-47</pre></div></td>
+47
+48
+49
+50
+51</pre></div></td>
 
      <td class="code">
 
@@ -297,14 +301,18 @@
 <span class="p">{</span>
   <span class="k">const</span> <span class="n">EC_GROUP</span> <span class="o">*</span><span class="n">ecgroup</span> <span class="o">=</span> <span class="n">EC_GROUP_new_by_curve_name</span><span class="p">(</span> <span class="n">NID_secp256k1</span> <span class="p">);</span>
 
+  <span class="c1">// convert priv_key from hex to bytes to BIGNUM</span>
   <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">privkey_bytes</span><span class="p">[</span><span class="n">PRIV_KEY_LEN</span><span class="p">];</span>
   <span class="n">hex2bytes</span><span class="p">(</span> <span class="n">priv_hex</span><span class="p">,</span> <span class="n">PRIV_KEY_LEN</span><span class="p">,</span> <span class="n">privkey_bytes</span> <span class="p">);</span>
   <span class="k">const</span> <span class="n">BIGNUM</span> <span class="o">*</span><span class="n">privkey_bn</span> <span class="o">=</span> <span class="n">BN_bin2bn</span><span class="p">(</span> <span class="n">privkey_bytes</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
 
+  <span class="c1">// allocate pub_key</span>
   <span class="n">EC_POINT</span> <span class="o">*</span><span class="n">pub_key</span> <span class="o">=</span> <span class="n">EC_POINT_new</span><span class="p">(</span> <span class="n">ecgroup</span> <span class="p">);</span>
 
+  <span class="c1">// compute pub_key</span>
   <span class="n">EC_POINT_mul</span><span class="p">(</span> <span class="n">ecgroup</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">,</span> <span class="n">privkey_bn</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
 
+  <span class="c1">// convert pub_key from EC_POINT curve coordinate to hex</span>
   <span class="k">return</span>
     <span class="n">EC_POINT_point2hex</span><span class="p">(</span> <span class="n">ecgroup</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">,</span> <span class="n">POINT_CONVERSION_UNCOMPRESSED</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
 <span class="p">}</span>

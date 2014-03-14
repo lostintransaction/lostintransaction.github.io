@@ -93,15 +93,19 @@ void print_chars( const unsigned char *in, size_t len )
 unsigned char *priv2pub( const unsigned char *priv_hex, size_t len )
 {
   const EC_GROUP *ecgroup = EC_GROUP_new_by_curve_name( NID_secp256k1 );
-  
+
+  // convert priv_key from hex to bytes to BIGNUM
   unsigned char privkey_bytes[PRIV_KEY_LEN];
   hex2bytes( priv_hex, PRIV_KEY_LEN, privkey_bytes );
   const BIGNUM *privkey_bn = BN_bin2bn( privkey_bytes, len, NULL );
   
+  // allocate pub_key
   EC_POINT *pub_key = EC_POINT_new( ecgroup );
   
+  // compute pub_key
   EC_POINT_mul( ecgroup, pub_key, privkey_bn, NULL, NULL, NULL );
 										
+  // convert pub_key from EC_POINT curve coordinate to hex
   return
     EC_POINT_point2hex( ecgroup, pub_key, POINT_CONVERSION_UNCOMPRESSED, NULL );
 }

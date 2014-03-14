@@ -1,6 +1,6 @@
     Title: Deriving a Bitcoin Public Key From a Private Key
     Date: 2014-03-14T05:28:01
-    Tags: public key, private key, elliptic curve
+    Tags: public key, private key, elliptic curve, openssl
 
 I've been wondering about the relationship between Bitcoin public and
 private keys. I know they are [Elliptic Curve DSA (ECDSA)][wiki:ecdsa]
@@ -51,7 +51,7 @@ right data representation. Here is the
 int EC_POINT_mul(const EC_GROUP *group, EC_POINT *r, const BIGNUM *n, const EC_POINT *q, const BIGNUM *m, BN_CTX *ctx);
 ```
 
-Looks like we want to create a new `EC_GROUP` and we can use
+Looks like we need to create an `EC_GROUP` and to do that we can use
 [`EC_GROUP_new_by_curve_name`][ec_curve].
 
 [openssl]: https://www.openssl.org/ "OpenSSL"
@@ -140,6 +140,8 @@ Let's do another one. I generated a private key with [bitaddress.org](https://ww
 	0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117
 
 [bwiki:base58]: https://en.bitcoin.it/wiki/Base58Check_encoding "Bitcoin wiki: Base58Check encoding"
+
+Hurrah!
 
 ### Software ###
 

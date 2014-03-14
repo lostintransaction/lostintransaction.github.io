@@ -6,7 +6,7 @@
     <title>Deriving a Bitcoin Public Key From a Private Key</title>
     <meta name="description" content="I've been wondering about the relationship between Bitcoin public and private keys. I know they are Elliptic Curve DSA (ECDSA) key pairs, and I've seen the `Q = dG` explanation on a few sites, but it leaves out many details. Figuring it out seems like a good learning opportunity so this post describes how to derive a public key from a private key with conrete, runnable C code. ...">
     <meta name="author"      content="The Unknown Blogger">
-    <meta name="keywords"    content="public key, private key, elliptic curve">
+    <meta name="keywords"    content="public key, private key, elliptic curve, openssl">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
     <link rel="icon"      href="/favicon.ico">
     <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">
@@ -78,6 +78,8 @@
 
 <li><a href="/tags/MultiBit.html">MultiBit</a></li>
 
+<li><a href="/tags/openssl.html">openssl</a></li>
+
 <li><a href="/tags/private-key.html">private key</a></li>
 
 <li><a href="/tags/public-key.html">public key</a></li>
@@ -114,7 +116,7 @@
   <h1>Deriving a Bitcoin Public Key From a Private Key</h1>
 
   <p class="date-and-tags">
-   <time datetime="2014-03-14" pubdate="true">2014-03-14</time> :: <span class="tags"><a href="/tags/public-key.html">public key</a>, <a href="/tags/private-key.html">private key</a>, <a href="/tags/elliptic-curve.html">elliptic curve</a></span></p>
+   <time datetime="2014-03-14" pubdate="true">2014-03-14</time> :: <span class="tags"><a href="/tags/public-key.html">public key</a>, <a href="/tags/private-key.html">private key</a>, <a href="/tags/elliptic-curve.html">elliptic curve</a>, <a href="/tags/openssl.html">openssl</a></span></p>
   </header>
 
 
@@ -196,7 +198,7 @@
 </div>
 
 
- <p>Looks like we want to create a new <code>EC_GROUP</code> and we can use <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"><code>EC_GROUP_new_by_curve_name</code></a>.</p>
+ <p>Looks like we need to create an <code>EC_GROUP</code> and to do that we can use <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"><code>EC_GROUP_new_by_curve_name</code></a>.</p>
 
 
  <p>Here&rsquo;s what my the complete code for computing a public key from a private looks like (disclaimer: obviously not production-quality):</p>
@@ -333,6 +335,9 @@ $ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117</code></pre>
 
 
+ <p>Hurrah!</p>
+
+
  <h3 id="software">Software</h3>
 
 
@@ -408,6 +413,7 @@ $ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
         <p>Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
 <!--        <p><em>Your legal notice here</em>.</p>-->
         <p><em>Don't believe anything you read here</em>.</p>
+        <p><a href="bitcoin:18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS">18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS</a></p>
       </footer>
     </div>
     <!-- </body> JS -->

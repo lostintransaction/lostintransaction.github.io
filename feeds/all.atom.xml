@@ -30,7 +30,7 @@
  *  \return 1 on success and 0 if an error occured
  */
 int EC_POINT_mul(const EC_GROUP *group, EC_POINT *r, const BIGNUM *n, const EC_POINT *q, const BIGNUM *m, BN_CTX *ctx);&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Looks like we want to create a new &lt;code&gt;EC_GROUP&lt;/code&gt; and we can use &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"&gt;&lt;code&gt;EC_GROUP_new_by_curve_name&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;Looks like we need to create an &lt;code&gt;EC_GROUP&lt;/code&gt; and to do that we can use &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"&gt;&lt;code&gt;EC_GROUP_new_by_curve_name&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
  &lt;p&gt;Here&amp;rsquo;s what my the complete code for computing a public key from a private looks like (disclaimer: obviously not production-quality):&lt;/p&gt;
  &lt;pre class="brush: c"&gt;&lt;code&gt;#include &amp;lt;stdlib.h&amp;gt;
 #include &amp;lt;stdio.h&amp;gt;
@@ -85,6 +85,7 @@ $ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
  &lt;p&gt;Let&amp;rsquo;s do another one. I generated a private key with &lt;a href="https://www.bitaddress.org"&gt;bitaddress.org&lt;/a&gt;, &lt;code&gt;5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe&lt;/code&gt;, but it&amp;rsquo;s in &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding"&gt;Base58Check encoding&lt;/a&gt; and not hex. So I went to the &amp;ldquo;Wallet Details&amp;rdquo; tab, entered the base58 key, and &lt;a href="https://www.bitaddress.org"&gt;bitaddress.org&lt;/a&gt; reports that the private key in hex is &lt;code&gt;4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61&lt;/code&gt;, and public key is &lt;code&gt;0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117&lt;/code&gt;. Let&amp;rsquo;s check with our code:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ ./a.out 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
 0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Hurrah!&lt;/p&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
  &lt;p&gt;In this post, I&amp;rsquo;m using OpenSSL 1.0.1e, gcc 4.7.2, and running Debian 7.0. I had to also install the &lt;code&gt;libssl-dev&lt;/code&gt; package to get the proper header files.&lt;/p&gt;&lt;/html&gt;</content></entry>
  <entry>

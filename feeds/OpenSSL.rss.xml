@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?> 
-<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
- <title type="text">Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'openssl'</title>
- <link rel="self" href="http://www.lostintransaction.com/feeds/openssl.atom.xml" />
- <link href="http://www.lostintransaction.com/tags/openssl.html" />
- <id>urn:http-www-lostintransaction-com:-tags-openssl-html</id>
- <updated>2014-03-14T05:28:01Z</updated>
- <entry>
-  <title type="text">Deriving a Bitcoin Public Key From a Private Key</title>
-  <link rel="alternate" href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/?utm_source=openssl&amp;utm_medium=Atom" />
-  <id>urn:http-www-lostintransaction-com:-blog-2014-03-14-deriving-a-bitcoin-public-key-from-a-private-key</id>
-  <published>2014-03-14T05:28:01Z</published>
-  <updated>2014-03-14T05:28:01Z</updated>
-  <author>
-   <name>The Unknown Author</name></author>
-  <content type="html">
-&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=openssl&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F14%2Fderiving-a-bitcoin-public-key-from-a-private-key%2F" height="1" width="1" /&gt;
+<rss version="2.0">
+ <channel>
+  <title>Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'OpenSSL'</title>
+  <description>Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'OpenSSL'</description>
+  <link>http://www.lostintransaction.com/tags/OpenSSL.html</link>
+  <lastBuildDate>Fri, 14 Mar 2014 05:28:01 UTC</lastBuildDate>
+  <pubDate>Fri, 14 Mar 2014 05:28:01 UTC</pubDate>
+  <ttl>1800</ttl>
+  <item>
+   <title>Deriving a Bitcoin Public Key From a Private Key</title>
+   <link>http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/?utm_source=OpenSSL&amp;utm_medium=RSS</link>
+   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-14-deriving-a-bitcoin-public-key-from-a-private-key</guid>
+   <pubDate>Fri, 14 Mar 2014 05:28:01 UTC</pubDate>
+   <description>
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=OpenSSL&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F14%2Fderiving-a-bitcoin-public-key-from-a-private-key%2F" height="1" width="1" /&gt;
  &lt;p&gt;I&amp;rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I know they are &lt;a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA"&gt;Elliptic Curve DSA (ECDSA)&lt;/a&gt; key pairs, and I&amp;rsquo;ve seen the &lt;a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"&gt;&lt;code&gt;Q = dG&lt;/code&gt; explanation&lt;/a&gt; on a few sites, but they leave out some details. I wanted to experiment, so this post describes how to derive a public key from a private key with runnable C code.&lt;/p&gt;
  &lt;p&gt;The &lt;a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer"&gt;accepted Stack Overflow answer from the previous link&lt;/a&gt; says that in the &lt;code&gt;Q = dG&lt;/code&gt; equation, &lt;code&gt;Q&lt;/code&gt; is the public key and &lt;code&gt;d&lt;/code&gt; is the private key, but does not explain &lt;code&gt;G&lt;/code&gt;, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the &lt;a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"&gt;&lt;code&gt;secp256k1&lt;/code&gt; ECDSA curve&lt;/a&gt;.&lt;/p&gt;
  &lt;p&gt;Next, I looked at the &lt;a href="https://www.openssl.org/" title="OpenSSL"&gt;OpenSSL&lt;/a&gt; &lt;code&gt;libcrypto&lt;/code&gt; library, in the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c"&gt;function mentioned in the Stack Overflow post, &lt;code&gt;EC_KEY_generate_key&lt;/code&gt;&lt;/a&gt;. Here&amp;rsquo;s the line that performs the multiplication:&lt;/p&gt;
@@ -94,4 +93,4 @@ $ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;Hurrah!&lt;/p&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
- &lt;p&gt;In this post, I&amp;rsquo;m using OpenSSL 1.0.1e, gcc 4.7.2, and running Debian 7.0. I had to also install the &lt;code&gt;libssl-dev&lt;/code&gt; package to get the proper header files.&lt;/p&gt;&lt;/html&gt;</content></entry></feed>
+ &lt;p&gt;In this post, I&amp;rsquo;m using OpenSSL 1.0.1e, gcc 4.7.2, and running Debian 7.0. I had to also install the &lt;code&gt;libssl-dev&lt;/code&gt; package to get the proper header files.&lt;/p&gt;&lt;/html&gt;</description></item></channel></rss>

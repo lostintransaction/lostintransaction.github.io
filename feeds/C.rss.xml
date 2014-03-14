@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <rss version="2.0">
  <channel>
-  <title>Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'openssl'</title>
-  <description>Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'openssl'</description>
-  <link>http://www.lostintransaction.com/tags/openssl.html</link>
+  <title>Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'C'</title>
+  <description>Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'C'</description>
+  <link>http://www.lostintransaction.com/tags/C.html</link>
   <lastBuildDate>Fri, 14 Mar 2014 05:28:01 UTC</lastBuildDate>
   <pubDate>Fri, 14 Mar 2014 05:28:01 UTC</pubDate>
   <ttl>1800</ttl>
   <item>
    <title>Deriving a Bitcoin Public Key From a Private Key</title>
-   <link>http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/?utm_source=openssl&amp;utm_medium=RSS</link>
+   <link>http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/?utm_source=C&amp;utm_medium=RSS</link>
    <guid>urn:http-www-lostintransaction-com:-blog-2014-03-14-deriving-a-bitcoin-public-key-from-a-private-key</guid>
    <pubDate>Fri, 14 Mar 2014 05:28:01 UTC</pubDate>
    <description>
-&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=openssl&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F14%2Fderiving-a-bitcoin-public-key-from-a-private-key%2F" height="1" width="1" /&gt;
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=C&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F14%2Fderiving-a-bitcoin-public-key-from-a-private-key%2F" height="1" width="1" /&gt;
  &lt;p&gt;I&amp;rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I know they are &lt;a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA"&gt;Elliptic Curve DSA (ECDSA)&lt;/a&gt; key pairs, and I&amp;rsquo;ve seen the &lt;a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"&gt;&lt;code&gt;Q = dG&lt;/code&gt; explanation&lt;/a&gt; on a few sites, but they leave out some details. I wanted to experiment, so this post describes how to derive a public key from a private key with runnable C code.&lt;/p&gt;
  &lt;p&gt;The &lt;a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer"&gt;accepted Stack Overflow answer from the previous link&lt;/a&gt; says that in the &lt;code&gt;Q = dG&lt;/code&gt; equation, &lt;code&gt;Q&lt;/code&gt; is the public key and &lt;code&gt;d&lt;/code&gt; is the private key, but does not explain &lt;code&gt;G&lt;/code&gt;, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the &lt;a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"&gt;&lt;code&gt;secp256k1&lt;/code&gt; ECDSA curve&lt;/a&gt;.&lt;/p&gt;
  &lt;p&gt;Next, I looked at the &lt;a href="https://www.openssl.org/" title="OpenSSL"&gt;OpenSSL&lt;/a&gt; &lt;code&gt;libcrypto&lt;/code&gt; library, in the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c"&gt;function mentioned in the Stack Overflow post, &lt;code&gt;EC_KEY_generate_key&lt;/code&gt;&lt;/a&gt;. Here&amp;rsquo;s the line that performs the multiplication:&lt;/p&gt;

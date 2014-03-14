@@ -1,6 +1,6 @@
     Title: Deriving a Bitcoin Public Key From a Private Key
     Date: 2014-03-14T05:28:01
-    Tags: public key, private key, elliptic curve, openssl
+    Tags: public key, private key, elliptic curve, OpenSSL, C
 
 I've been wondering about the relationship between Bitcoin public and
 private keys. I know they are [Elliptic Curve DSA (ECDSA)][wiki:ecdsa]

@@ -19,7 +19,7 @@
  &lt;p&gt;The &lt;a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer"&gt;accepted Stack Overflow answer from the previous link&lt;/a&gt; says that in the &lt;code&gt;Q = dG&lt;/code&gt; equation, &lt;code&gt;Q&lt;/code&gt; is the public key and &lt;code&gt;d&lt;/code&gt; is the private key, but does not explain &lt;code&gt;G&lt;/code&gt;, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the &lt;a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"&gt;&lt;code&gt;secp256k1&lt;/code&gt; ECDSA curve&lt;/a&gt;.&lt;/p&gt;
  &lt;p&gt;Next, I looked at the &lt;a href="https://www.openssl.org/" title="OpenSSL"&gt;OpenSSL&lt;/a&gt; &lt;code&gt;libcrypto&lt;/code&gt; library, in the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c"&gt;function mentioned in the Stack Overflow post, &lt;code&gt;EC_KEY_generate_key&lt;/code&gt;&lt;/a&gt;. Here&amp;rsquo;s the line that performs the multiplication:&lt;/p&gt;
  &lt;pre class="brush: c"&gt;&lt;code&gt;EC_POINT_mul(eckey-&amp;gt;group, pub_key, priv_key, NULL, NULL, ctx);&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;In my case, I&amp;rsquo;m supplying &lt;code&gt;priv_key&lt;/code&gt; and &lt;code&gt;pub_key&lt;/code&gt; is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h"&gt;already defined the &lt;code&gt;secp256k1&lt;/code&gt; curve&lt;/a&gt;, so it&amp;rsquo;s just a matter of getting the right data representation. Here is the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h"&gt;header for that function&lt;/a&gt;&lt;/p&gt;
+ &lt;p&gt;In my case, I&amp;rsquo;m supplying &lt;code&gt;priv_key&lt;/code&gt; and &lt;code&gt;pub_key&lt;/code&gt; is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h"&gt;already defined the &lt;code&gt;secp256k1&lt;/code&gt; curve&lt;/a&gt;, so it&amp;rsquo;s just a matter of getting the right data representation. Here is the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h"&gt;header for &lt;code&gt;EC_POINT_mul&lt;/code&gt;&lt;/a&gt;:&lt;/p&gt;
  &lt;pre class="brush: c"&gt;&lt;code&gt;/** Computes r = generator * n + q * m
  *  \param  group  underlying EC_GROUP object
  *  \param  r      EC_POINT object for the result
@@ -30,8 +30,8 @@
  *  \return 1 on success and 0 if an error occured
  */
 int EC_POINT_mul(const EC_GROUP *group, EC_POINT *r, const BIGNUM *n, const EC_POINT *q, const BIGNUM *m, BN_CTX *ctx);&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Looks like we need to create an &lt;code&gt;EC_GROUP&lt;/code&gt; and to do that we can use &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"&gt;&lt;code&gt;EC_GROUP_new_by_curve_name&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
- &lt;p&gt;Here&amp;rsquo;s what my the complete code for computing a public key from a private looks like (disclaimer: obviously not production-quality):&lt;/p&gt;
+ &lt;p&gt;Looks like we need an &lt;code&gt;EC_GROUP&lt;/code&gt; and to create one we can use &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"&gt;&lt;code&gt;EC_GROUP_new_by_curve_name&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;Putting everything together, here&amp;rsquo;s what I came up with to compute a public key from a private key (disclaimer: obviously not production-quality code):&lt;/p&gt;
  &lt;pre class="brush: c"&gt;&lt;code&gt;#include &amp;lt;stdlib.h&amp;gt;
 #include &amp;lt;stdio.h&amp;gt;
 #include &amp;lt;openssl/ec.h&amp;gt;
@@ -40,12 +40,14 @@ int EC_POINT_mul(const EC_GROUP *group, EC_POINT *r, const BIGNUM *n, const EC_P
 #define PRIV_KEY_LEN 32
 #define PUB_KEY_LEN 65
 
+// reads 2 hex chars at a time from in and writes as a byte to out
 void hex2bytes( const unsigned char *in, size_t len, unsigned char *out )
 {
-  for( size_t i = 0; i &amp;lt; len; i++ ,in += 2 ) {
+  for( size_t i = 0; i &amp;lt; len; i++, in += 2 ) {
     sscanf( in, "%2hhx", out + i );
   }
 }
+// prints the given char array
 void print_chars( const unsigned char *in, size_t len )
 {
   for( size_t i = 0; i &amp;lt; len; i++ ) {
@@ -53,7 +55,8 @@ void print_chars( const unsigned char *in, size_t len )
   }
   printf( "\n" );
 }
-                          
+// calculates and returns the public key associated with the given private key
+// input private key is in hex
 unsigned char *priv2pub( const unsigned char *priv_hex, size_t len )
 {
   const EC_GROUP *ecgroup = EC_GROUP_new_by_curve_name( NID_secp256k1 );
@@ -65,7 +68,7 @@ unsigned char *priv2pub( const unsigned char *priv_hex, size_t len )
   EC_POINT *pub_key = EC_POINT_new( ecgroup );
   
   EC_POINT_mul( ecgroup, pub_key, privkey_bn, NULL, NULL, NULL );
-                                      
+                                     
   return
     EC_POINT_point2hex( ecgroup, pub_key, POINT_CONVERSION_UNCOMPRESSED, NULL );
 }

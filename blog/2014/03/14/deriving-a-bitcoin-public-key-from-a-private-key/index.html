@@ -153,7 +153,7 @@
 </div>
 
 
- <p>In my case, I&rsquo;m supplying <code>priv_key</code> and <code>pub_key</code> is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a>, so it&rsquo;s just a matter of getting the right data representation. Here is the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h">header for that function</a></p>
+ <p>In my case, I&rsquo;m supplying <code>priv_key</code> and <code>pub_key</code> is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a>, so it&rsquo;s just a matter of getting the right data representation. Here is the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h">header for <code>EC_POINT_mul</code></a>:</p>
 
 
  <div class="brush: c">
@@ -198,10 +198,10 @@
 </div>
 
 
- <p>Looks like we need to create an <code>EC_GROUP</code> and to do that we can use <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"><code>EC_GROUP_new_by_curve_name</code></a>.</p>
+ <p>Looks like we need an <code>EC_GROUP</code> and to create one we can use <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"><code>EC_GROUP_new_by_curve_name</code></a>.</p>
 
 
- <p>Here&rsquo;s what my the complete code for computing a public key from a private looks like (disclaimer: obviously not production-quality):</p>
+ <p>Putting everything together, here&rsquo;s what I came up with to compute a public key from a private key (disclaimer: obviously not production-quality code):</p>
 
 
  <div class="brush: c">
@@ -259,7 +259,10 @@
 41
 42
 43
-44</pre></div></td>
+44
+45
+46
+47</pre></div></td>
 
      <td class="code">
 
@@ -273,12 +276,14 @@
 <span class="cp">#define PRIV_KEY_LEN 32</span>
 <span class="cp">#define PUB_KEY_LEN 65</span>
 
+<span class="c1">// reads 2 hex chars at a time from in and writes as a byte to out</span>
 <span class="kt">void</span> <span class="nf">hex2bytes</span><span class="p">(</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">in</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">out</span> <span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">for</span><span class="p">(</span> <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">,</span><span class="n">in</span> <span class="o">+=</span> <span class="mi">2</span> <span class="p">)</span> <span class="p">{</span>
+  <span class="k">for</span><span class="p">(</span> <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">,</span> <span class="n">in</span> <span class="o">+=</span> <span class="mi">2</span> <span class="p">)</span> <span class="p">{</span>
     <span class="n">sscanf</span><span class="p">(</span> <span class="n">in</span><span class="p">,</span> <span class="s">"%2hhx"</span><span class="p">,</span> <span class="n">out</span> <span class="o">+</span> <span class="n">i</span> <span class="p">);</span>
   <span class="p">}</span>
 <span class="p">}</span>
+<span class="c1">// prints the given char array</span>
 <span class="kt">void</span> <span class="nf">print_chars</span><span class="p">(</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">in</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span> <span class="p">)</span>
 <span class="p">{</span>
   <span class="k">for</span><span class="p">(</span> <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
@@ -286,7 +291,8 @@
   <span class="p">}</span>
   <span class="n">printf</span><span class="p">(</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span> <span class="p">);</span>
 <span class="p">}</span>
-
+<span class="c1">// calculates and returns the public key associated with the given private key</span>
+<span class="c1">// input private key is in hex</span>
 <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">priv2pub</span><span class="p">(</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">priv_hex</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span> <span class="p">)</span>
 <span class="p">{</span>
   <span class="k">const</span> <span class="n">EC_GROUP</span> <span class="o">*</span><span class="n">ecgroup</span> <span class="o">=</span> <span class="n">EC_GROUP_new_by_curve_name</span><span class="p">(</span> <span class="n">NID_secp256k1</span> <span class="p">);</span>

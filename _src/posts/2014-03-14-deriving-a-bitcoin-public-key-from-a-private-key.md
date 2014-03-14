@@ -36,7 +36,7 @@ parameter, so I just need the appropriate group for the first
 parameter. OpenSSL has
 [already defined the `secp256k1` curve][obj_mac], so it's just a
 matter of getting the right data representation. Here is the
-[header for that function][openssl:ech]
+[header for `EC_POINT_mul`][openssl:ech]:
 
 ```c
 /** Computes r = generator * n + q * m
@@ -51,7 +51,7 @@ matter of getting the right data representation. Here is the
 int EC_POINT_mul(const EC_GROUP *group, EC_POINT *r, const BIGNUM *n, const EC_POINT *q, const BIGNUM *m, BN_CTX *ctx);
 ```
 
-Looks like we need to create an `EC_GROUP` and to do that we can use
+Looks like we need an `EC_GROUP` and to create one we can use
 [`EC_GROUP_new_by_curve_name`][ec_curve].
 
 [openssl]: https://www.openssl.org/ "OpenSSL"
@@ -60,8 +60,9 @@ Looks like we need to create an `EC_GROUP` and to do that we can use
 [obj_mac]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385 "crypto/objects/obj_mac.h"
 [ec_curve]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057 "crypco/ec/ec_curve.c"
 
-Here's what my the complete code for computing a public key from a
-private looks like (disclaimer: obviously not production-quality):
+Putting everything together, here's what I came up with to compute a
+public key from a private key (disclaimer: obviously not
+production-quality code):
 
 ```c
 #include <stdlib.h>
@@ -72,12 +73,14 @@ private looks like (disclaimer: obviously not production-quality):
 #define PRIV_KEY_LEN 32
 #define PUB_KEY_LEN 65
 
+// reads 2 hex chars at a time from in and writes as a byte to out
 void hex2bytes( const unsigned char *in, size_t len, unsigned char *out )
 {
-  for( size_t i = 0; i < len; i++ ,in += 2 ) {
+  for( size_t i = 0; i < len; i++, in += 2 ) {
     sscanf( in, "%2hhx", out + i );
   }
 }
+// prints the given char array
 void print_chars( const unsigned char *in, size_t len )
 {
   for( size_t i = 0; i < len; i++ ) {
@@ -85,7 +88,8 @@ void print_chars( const unsigned char *in, size_t len )
   }
   printf( "\n" );
 }
-							
+// calculates and returns the public key associated with the given private key
+// input private key is in hex
 unsigned char *priv2pub( const unsigned char *priv_hex, size_t len )
 {
   const EC_GROUP *ecgroup = EC_GROUP_new_by_curve_name( NID_secp256k1 );

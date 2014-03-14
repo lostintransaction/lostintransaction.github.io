@@ -52,6 +52,12 @@ int main() {
   print_chars(priv2pub(privkey_hex, PRIV_KEY_LENGTH), PUB_KEY_LENGTH*2);
   return 0;
 }&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;I borrowed a sample public/private key pair from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki entry about addresses"&gt;this Bitcoin wiki article&lt;/a&gt;. You can see the private key, &lt;code&gt;18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725&lt;/code&gt;, hardcoded in the program. Bitcoin private keys are 32 bytes and public keys are 65 bytes. I wanted the input and output to be hexadecimal, so I needed a &lt;code&gt;hex2bytes&lt;/code&gt; helper function. I had to then convert the private key again, from bytes to &lt;code&gt;BIGNUM&lt;/code&gt;, which is the type OpenSSL uses for arbitrary precision arithmetic. Finally, I use another helper function, &lt;code&gt;print_chars&lt;/code&gt;, to print the final result.&lt;/p&gt;
+ &lt;p&gt;The public key from the article is &lt;code&gt;0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;. Let&amp;rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file &lt;code&gt;blog.c&lt;/code&gt;.)&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ gcc -lcrypto -std=c99 blog.c
+$ ./a.out
+0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Success!&lt;/p&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
  &lt;p&gt;In this post, I&amp;rsquo;m using OpenSSL 1.0.1e and running Debian 7.0.&lt;/p&gt;&lt;/html&gt;</content></entry>
  <entry>

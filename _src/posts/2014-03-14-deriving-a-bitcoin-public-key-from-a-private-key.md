@@ -74,6 +74,28 @@ int main() {
 }
 ```
 
+I borrowed a sample public/private key pair from
+[this Bitcoin wiki article][wiki:address]. You can see the private
+key,
+`18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725`,
+hardcoded in the program. Bitcoin private keys are 32 bytes and public
+keys are 65 bytes. I wanted the input and output to be hexadecimal, so
+I needed a `hex2bytes` helper function. I had to then convert the
+private key again, from bytes to `BIGNUM`, which is the type OpenSSL
+uses for arbitrary precision arithmetic. Finally, I use another helper
+function, `print_chars`, to print the final result.
+
+
+The public key from the article is `0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6`. Let's see if our program can recover this public key from the private key. (I save the code above to a file `blog.c`.)
+
+    $ gcc -lcrypto -std=c99 blog.c
+    $ ./a.out
+    0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6
+
+Success!
+
+[wiki:address]: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses "Bitcoin wiki entry about addresses"
+
 ### Software ###
 
 In this post, I'm using OpenSSL 1.0.1e and running Debian 7.0.

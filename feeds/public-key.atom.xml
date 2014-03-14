@@ -15,48 +15,75 @@
    <name>The Unknown Author</name></author>
   <content type="html">
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=public-key&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F14%2Fderiving-a-bitcoin-public-key-from-a-private-key%2F" height="1" width="1" /&gt;
- &lt;p&gt;I&amp;rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I&amp;rsquo;ve seen the &lt;a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"&gt;&lt;code&gt;Q = dG&lt;/code&gt; explanation&lt;/a&gt; but it leaves out a few too many details for my tastes. This post describes how to derive a public key from a private key with conrete, runnable C code.&lt;/p&gt;
+ &lt;p&gt;I&amp;rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I know they are &lt;a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA"&gt;Elliptic Curve DSA (ECDSA)&lt;/a&gt; key pairs, and I&amp;rsquo;ve seen the &lt;a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"&gt;&lt;code&gt;Q = dG&lt;/code&gt; explanation&lt;/a&gt; on a few sites, but it leaves out many details. Figuring it out seems like a good learning opportunity so this post describes how to derive a public key from a private key with conrete, runnable C code.&lt;/p&gt;
  &lt;p&gt;The Stack Overflow post says that in the &lt;code&gt;Q = dG&lt;/code&gt; equation, &lt;code&gt;Q&lt;/code&gt; is the public key and &lt;code&gt;d&lt;/code&gt; is the private key, but does not explain &lt;code&gt;G&lt;/code&gt;, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the &lt;a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"&gt;&lt;code&gt;secp256k1&lt;/code&gt; ECDSA curve&lt;/a&gt;.&lt;/p&gt;
- &lt;p&gt;Next, I started by looking at the OpenSSL &lt;code&gt;libcrypto&lt;/code&gt; library, at the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c"&gt;function mentioned in the Stack Overflow post&lt;/a&gt;, &lt;code&gt;EC_KEY_generate_key&lt;/code&gt;. Here&amp;rsquo;s the line that performs the multiplication again:&lt;/p&gt;
+ &lt;p&gt;Next, I looked at the &lt;a href="https://www.openssl.org/" title="OpenSSL"&gt;OpenSSL&lt;/a&gt; &lt;code&gt;libcrypto&lt;/code&gt; library, in the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c"&gt;function mentioned in the Stack Overflow post&lt;/a&gt;, &lt;code&gt;EC_KEY_generate_key&lt;/code&gt;. Here&amp;rsquo;s the line that performs the multiplication again:&lt;/p&gt;
  &lt;pre class="brush: c"&gt;&lt;code&gt;EC_POINT_mul(eckey-&amp;gt;group, pub_key, priv_key, NULL, NULL, ctx);&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;The &lt;code&gt;priv_key&lt;/code&gt; is known and the &lt;code&gt;pub_key&lt;/code&gt; is an output parameter, so we just need to pass in the appropriate group as the first parameter. OpenSSL has &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h"&gt;already defined the &lt;code&gt;secp256k1&lt;/code&gt; curve&lt;/a&gt; (in &lt;code&gt;crypto/objects/obj_mac.h&lt;/code&gt;), so it&amp;rsquo;s just a matter of finding the right calls. In this case, we want &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"&gt;&lt;code&gt;EC_GROUP_new_by_curve_name&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
- &lt;p&gt;Here&amp;rsquo;s what my the complete code for computing a public key from a private looks like:&lt;/p&gt;
+ &lt;p&gt;In my case, I&amp;rsquo;m supplying the &lt;code&gt;priv_key&lt;/code&gt; and the &lt;code&gt;pub_key&lt;/code&gt; is the output parameter, so we just need to pass in the appropriate group as the first parameter. OpenSSL has &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h"&gt;already defined the &lt;code&gt;secp256k1&lt;/code&gt; curve&lt;/a&gt; (in &lt;code&gt;crypto/objects/obj_mac.h&lt;/code&gt;), so it&amp;rsquo;s just a matter of getting the right data representation. Here is the [header for that function][openssl:ec]&lt;/p&gt;
+ &lt;pre class="brush: c"&gt;&lt;code&gt;/** Computes r = generator * n + q * m
+ *  \param  group  underlying EC_GROUP object
+ *  \param  r      EC_POINT object for the result
+ *  \param  n      BIGNUM with the multiplier for the group generator (optional)
+ *  \param  q      EC_POINT object with the first factor of the second summand
+ *  \param  m      BIGNUM with the second factor of the second summand
+ *  \param  ctx    BN_CTX object (optional)
+ *  \return 1 on success and 0 if an error occured
+ */
+int EC_POINT_mul(const EC_GROUP *group, EC_POINT *r, const BIGNUM *n, const EC_POINT *q, const BIGNUM *m, BN_CTX *ctx);&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Looks like we want to create a new &lt;code&gt;EC_GROUP&lt;/code&gt; and we can use &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"&gt;&lt;code&gt;EC_GROUP_new_by_curve_name&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;Here&amp;rsquo;s what my the complete code for computing a public key from a private looks like (disclaimer: obviously not production-quality):&lt;/p&gt;
  &lt;pre class="brush: c"&gt;&lt;code&gt;#include &amp;lt;stdlib.h&amp;gt;
 #include &amp;lt;stdio.h&amp;gt;
 #include &amp;lt;openssl/ec.h&amp;gt;
 #include &amp;lt;openssl/obj_mac.h&amp;gt; // for NID_secp256k1
 
-#define PRIV_KEY_LENGTH 32
-#define PUB_KEY_LENGTH 65
+#define PRIV_KEY_LEN 32
+#define PUB_KEY_LEN 65
 
-void hex2bytes(const unsigned char *in, size_t len, unsigned char *out) {
-  for(size_t i=0; i&amp;lt;len; i++,in+=2) sscanf(in, "%2hhx", out+i);
+void hex2bytes( const unsigned char *in, size_t len, unsigned char *out )
+{
+  for( size_t i = 0; i &amp;lt; len; i++ ,in += 2 ) {
+    sscanf( in, "%2hhx", out + i );
+  }
 }
-
-void print_chars(unsigned char *in, size_t len) {
-  for(size_t i=0; i&amp;lt;len; i++) printf("%c",in[i]); printf("\n");
+void print_chars( const unsigned char *in, size_t len )
+{
+  for( size_t i = 0; i &amp;lt; len; i++ ) {
+    printf( "%c", in[i] );
+  }
+  printf( "\n" );
 }
-       
-unsigned char *priv2pub(const unsigned char *priv_hex, size_t len) {
-  const EC_GROUP *ecgroup = EC_GROUP_new_by_curve_name(NID_secp256k1);
-  unsigned char privkey_bytes[PRIV_KEY_LENGTH];
-  hex2bytes(priv_hex, PRIV_KEY_LENGTH, privkey_bytes);
-  const BIGNUM *privkey_bn = BN_bin2bn(privkey_bytes, len, NULL);
-  EC_POINT *pub_key = EC_POINT_new(ecgroup);
-  EC_POINT_mul(ecgroup, pub_key, privkey_bn, NULL, NULL, NULL);
-  return EC_POINT_point2hex(ecgroup, pub_key, POINT_CONVERSION_UNCOMPRESSED, NULL);
+                          
+unsigned char *priv2pub( const unsigned char *priv_hex, size_t len )
+{
+  const EC_GROUP *ecgroup = EC_GROUP_new_by_curve_name( NID_secp256k1 );
+  
+  unsigned char privkey_bytes[PRIV_KEY_LEN];
+  hex2bytes( priv_hex, PRIV_KEY_LEN, privkey_bytes );
+  const BIGNUM *privkey_bn = BN_bin2bn( privkey_bytes, len, NULL );
+  
+  EC_POINT *pub_key = EC_POINT_new( ecgroup );
+  
+  EC_POINT_mul( ecgroup, pub_key, privkey_bn, NULL, NULL, NULL );
+                                      
+  return
+    EC_POINT_point2hex( ecgroup, pub_key, POINT_CONVERSION_UNCOMPRESSED, NULL );
 }
-
-int main() {
-  const unsigned char privkey_hex[] = "18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725";
-  print_chars(priv2pub(privkey_hex, PRIV_KEY_LENGTH), PUB_KEY_LENGTH*2);
+                                             
+int main( int argc, const unsigned char *argv[] )
+{
+  print_chars( priv2pub( argv[1], PRIV_KEY_LEN ), PUB_KEY_LEN * 2 );
+  
   return 0;
 }&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;I borrowed a sample public/private key pair from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki entry about addresses"&gt;this Bitcoin wiki article&lt;/a&gt;. You can see the private key, &lt;code&gt;18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725&lt;/code&gt;, hardcoded in the program. Bitcoin private keys are 32 bytes and public keys are 65 bytes. I wanted the input and output to be hexadecimal, so I needed a &lt;code&gt;hex2bytes&lt;/code&gt; helper function. I had to then convert the private key again, from bytes to &lt;code&gt;BIGNUM&lt;/code&gt;, which is the type OpenSSL uses for arbitrary precision arithmetic. Finally, I use another helper function, &lt;code&gt;print_chars&lt;/code&gt;, to print the final result.&lt;/p&gt;
- &lt;p&gt;The public key from the article is &lt;code&gt;0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;. Let&amp;rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file &lt;code&gt;blog.c&lt;/code&gt;.)&lt;/p&gt;
+ &lt;p&gt;Bitcoin private keys are 32 bytes and public keys are 65 bytes. The input and output are in hexadecimal so I created a &lt;code&gt;hex2bytes&lt;/code&gt; helper function. I had to then convert the private key again, from bytes to &lt;code&gt;BIGNUM&lt;/code&gt;, which is OpenSSL&amp;rsquo;s number representation for arbitrary precision arithmetic. Finally, I use another helper function, &lt;code&gt;print_chars&lt;/code&gt;, to print the final result.&lt;/p&gt;
+ &lt;p&gt;To test, I borrowed a sample public/private key pair from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses"&gt;this Bitcoin wiki article&lt;/a&gt;. The private key from the article is &lt;code&gt;18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725&lt;/code&gt; and the public key is &lt;code&gt;0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;. Let&amp;rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file &lt;code&gt;blog.c&lt;/code&gt;.)&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ gcc -lcrypto -std=c99 blog.c
-$ ./a.out
+$ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;Success!&lt;/p&gt;
+ &lt;p&gt;Let&amp;rsquo;s do another one. I generated a private key with &lt;a href="https://www.bitaddress.org"&gt;bitaddress.org&lt;/a&gt;, &lt;code&gt;5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe&lt;/code&gt;, but it&amp;rsquo;s in &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding"&gt;Base58Check encoding&lt;/a&gt; and not hex. So I went to the &amp;ldquo;Wallet Details&amp;rdquo; tab, entered the base58 key, and &lt;a href="https://www.bitaddress.org"&gt;bitaddress.org&lt;/a&gt; reports that the private key in hex is &lt;code&gt;4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61&lt;/code&gt;, and public key is &lt;code&gt;0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117&lt;/code&gt;. Let&amp;rsquo;s check with our code:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ ./a.out 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
+0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117&lt;/code&gt;&lt;/pre&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
  &lt;p&gt;In this post, I&amp;rsquo;m using OpenSSL 1.0.1e, gcc 4.7.2, and running Debian 7.0. I had to also install the &lt;code&gt;libssl-dev&lt;/code&gt; package to get the proper header files.&lt;/p&gt;&lt;/html&gt;</content></entry></feed>

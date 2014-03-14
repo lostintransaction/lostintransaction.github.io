@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Deriving a Bitcoin Public Key From a Private Key</title>
-    <meta name="description" content="I've been wondering about the relationship between Bitcoin public and private keys. I've seen the `Q = dG` explanation but it leaves out a few too many details for my tastes. This post describes how to derive a public key from a private key with conrete, runnable C code. ...">
+    <meta name="description" content="I've been wondering about the relationship between Bitcoin public and private keys. I know they are Elliptic Curve DSA (ECDSA) key pairs, and I've seen the `Q = dG` explanation on a few sites, but it leaves out many details. Figuring it out seems like a good learning opportunity so this post describes how to derive a public key from a private key with conrete, runnable C code. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="public key, private key, elliptic curve">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -118,13 +118,13 @@
   </header>
 
 
- <p>I&rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> but it leaves out a few too many details for my tastes. This post describes how to derive a public key from a private key with conrete, runnable C code.</p>
+ <p>I&rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I know they are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but it leaves out many details. Figuring it out seems like a good learning opportunity so this post describes how to derive a public key from a private key with conrete, runnable C code.</p>
 
 
  <p>The Stack Overflow post says that in the <code>Q = dG</code> equation, <code>Q</code> is the public key and <code>d</code> is the private key, but does not explain <code>G</code>, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the <a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"><code>secp256k1</code> ECDSA curve</a>.</p>
 
 
- <p>Next, I started by looking at the OpenSSL <code>libcrypto</code> library, at the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c">function mentioned in the Stack Overflow post</a>, <code>EC_KEY_generate_key</code>. Here&rsquo;s the line that performs the multiplication again:</p>
+ <p>Next, I looked at the <a href="https://www.openssl.org/" title="OpenSSL">OpenSSL</a> <code>libcrypto</code> library, in the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c">function mentioned in the Stack Overflow post</a>, <code>EC_KEY_generate_key</code>. Here&rsquo;s the line that performs the multiplication again:</p>
 
 
  <div class="brush: c">
@@ -151,10 +151,55 @@
 </div>
 
 
- <p>The <code>priv_key</code> is known and the <code>pub_key</code> is an output parameter, so we just need to pass in the appropriate group as the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a> (in <code>crypto/objects/obj_mac.h</code>), so it&rsquo;s just a matter of finding the right calls. In this case, we want <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"><code>EC_GROUP_new_by_curve_name</code></a>.</p>
+ <p>In my case, I&rsquo;m supplying the <code>priv_key</code> and the <code>pub_key</code> is the output parameter, so we just need to pass in the appropriate group as the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a> (in <code>crypto/objects/obj_mac.h</code>), so it&rsquo;s just a matter of getting the right data representation. Here is the [header for that function][openssl:ec]</p>
 
 
- <p>Here&rsquo;s what my the complete code for computing a public key from a private looks like:</p>
+ <div class="brush: c">
+
+  <table class="sourcetable">
+
+   <tbody>
+
+    <tr>
+
+     <td class="linenos">
+
+      <div class="linenodiv">
+
+       <pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></div></td>
+
+     <td class="code">
+
+      <div class="source">
+
+       <pre><span class="cm">/** Computes r = generator * n + q * m</span>
+<span class="cm"> *  \param  group  underlying EC_GROUP object</span>
+<span class="cm"> *  \param  r      EC_POINT object for the result</span>
+<span class="cm"> *  \param  n      BIGNUM with the multiplier for the group generator (optional)</span>
+<span class="cm"> *  \param  q      EC_POINT object with the first factor of the second summand</span>
+<span class="cm"> *  \param  m      BIGNUM with the second factor of the second summand</span>
+<span class="cm"> *  \param  ctx    BN_CTX object (optional)</span>
+<span class="cm"> *  \return 1 on success and 0 if an error occured</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">EC_POINT_mul</span><span class="p">(</span><span class="k">const</span> <span class="n">EC_GROUP</span> <span class="o">*</span><span class="n">group</span><span class="p">,</span> <span class="n">EC_POINT</span> <span class="o">*</span><span class="n">r</span><span class="p">,</span> <span class="k">const</span> <span class="n">BIGNUM</span> <span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="k">const</span> <span class="n">EC_POINT</span> <span class="o">*</span><span class="n">q</span><span class="p">,</span> <span class="k">const</span> <span class="n">BIGNUM</span> <span class="o">*</span><span class="n">m</span><span class="p">,</span> <span class="n">BN_CTX</span> <span class="o">*</span><span class="n">ctx</span><span class="p">);</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+
+ <p>Looks like we want to create a new <code>EC_GROUP</code> and we can use <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"><code>EC_GROUP_new_by_curve_name</code></a>.</p>
+
+
+ <p>Here&rsquo;s what my the complete code for computing a public key from a private looks like (disclaimer: obviously not production-quality):</p>
 
 
  <div class="brush: c">
@@ -199,7 +244,20 @@
 28
 29
 30
-31</pre></div></td>
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44</pre></div></td>
 
      <td class="code">
 
@@ -210,30 +268,43 @@
 <span class="cp">#include &lt;openssl/ec.h&gt;</span>
 <span class="cp">#include &lt;openssl/obj_mac.h&gt; </span><span class="c1">// for NID_secp256k1</span>
 
-<span class="cp">#define PRIV_KEY_LENGTH 32</span>
-<span class="cp">#define PUB_KEY_LENGTH 65</span>
+<span class="cp">#define PRIV_KEY_LEN 32</span>
+<span class="cp">#define PUB_KEY_LEN 65</span>
 
-<span class="kt">void</span> <span class="nf">hex2bytes</span><span class="p">(</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">in</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">out</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">for</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">,</span><span class="n">in</span><span class="o">+=</span><span class="mi">2</span><span class="p">)</span> <span class="n">sscanf</span><span class="p">(</span><span class="n">in</span><span class="p">,</span> <span class="s">"%2hhx"</span><span class="p">,</span> <span class="n">out</span><span class="o">+</span><span class="n">i</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">hex2bytes</span><span class="p">(</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">in</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">out</span> <span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">for</span><span class="p">(</span> <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">,</span><span class="n">in</span> <span class="o">+=</span> <span class="mi">2</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="n">sscanf</span><span class="p">(</span> <span class="n">in</span><span class="p">,</span> <span class="s">"%2hhx"</span><span class="p">,</span> <span class="n">out</span> <span class="o">+</span> <span class="n">i</span> <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+<span class="kt">void</span> <span class="nf">print_chars</span><span class="p">(</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">in</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span> <span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">for</span><span class="p">(</span> <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span> <span class="s">"%c"</span><span class="p">,</span> <span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">printf</span><span class="p">(</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span> <span class="p">);</span>
 <span class="p">}</span>
 
-<span class="kt">void</span> <span class="nf">print_chars</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">in</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">for</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="n">printf</span><span class="p">(</span><span class="s">"%c"</span><span class="p">,</span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span> <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+<span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">priv2pub</span><span class="p">(</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">priv_hex</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span> <span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">const</span> <span class="n">EC_GROUP</span> <span class="o">*</span><span class="n">ecgroup</span> <span class="o">=</span> <span class="n">EC_GROUP_new_by_curve_name</span><span class="p">(</span> <span class="n">NID_secp256k1</span> <span class="p">);</span>
+
+  <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">privkey_bytes</span><span class="p">[</span><span class="n">PRIV_KEY_LEN</span><span class="p">];</span>
+  <span class="n">hex2bytes</span><span class="p">(</span> <span class="n">priv_hex</span><span class="p">,</span> <span class="n">PRIV_KEY_LEN</span><span class="p">,</span> <span class="n">privkey_bytes</span> <span class="p">);</span>
+  <span class="k">const</span> <span class="n">BIGNUM</span> <span class="o">*</span><span class="n">privkey_bn</span> <span class="o">=</span> <span class="n">BN_bin2bn</span><span class="p">(</span> <span class="n">privkey_bytes</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
+
+  <span class="n">EC_POINT</span> <span class="o">*</span><span class="n">pub_key</span> <span class="o">=</span> <span class="n">EC_POINT_new</span><span class="p">(</span> <span class="n">ecgroup</span> <span class="p">);</span>
+
+  <span class="n">EC_POINT_mul</span><span class="p">(</span> <span class="n">ecgroup</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">,</span> <span class="n">privkey_bn</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
+
+  <span class="k">return</span>
+    <span class="n">EC_POINT_point2hex</span><span class="p">(</span> <span class="n">ecgroup</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">,</span> <span class="n">POINT_CONVERSION_UNCOMPRESSED</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
 <span class="p">}</span>
 
-<span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">priv2pub</span><span class="p">(</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">priv_hex</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
-  <span class="k">const</span> <span class="n">EC_GROUP</span> <span class="o">*</span><span class="n">ecgroup</span> <span class="o">=</span> <span class="n">EC_GROUP_new_by_curve_name</span><span class="p">(</span><span class="n">NID_secp256k1</span><span class="p">);</span>
-  <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">privkey_bytes</span><span class="p">[</span><span class="n">PRIV_KEY_LENGTH</span><span class="p">];</span>
-  <span class="n">hex2bytes</span><span class="p">(</span><span class="n">priv_hex</span><span class="p">,</span> <span class="n">PRIV_KEY_LENGTH</span><span class="p">,</span> <span class="n">privkey_bytes</span><span class="p">);</span>
-  <span class="k">const</span> <span class="n">BIGNUM</span> <span class="o">*</span><span class="n">privkey_bn</span> <span class="o">=</span> <span class="n">BN_bin2bn</span><span class="p">(</span><span class="n">privkey_bytes</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-  <span class="n">EC_POINT</span> <span class="o">*</span><span class="n">pub_key</span> <span class="o">=</span> <span class="n">EC_POINT_new</span><span class="p">(</span><span class="n">ecgroup</span><span class="p">);</span>
-  <span class="n">EC_POINT_mul</span><span class="p">(</span><span class="n">ecgroup</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">,</span> <span class="n">privkey_bn</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-  <span class="k">return</span> <span class="n">EC_POINT_point2hex</span><span class="p">(</span><span class="n">ecgroup</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">,</span> <span class="n">POINT_CONVERSION_UNCOMPRESSED</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
-<span class="p">}</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span> <span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[]</span> <span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">print_chars</span><span class="p">(</span> <span class="n">priv2pub</span><span class="p">(</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">PRIV_KEY_LEN</span> <span class="p">),</span> <span class="n">PUB_KEY_LEN</span> <span class="o">*</span> <span class="mi">2</span> <span class="p">);</span>
 
-<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-  <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">privkey_hex</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725"</span><span class="p">;</span>
-  <span class="n">print_chars</span><span class="p">(</span><span class="n">priv2pub</span><span class="p">(</span><span class="n">privkey_hex</span><span class="p">,</span> <span class="n">PRIV_KEY_LENGTH</span><span class="p">),</span> <span class="n">PUB_KEY_LENGTH</span><span class="o">*</span><span class="mi">2</span><span class="p">);</span>
   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
@@ -241,18 +312,25 @@
 </div>
 
 
- <p>I borrowed a sample public/private key pair from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki entry about addresses">this Bitcoin wiki article</a>. You can see the private key, <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code>, hardcoded in the program. Bitcoin private keys are 32 bytes and public keys are 65 bytes. I wanted the input and output to be hexadecimal, so I needed a <code>hex2bytes</code> helper function. I had to then convert the private key again, from bytes to <code>BIGNUM</code>, which is the type OpenSSL uses for arbitrary precision arithmetic. Finally, I use another helper function, <code>print_chars</code>, to print the final result.</p>
+ <p>Bitcoin private keys are 32 bytes and public keys are 65 bytes. The input and output are in hexadecimal so I created a <code>hex2bytes</code> helper function. I had to then convert the private key again, from bytes to <code>BIGNUM</code>, which is OpenSSL&rsquo;s number representation for arbitrary precision arithmetic. Finally, I use another helper function, <code>print_chars</code>, to print the final result.</p>
 
 
- <p>The public key from the article is <code>0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code>. Let&rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file <code>blog.c</code>.)</p>
+ <p>To test, I borrowed a sample public/private key pair from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses">this Bitcoin wiki article</a>. The private key from the article is <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code> and the public key is <code>0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code>. Let&rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file <code>blog.c</code>.)</p>
 
 
  <pre><code>$ gcc -lcrypto -std=c99 blog.c
-$ ./a.out
+$ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code></pre>
 
 
  <p>Success!</p>
+
+
+ <p>Let&rsquo;s do another one. I generated a private key with <a href="https://www.bitaddress.org">bitaddress.org</a>, <code>5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe</code>, but it&rsquo;s in <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a> and not hex. So I went to the &ldquo;Wallet Details&rdquo; tab, entered the base58 key, and <a href="https://www.bitaddress.org">bitaddress.org</a> reports that the private key in hex is <code>4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61</code>, and public key is <code>0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117</code>. Let&rsquo;s check with our code:</p>
+
+
+ <pre><code>$ ./a.out 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
+0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117</code></pre>
 
 
  <h3 id="software">Software</h3>

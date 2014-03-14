@@ -3,10 +3,13 @@
     Tags: public key, private key, elliptic curve
 
 I've been wondering about the relationship between Bitcoin public and
-private keys. I've seen the [`Q = dG` explanation][so] but it leaves
-out a few too many details for my tastes. This post describes how to
-derive a public key from a private key with conrete, runnable C code.
+private keys. I know they are [Elliptic Curve DSA (ECDSA)][wiki:ecdsa]
+key pairs, and I've seen the [`Q = dG` explanation][so] on a few
+sites, but it leaves out many details. Figuring it out seems like a
+good learning opportunity so this post describes how to derive a
+public key from a private key with conrete, runnable C code.
 
+[wiki:ecdsa]: http://en.wikipedia.org/wiki/Elliptic_Curve_DSA "Wikipedia: Elliptic Curve DSA"
 [so]: http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl "Stack Overflow: Public Key from Private Key"
 
 <!-- more -->
@@ -18,7 +21,7 @@ uses the [`secp256k1` ECDSA curve][wiki].
 
 [wiki]: https://en.bitcoin.it/wiki/Secp256k1 "secp256k1 Bitcoin wiki entry"
 
-Next, I started by looking at the OpenSSL `libcrypto` library, at the
+Next, I looked at the [OpenSSL][openssl] `libcrypto` library, in the
 [function mentioned in the Stack Overflow post][ec_key],
 `EC_KEY_generate_key`. Here's the line that performs the
 multiplication again:
@@ -27,19 +30,38 @@ multiplication again:
 EC_POINT_mul(eckey->group, pub_key, priv_key, NULL, NULL, ctx);
 ```
 
-The `priv_key` is known and the `pub_key` is an output parameter, so
-we just need to pass in the appropriate group as the first
-parameter. OpenSSL has
+In my case, I'm supplying the `priv_key` and the `pub_key` is the
+output parameter, so we just need to pass in the appropriate group as
+the first parameter. OpenSSL has
 [already defined the `secp256k1` curve][obj_mac] (in
-`crypto/objects/obj_mac.h`), so it's just a matter of finding the
-right calls. In this case, we want [`EC_GROUP_new_by_curve_name`][ec_curve].
+`crypto/objects/obj_mac.h`), so it's just a matter of getting the
+right data representation. Here is the
+[header for that function][openssl:ec]
 
+```c
+/** Computes r = generator * n + q * m
+ *  \param  group  underlying EC_GROUP object
+ *  \param  r      EC_POINT object for the result
+ *  \param  n      BIGNUM with the multiplier for the group generator (optional)
+ *  \param  q      EC_POINT object with the first factor of the second summand
+ *  \param  m      BIGNUM with the second factor of the second summand
+ *  \param  ctx    BN_CTX object (optional)
+ *  \return 1 on success and 0 if an error occured
+ */
+int EC_POINT_mul(const EC_GROUP *group, EC_POINT *r, const BIGNUM *n, const EC_POINT *q, const BIGNUM *m, BN_CTX *ctx);
+```
+
+Looks like we want to create a new `EC_GROUP` and we can use
+[`EC_GROUP_new_by_curve_name`][ec_curve].
+
+[openssl]: https://www.openssl.org/ "OpenSSL"
 [ec_key]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236 "crypto/ec/ec_key.c"
+[openssl:ech]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643 "crypto/ec/ec.h"
 [obj_mac]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385 "crypto/objects/obj_mac.h"
 [ec_curve]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057 "crypco/ec/ec_curve.c"
 
 Here's what my the complete code for computing a public key from a
-private looks like:
+private looks like (disclaimer: obviously not production-quality):
 
 ```c
 #include <stdlib.h>
@@ -47,55 +69,77 @@ private looks like:
 #include <openssl/ec.h>
 #include <openssl/obj_mac.h> // for NID_secp256k1
 
-#define PRIV_KEY_LENGTH 32
-#define PUB_KEY_LENGTH 65
+#define PRIV_KEY_LEN 32
+#define PUB_KEY_LEN 65
 
-void hex2bytes(const unsigned char *in, size_t len, unsigned char *out) {
-  for(size_t i=0; i<len; i++,in+=2) sscanf(in, "%2hhx", out+i);
+void hex2bytes( const unsigned char *in, size_t len, unsigned char *out )
+{
+  for( size_t i = 0; i < len; i++ ,in += 2 ) {
+    sscanf( in, "%2hhx", out + i );
+  }
 }
-
-void print_chars(unsigned char *in, size_t len) {
-  for(size_t i=0; i<len; i++) printf("%c",in[i]); printf("\n");
+void print_chars( const unsigned char *in, size_t len )
+{
+  for( size_t i = 0; i < len; i++ ) {
+    printf( "%c", in[i] );
+  }
+  printf( "\n" );
 }
-		
-unsigned char *priv2pub(const unsigned char *priv_hex, size_t len) {
-  const EC_GROUP *ecgroup = EC_GROUP_new_by_curve_name(NID_secp256k1);
-  unsigned char privkey_bytes[PRIV_KEY_LENGTH];
-  hex2bytes(priv_hex, PRIV_KEY_LENGTH, privkey_bytes);
-  const BIGNUM *privkey_bn = BN_bin2bn(privkey_bytes, len, NULL);
-  EC_POINT *pub_key = EC_POINT_new(ecgroup);
-  EC_POINT_mul(ecgroup, pub_key, privkey_bn, NULL, NULL, NULL);
-  return EC_POINT_point2hex(ecgroup, pub_key, POINT_CONVERSION_UNCOMPRESSED, NULL);
+							
+unsigned char *priv2pub( const unsigned char *priv_hex, size_t len )
+{
+  const EC_GROUP *ecgroup = EC_GROUP_new_by_curve_name( NID_secp256k1 );
+  
+  unsigned char privkey_bytes[PRIV_KEY_LEN];
+  hex2bytes( priv_hex, PRIV_KEY_LEN, privkey_bytes );
+  const BIGNUM *privkey_bn = BN_bin2bn( privkey_bytes, len, NULL );
+  
+  EC_POINT *pub_key = EC_POINT_new( ecgroup );
+  
+  EC_POINT_mul( ecgroup, pub_key, privkey_bn, NULL, NULL, NULL );
+										
+  return
+    EC_POINT_point2hex( ecgroup, pub_key, POINT_CONVERSION_UNCOMPRESSED, NULL );
 }
-
-int main() {
-  const unsigned char privkey_hex[] = "18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725";
-  print_chars(priv2pub(privkey_hex, PRIV_KEY_LENGTH), PUB_KEY_LENGTH*2);
+											  
+int main( int argc, const unsigned char *argv[] )
+{
+  print_chars( priv2pub( argv[1], PRIV_KEY_LEN ), PUB_KEY_LEN * 2 );
+  
   return 0;
 }
 ```
 
-I borrowed a sample public/private key pair from
-[this Bitcoin wiki article][wiki:address]. You can see the private
-key,
-`18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725`,
-hardcoded in the program. Bitcoin private keys are 32 bytes and public
-keys are 65 bytes. I wanted the input and output to be hexadecimal, so
-I needed a `hex2bytes` helper function. I had to then convert the
-private key again, from bytes to `BIGNUM`, which is the type OpenSSL
-uses for arbitrary precision arithmetic. Finally, I use another helper
-function, `print_chars`, to print the final result.
+Bitcoin private keys are 32 bytes and public keys are 65 bytes. The
+input and output are in hexadecimal so I created a `hex2bytes` helper
+function. I had to then convert the private key again, from bytes to
+`BIGNUM`, which is OpenSSL's number representation for arbitrary
+precision arithmetic. Finally, I use another helper function,
+`print_chars`, to print the final result.
 
-
-The public key from the article is `0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6`. Let's see if our program can recover this public key from the private key. (I save the code above to a file `blog.c`.)
+To test, I borrowed a sample public/private key pair from
+[this Bitcoin wiki article][wiki:address]. The private key from the
+article is
+`18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725` and
+the public key is
+`0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6`. Let's
+see if our program can recover this public key from the private
+key. (I save the code above to a file `blog.c`.)
 
     $ gcc -lcrypto -std=c99 blog.c
-    $ ./a.out
-    0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6
+    $ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
+	0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6
 
 Success!
 
-[wiki:address]: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses "Bitcoin wiki entry about addresses"
+[wiki:address]: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses "Bitcoin wiki: technical explanation of addresses"
+
+Let's do another one. I generated a private key with [bitaddress.org](https://www.bitaddress.org), `5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe`, but it's in [Base58Check encoding][bwiki:base58] and not hex. So I went to the "Wallet Details" tab, entered the base58 key, and [bitaddress.org](https://www.bitaddress.org) reports that the private key in hex is `4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61`, and public key is `0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117`. Let's check with our code:
+
+    $ ./a.out 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
+	0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117
+
+[bwiki:base58]: https://en.bitcoin.it/wiki/Base58Check_encoding "Bitcoin wiki: Base58Check encoding"
 
 ### Software ###
 

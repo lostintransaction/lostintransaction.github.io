@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8">
+    <title>Deriving a Bitcoin Public Key From a Private Key</title>
+    <meta name="description" content="I've been wondering about the relationship between Bitcoin public and private keys. I've seen the `Q = dG` explanation but it leaves out a few too many details for my tastes. This post describes how to derive a public key from a private key with conrete, runnable C code. ...">
+    <meta name="author"      content="The Unknown Blogger">
+    <meta name="keywords"    content="public key, private key, elliptic curve">
+    <meta name="viewport"    content="width=device-width, initial-scale=1.0">
+    <link rel="icon"      href="/favicon.ico">
+    <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">
+    <link rel="next" href="/blog/2014/03/07/verifying-andreas-s-fundraising-for-dorian-message/">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/pygments.css">
+    <link rel="stylesheet" type="text/css" href="/css/scribble.css">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
+    <!-- Feeds -->
+    <link ref="alternate" type="application/atom+xml"
+          href="/feeds/all.atom.xml" title="Atom Feed">
+    <link ref="alternate" type="application/rss+xml"
+          href="/feeds/all.rss.xml" title="RSS Feed">
+    <!-- JS -->
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-48721117-3']);
+      _gaq.push(['_setDomainName', 'www.lostintransaction.com']);
+      _gaq.push(['_trackPageview']);
+      setTimeout(function(){_gaq.push(['_trackEvent', '30_seconds', 'read'])}, 30000); // http://drawingablank.me/blog/fix-your-bounce-rate.html
+      (function() {
+          var ga = document.createElement('script');
+          ga.type = 'text/javascript'; ga.async = true;
+          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- A standard Twitter Bootstrap nav bar -->
+    <header class="navbar navbar-default navbar-inverse"
+            role="banner">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button"
+                  class="navbar-toggle"
+                  data-toggle="collapse"
+                  data-target=".our-nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a href="/index.html" class="navbar-brand">Lost in Transaction</a>
+        </div>
+        <div class="collapse navbar-collapse our-nav-collapse"
+             role="navigation">
+          <ul class="nav navbar-nav">
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                Tags <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="/index.html">All Posts</a></li>
+
+<li><a href="/tags/Andreas-Antonopoulos.html">Andreas Antonopoulos</a></li>
+
+<li><a href="/tags/bar.html">bar</a></li>
+
+<li><a href="/tags/baz.html">baz</a></li>
+
+<li><a href="/tags/elliptic-curve.html">elliptic curve</a></li>
+
+<li><a href="/tags/foo.html">foo</a></li>
+
+<li><a href="/tags/hashes.html">hashes</a></li>
+
+<li><a href="/tags/MultiBit.html">MultiBit</a></li>
+
+<li><a href="/tags/private-key.html">private key</a></li>
+
+<li><a href="/tags/public-key.html">public key</a></li>
+
+<li><a href="/tags/signatures.html">signatures</a></li>
+
+<li><a href="/tags/tag-with-spaces.html">tag with spaces</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="/About.html">About</a>
+            </li> 
+            <li><a href="/feeds/all.atom.xml">Atom</a></li>
+            <li><a href="/feeds/all.rss.xml">RSS</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+
+        <!-- Main column -->
+        <div id="content" class="col-md-12">
+
+
+
+
+
+
+<article>
+
+ <header>
+
+  <h1>Deriving a Bitcoin Public Key From a Private Key</h1>
+
+  <p class="date-and-tags">
+   <time datetime="2014-03-14" pubdate="true">2014-03-14</time> :: <span class="tags"><a href="/tags/public-key.html">public key</a>, <a href="/tags/private-key.html">private key</a>, <a href="/tags/elliptic-curve.html">elliptic curve</a></span></p>
+  </header>
+
+
+ <p>I&rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> but it leaves out a few too many details for my tastes. This post describes how to derive a public key from a private key with conrete, runnable C code.</p>
+
+
+ <p>The Stack Overflow post says that in the <code>Q = dG</code> equation, <code>Q</code> is the public key and <code>d</code> is the private key, but does not explain <code>G</code>, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the <a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"><code>secp256k1</code> ECDSA curve</a>.</p>
+
+
+ <p>Next, I started by looking at the OpenSSL <code>libcrypto</code> library, at the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c">function mentioned in the Stack Overflow post</a>, <code>EC_KEY_generate_key</code>. Here&rsquo;s the line that performs the multiplication again:</p>
+
+
+ <div class="brush: c">
+
+  <table class="sourcetable">
+
+   <tbody>
+
+    <tr>
+
+     <td class="linenos">
+
+      <div class="linenodiv">
+
+       <pre>1</pre></div></td>
+
+     <td class="code">
+
+      <div class="source">
+
+       <pre><span class="n">EC_POINT_mul</span><span class="p">(</span><span class="n">eckey</span><span class="o">-&gt;</span><span class="n">group</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">,</span> <span class="n">priv_key</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">ctx</span><span class="p">);</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+
+ <p>The <code>priv_key</code> is known and the <code>pub_key</code> is an output parameter, so we just need to pass in the appropriate group as the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a> (in <code>crypto/objects/obj_mac.h</code>), so it&rsquo;s just a matter of finding the right calls. In this case, we want <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"><code>EC_GROUP_new_by_curve_name</code></a>.</p>
+
+
+ <p>Here&rsquo;s what my public-from-private-key function looks like:</p>
+
+
+ <div class="brush: c">
+
+  <table class="sourcetable">
+
+   <tbody>
+
+    <tr>
+
+     <td class="linenos">
+
+      <div class="linenodiv">
+
+       <pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31</pre></div></td>
+
+     <td class="code">
+
+      <div class="source">
+
+       <pre><span class="cp">#include &lt;stdlib.h&gt;</span>
+<span class="cp">#include &lt;stdio.h&gt;</span>
+<span class="cp">#include &lt;openssl/ec.h&gt;</span>
+<span class="cp">#include &lt;openssl/obj_mac.h&gt; </span><span class="c1">// for NID_secp256k1</span>
+
+<span class="cp">#define PRIV_KEY_LENGTH 32</span>
+<span class="cp">#define PUB_KEY_LENGTH 65</span>
+
+<span class="kt">void</span> <span class="nf">hex2bytes</span><span class="p">(</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">in</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">out</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">,</span><span class="n">in</span><span class="o">+=</span><span class="mi">2</span><span class="p">)</span> <span class="n">sscanf</span><span class="p">(</span><span class="n">in</span><span class="p">,</span> <span class="s">"%2hhx"</span><span class="p">,</span> <span class="n">out</span><span class="o">+</span><span class="n">i</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">print_chars</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">in</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="n">printf</span><span class="p">(</span><span class="s">"%c"</span><span class="p">,</span><span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span> <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">priv2pub</span><span class="p">(</span><span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">priv_hex</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">const</span> <span class="n">EC_GROUP</span> <span class="o">*</span><span class="n">ecgroup</span> <span class="o">=</span> <span class="n">EC_GROUP_new_by_curve_name</span><span class="p">(</span><span class="n">NID_secp256k1</span><span class="p">);</span>
+  <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">privkey_bytes</span><span class="p">[</span><span class="n">PRIV_KEY_LENGTH</span><span class="p">];</span>
+  <span class="n">hex2bytes</span><span class="p">(</span><span class="n">priv_hex</span><span class="p">,</span> <span class="n">PRIV_KEY_LENGTH</span><span class="p">,</span> <span class="n">privkey_bytes</span><span class="p">);</span>
+  <span class="k">const</span> <span class="n">BIGNUM</span> <span class="o">*</span><span class="n">privkey_bn</span> <span class="o">=</span> <span class="n">BN_bin2bn</span><span class="p">(</span><span class="n">privkey_bytes</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+  <span class="n">EC_POINT</span> <span class="o">*</span><span class="n">pub_key</span> <span class="o">=</span> <span class="n">EC_POINT_new</span><span class="p">(</span><span class="n">ecgroup</span><span class="p">);</span>
+  <span class="n">EC_POINT_mul</span><span class="p">(</span><span class="n">ecgroup</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">,</span> <span class="n">privkey_bn</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">EC_POINT_point2hex</span><span class="p">(</span><span class="n">ecgroup</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">,</span> <span class="n">POINT_CONVERSION_UNCOMPRESSED</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">privkey_hex</span><span class="p">[]</span> <span class="o">=</span> <span class="s">"18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725"</span><span class="p">;</span>
+  <span class="n">print_chars</span><span class="p">(</span><span class="n">priv2pub</span><span class="p">(</span><span class="n">privkey_hex</span><span class="p">,</span> <span class="n">PRIV_KEY_LENGTH</span><span class="p">),</span> <span class="n">PUB_KEY_LENGTH</span><span class="o">*</span><span class="mi">2</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+
+ <h3 id="software">Software</h3>
+
+
+ <p>In this post, I&rsquo;m using OpenSSL 1.0.1e and running Debian 7.0.</p>
+
+ <footer>
+
+  <script type="text/javascript">
+      !function(d,s,id){
+          var js,fjs=d.getElementsByTagName(s)[0];
+          if(!d.getElementById(id)){
+              js=d.createElement(s);
+              js.id=id;
+              js.src="//platform.twitter.com/widgets.js";
+              fjs.parentNode.insertBefore(js,fjs);
+          }
+      }(document,"script","twitter-wjs");
+    </script>
+    <a class="twitter-share-button" data-dnt="true" data-url="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" href="https://twitter.com/share">
+      "Tweet"</a>
+
+  <script src="https://apis.google.com/js/plusone.js" type="text/javascript"></script>
+
+  <g:plusone href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" size="medium"></g:plusone>
+
+  <script type="text/javascript">
+      var disqus_shortname = 'lostintransaction';
+      (function() {
+          var dsq = document.createElement('script');
+          dsq.type = 'text/javascript';
+          dsq.async = true;
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+
+  <div id="disqus_thread"></div>
+
+  <ul class="pager">
+
+
+   <li class="next">
+      <a href="/blog/2014/03/07/verifying-andreas-s-fundraising-for-dorian-message/"><em>Verifying Andreas&rsquo;s &ldquo;Fundraising for Dorian&rdquo; Message</em> &rarr;</a>
+    </li>
+    </ul>
+  </footer>
+</article>
+        </div>
+      </div>
+      <footer>
+        <hr />
+        <p>Lost in Transaction: A neophyte explores Bitcoin.</p>
+        <p><a href="https://twitter.com/sixconfirms"
+              class="twitter-follow-button"
+              data-show-count="false"
+              data-lang="en">
+             "Follow sixconfirms"
+           </a>
+           <script type="text/javascript">
+             !function(d,s,id){
+                 var js,fjs=d.getElementsByTagName(s)[0];
+                 if(!d.getElementById(id)){
+                     js=d.createElement(s);
+                     js.id=id;
+                     js.src="//platform.twitter.com/widgets.js";
+                     fjs.parentNode.insertBefore(js,fjs);
+                 }
+             }(document,"script","twitter-wjs");
+           </script></p>
+        <p>Site generated
+        by <a href="https://github.com/greghendershott/frog">Frog</a>,
+        the <strong>fr</strong>ozen bl<strong>og</strong> tool.</p>
+        <p>Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
+<!--        <p><em>Your legal notice here</em>.</p>-->
+        <p><em>Don't believe anything you read here</em>.</p>
+      </footer>
+    </div>
+    <!-- </body> JS -->
+    <script type="text/javascript" src="//code.jquery.com/jquery.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+  </body>
+</html>

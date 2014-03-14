@@ -7,5 +7,5 @@ about the Bitcoin world. After all, there's no better motivation to
 learn than to expose one's ignorance to the world! And perhaps others
 may benefit from my journey as well. 
 
-Thanks in advance to those who take the time to visit, and especially
-those who take the time to tell me when I'm wrong!
+Thanks for visiting. And special thanks to those generous enough to
+tell me when I'm wrong!

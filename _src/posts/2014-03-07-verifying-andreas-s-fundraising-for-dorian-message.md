@@ -1,4 +1,4 @@
-    Title: Verifying Andreas's Dorian Nakamoto Fundraiser Message
+    Title: Verifying Andreas's "Fundraising for Dorian" Message
     Date: 2014-03-07T18:52:52
     Tags: Andreas Antonopoulos, signatures
 

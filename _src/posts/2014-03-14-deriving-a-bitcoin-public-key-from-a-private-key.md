@@ -5,38 +5,38 @@
 I've been wondering about the relationship between Bitcoin public and
 private keys. I know they are [Elliptic Curve DSA (ECDSA)][wiki:ecdsa]
 key pairs, and I've seen the [`Q = dG` explanation][so] on a few
-sites, but it leaves out many details. Figuring it out seems like a
-good learning opportunity so this post describes how to derive a
-public key from a private key with conrete, runnable C code.
+sites, but they leave out some details. I wanted to experiment, so
+this post describes how to derive a public key from a private key with
+runnable C code.
 
 [wiki:ecdsa]: http://en.wikipedia.org/wiki/Elliptic_Curve_DSA "Wikipedia: Elliptic Curve DSA"
 [so]: http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl "Stack Overflow: Public Key from Private Key"
 
 <!-- more -->
 
-The Stack Overflow post says that in the `Q = dG` equation, `Q` is the
-public key and `d` is the private key, but does not explain `G`, the
-group parameter. Luckily, some Googling quickly finds that Bitcoin
-uses the [`secp256k1` ECDSA curve][wiki].
+The [accepted Stack Overflow answer from the previous link][so2] says that in
+the `Q = dG` equation, `Q` is the public key and `d` is the private
+key, but does not explain `G`, the group parameter. Luckily, some
+Googling quickly finds that Bitcoin uses the
+[`secp256k1` ECDSA curve][wiki].
 
+[so2]: http://stackoverflow.com/a/12482384/951881 "Stack Overflow: Public Key from Private Key Answer"
 [wiki]: https://en.bitcoin.it/wiki/Secp256k1 "secp256k1 Bitcoin wiki entry"
 
 Next, I looked at the [OpenSSL][openssl] `libcrypto` library, in the
-[function mentioned in the Stack Overflow post][ec_key],
-`EC_KEY_generate_key`. Here's the line that performs the
-multiplication again:
+[function mentioned in the Stack Overflow post, `EC_KEY_generate_key`][ec_key]. Here's
+the line that performs the multiplication:
 
 ```c
 EC_POINT_mul(eckey->group, pub_key, priv_key, NULL, NULL, ctx);
 ```
 
-In my case, I'm supplying the `priv_key` and the `pub_key` is the
-output parameter, so we just need to pass in the appropriate group as
-the first parameter. OpenSSL has
-[already defined the `secp256k1` curve][obj_mac] (in
-`crypto/objects/obj_mac.h`), so it's just a matter of getting the
-right data representation. Here is the
-[header for that function][openssl:ec]
+In my case, I'm supplying `priv_key` and `pub_key` is the output
+parameter, so I just need the appropriate group for the first
+parameter. OpenSSL has
+[already defined the `secp256k1` curve][obj_mac], so it's just a
+matter of getting the right data representation. Here is the
+[header for that function][openssl:ech]
 
 ```c
 /** Computes r = generator * n + q * m

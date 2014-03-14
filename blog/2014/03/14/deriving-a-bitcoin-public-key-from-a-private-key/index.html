@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Deriving a Bitcoin Public Key From a Private Key</title>
-    <meta name="description" content="I've been wondering about the relationship between Bitcoin public and private keys. I know they are Elliptic Curve DSA (ECDSA) key pairs, and I've seen the `Q = dG` explanation on a few sites, but it leaves out many details. Figuring it out seems like a good learning opportunity so this post describes how to derive a public key from a private key with conrete, runnable C code. ...">
+    <meta name="description" content="I've been wondering about the relationship between Bitcoin public and private keys. I know they are Elliptic Curve DSA (ECDSA) key pairs, and I've seen the `Q = dG` explanation on a few sites, but they leave out some details. I wanted to experiment, so this post describes how to derive a public key from a private key with runnable C code. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="public key, private key, elliptic curve, openssl">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -120,13 +120,13 @@
   </header>
 
 
- <p>I&rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I know they are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but it leaves out many details. Figuring it out seems like a good learning opportunity so this post describes how to derive a public key from a private key with conrete, runnable C code.</p>
+ <p>I&rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I know they are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but they leave out some details. I wanted to experiment, so this post describes how to derive a public key from a private key with runnable C code.</p>
 
 
- <p>The Stack Overflow post says that in the <code>Q = dG</code> equation, <code>Q</code> is the public key and <code>d</code> is the private key, but does not explain <code>G</code>, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the <a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"><code>secp256k1</code> ECDSA curve</a>.</p>
+ <p>The <a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer">accepted Stack Overflow answer from the previous link</a> says that in the <code>Q = dG</code> equation, <code>Q</code> is the public key and <code>d</code> is the private key, but does not explain <code>G</code>, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the <a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"><code>secp256k1</code> ECDSA curve</a>.</p>
 
 
- <p>Next, I looked at the <a href="https://www.openssl.org/" title="OpenSSL">OpenSSL</a> <code>libcrypto</code> library, in the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c">function mentioned in the Stack Overflow post</a>, <code>EC_KEY_generate_key</code>. Here&rsquo;s the line that performs the multiplication again:</p>
+ <p>Next, I looked at the <a href="https://www.openssl.org/" title="OpenSSL">OpenSSL</a> <code>libcrypto</code> library, in the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c">function mentioned in the Stack Overflow post, <code>EC_KEY_generate_key</code></a>. Here&rsquo;s the line that performs the multiplication:</p>
 
 
  <div class="brush: c">
@@ -153,7 +153,7 @@
 </div>
 
 
- <p>In my case, I&rsquo;m supplying the <code>priv_key</code> and the <code>pub_key</code> is the output parameter, so we just need to pass in the appropriate group as the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a> (in <code>crypto/objects/obj_mac.h</code>), so it&rsquo;s just a matter of getting the right data representation. Here is the [header for that function][openssl:ec]</p>
+ <p>In my case, I&rsquo;m supplying <code>priv_key</code> and <code>pub_key</code> is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a>, so it&rsquo;s just a matter of getting the right data representation. Here is the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h">header for that function</a></p>
 
 
  <div class="brush: c">

@@ -201,7 +201,7 @@
  <p>Looks like we need an <code>EC_GROUP</code> and to create one we can use <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"><code>EC_GROUP_new_by_curve_name</code></a>.</p>
 
 
- <p>Putting everything together, here&rsquo;s what I came up with to compute a public key from a private key (disclaimer: obviously not production-quality code):</p>
+ <p>Putting everything together, here&rsquo;s what I came up with to compute a public key from a private key (disclaimer: the code has no error-checking and is obviously not production-quality):</p>
 
 
  <div class="brush: c">
@@ -342,7 +342,7 @@ $ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
  <p>Success!</p>
 
 
- <p>Let&rsquo;s do another one. I generated a private key with <a href="https://www.bitaddress.org">bitaddress.org</a>, <code>5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe</code>, but it&rsquo;s in <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a> and not hex. So I went to the &ldquo;Wallet Details&rdquo; tab, entered the base58 key, and <a href="https://www.bitaddress.org">bitaddress.org</a> reports that the private key in hex is <code>4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61</code>, and public key is <code>0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117</code>. Let&rsquo;s check with our code:</p>
+ <p>Let&rsquo;s do another one. I generated a private key with <a href="https://www.bitaddress.org">bitaddress.org</a>, <code>5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe</code>, but it&rsquo;s in <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a> and not hex. So I went to the &ldquo;Wallet Details&rdquo; tab, entered the base58 key, and <a href="https://www.bitaddress.org">bitaddress.org</a> reports that the private key in hex is <code>4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61</code> and public key is <code>0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117</code>. Let&rsquo;s check with our code:</p>
 
 
  <pre><code>$ ./a.out 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61

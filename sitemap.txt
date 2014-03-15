@@ -1,5 +1,4 @@
 http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/
 http://www.lostintransaction.com/blog/2014/03/07/verifying-andreas-s-fundraising-for-dorian-message/
 http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/
-http://www.lostintransaction.com/blog/2012/01/01/a-2012-blog-post/
 http://www.lostintransaction.com/About.html

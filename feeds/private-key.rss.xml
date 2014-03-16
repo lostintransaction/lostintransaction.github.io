@@ -54,8 +54,7 @@ unsigned char *priv2pub( const unsigned char *priv_hex )
   EC_POINT_mul( ecgrp, pub, priv_bn, NULL, NULL, NULL );
                               
   // convert pub_key from EC_POINT curve coordinate to hexadecimal
-  unsigned char *ret =
-    EC_POINT_point2hex( ecgrp, pub, POINT_CONVERSION_UNCOMPRESSED, NULL );
+  unsigned char *ret = EC_POINT_point2hex( ecgrp, pub, POINT_CONVERSION_UNCOMPRESSED, NULL );
     
   EC_GROUP_free( ecgrp ); BN_free( priv_bn ); EC_POINT_free( pub );
   

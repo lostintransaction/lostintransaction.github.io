@@ -5,9 +5,9 @@
 I've been wondering about the relationship between Bitcoin public and
 private keys. I know they are [Elliptic Curve DSA (ECDSA)][wiki:ecdsa]
 key pairs, and I've seen the [`Q = dG` explanation][so] on a few
-sites, but they leave out some details. I wanted to experiment, so
-this post describes how to derive a public key from a private key with
-runnable C code.
+sites, but they leave out some details. I wanted to experiment for
+myself, so this post describes how to derive a public key from a
+private key with runnable C code.
 
 [wiki:ecdsa]: http://en.wikipedia.org/wiki/Elliptic_Curve_DSA "Wikipedia: Elliptic Curve DSA"
 [so]: http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl "Stack Overflow: Public Key from Private Key"
@@ -83,10 +83,8 @@ unsigned char *priv2pub( const unsigned char *priv_hex )
   BIGNUM *priv_bn = BN_new();
   BN_hex2bn( &priv_bn, priv_hex );
   
-  // allocate new pub key
-  EC_POINT *pub = EC_POINT_new( ecgrp );
-			
   // compute pub key from priv key and group
+  EC_POINT *pub = EC_POINT_new( ecgrp );
   EC_POINT_mul( ecgrp, pub, priv_bn, NULL, NULL, NULL );
 							  
   // convert pub_key from EC_POINT curve coordinate to hexadecimal

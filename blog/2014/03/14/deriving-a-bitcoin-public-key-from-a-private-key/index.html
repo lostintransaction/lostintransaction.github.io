@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Deriving a Bitcoin Public Key From a Private Key</title>
-    <meta name="description" content="I've been wondering about the relationship between Bitcoin public and private keys. I know they are Elliptic Curve DSA (ECDSA) key pairs, and I've seen the `Q = dG` explanation on a few sites, but they leave out some details. I wanted to experiment, so this post describes how to derive a public key from a private key with runnable C code. ...">
+    <meta name="description" content="I've been wondering about the relationship between Bitcoin public and private keys. I know they are Elliptic Curve DSA (ECDSA) key pairs, and I've seen the `Q = dG` explanation on a few sites, but they leave out some details. I wanted to experiment for myself, so this post describes how to derive a public key from a private key with runnable C code. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="public key, private key, elliptic curve, OpenSSL, C">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -122,7 +122,7 @@
   </header>
 
 
- <p>I&rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I know they are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but they leave out some details. I wanted to experiment, so this post describes how to derive a public key from a private key with runnable C code.</p>
+ <p>I&rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I know they are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but they leave out some details. I wanted to experiment for myself, so this post describes how to derive a public key from a private key with runnable C code.</p>
 
 
  <p>The <a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer">accepted Stack Overflow answer from the previous link</a> says that in the <code>Q = dG</code> equation, <code>Q</code> is the public key and <code>d</code> is the private key, but does not explain <code>G</code>, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the <a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"><code>secp256k1</code> ECDSA curve</a>.</p>
@@ -263,9 +263,7 @@
 43
 44
 45
-46
-47
-48</pre></div></td>
+46</pre></div></td>
 
      <td class="code">
 
@@ -289,10 +287,8 @@
   <span class="n">BIGNUM</span> <span class="o">*</span><span class="n">priv_bn</span> <span class="o">=</span> <span class="n">BN_new</span><span class="p">();</span>
   <span class="n">BN_hex2bn</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">priv_bn</span><span class="p">,</span> <span class="n">priv_hex</span> <span class="p">);</span>
 
-  <span class="c1">// allocate new pub key</span>
-  <span class="n">EC_POINT</span> <span class="o">*</span><span class="n">pub</span> <span class="o">=</span> <span class="n">EC_POINT_new</span><span class="p">(</span> <span class="n">ecgrp</span> <span class="p">);</span>
-
   <span class="c1">// compute pub key from priv key and group</span>
+  <span class="n">EC_POINT</span> <span class="o">*</span><span class="n">pub</span> <span class="o">=</span> <span class="n">EC_POINT_new</span><span class="p">(</span> <span class="n">ecgrp</span> <span class="p">);</span>
   <span class="n">EC_POINT_mul</span><span class="p">(</span> <span class="n">ecgrp</span><span class="p">,</span> <span class="n">pub</span><span class="p">,</span> <span class="n">priv_bn</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
 
   <span class="c1">// convert pub_key from EC_POINT curve coordinate to hexadecimal</span>

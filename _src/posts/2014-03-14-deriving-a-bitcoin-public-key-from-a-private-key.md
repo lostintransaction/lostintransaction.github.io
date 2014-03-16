@@ -114,11 +114,12 @@ int main( int argc, const unsigned char *argv[] )
 
 Bitcoin private keys are 32 bytes and public keys are 65 bytes. The
 `priv2pub` function computes the public key associated with the given
-private key. Both the input private key and the output public key is
+private key. Both the input private key and the output public key are
 in hexadecimal. I had to first convert the private key to `BIGNUM`,
 which is OpenSSL's number representation for arbitrary precision
-arithmetic. After computing the public key, I then convert back to hex
-using `EC_POINT_point2hex`.
+arithmetic. The computed public key is a curve coordinate in OpenSSL's
+`EC_POINT` representation. I then convert back to hex using
+`EC_POINT_point2hex`.
 
 To test, I found a sample public/private key pair from
 [this Bitcoin wiki article][wiki:address]. The private key from the

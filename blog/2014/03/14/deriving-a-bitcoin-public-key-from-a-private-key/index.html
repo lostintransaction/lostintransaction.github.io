@@ -318,7 +318,7 @@
 </div>
 
 
- <p>Bitcoin private keys are 32 bytes and public keys are 65 bytes. The <code>priv2pub</code> function computes the public key associated with the given private key. Both the input private key and the output public key is in hexadecimal. I had to first convert the private key to <code>BIGNUM</code>, which is OpenSSL&rsquo;s number representation for arbitrary precision arithmetic. After computing the public key, I then convert back to hex using <code>EC_POINT_point2hex</code>.</p>
+ <p>Bitcoin private keys are 32 bytes and public keys are 65 bytes. The <code>priv2pub</code> function computes the public key associated with the given private key. Both the input private key and the output public key are in hexadecimal. I had to first convert the private key to <code>BIGNUM</code>, which is OpenSSL&rsquo;s number representation for arbitrary precision arithmetic. The computed public key is a curve coordinate in OpenSSL&rsquo;s <code>EC_POINT</code> representation. I then convert back to hex using <code>EC_POINT_point2hex</code>.</p>
 
 
  <p>To test, I found a sample public/private key pair from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses">this Bitcoin wiki article</a>. The private key from the article is <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code> and the public key is <code>0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code>. Let&rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file <code>blog.c</code>.)</p>

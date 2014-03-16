@@ -11,7 +11,7 @@
     <link rel="icon"      href="/favicon.ico">
     <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">
     <link rel="next" href="/blog/2014/03/07/verifying-andreas-s-fundraising-for-dorian-message/">
-
+    <link rel="prev" href="/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/">
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/css/pygments.css">
@@ -70,6 +70,8 @@
 
 <li><a href="/tags/elliptic-curve.html">elliptic curve</a></li>
 
+<li><a href="/tags/FFI.html">FFI</a></li>
+
 <li><a href="/tags/hashes.html">hashes</a></li>
 
 <li><a href="/tags/MultiBit.html">MultiBit</a></li>
@@ -79,6 +81,12 @@
 <li><a href="/tags/private-key.html">private key</a></li>
 
 <li><a href="/tags/public-key.html">public key</a></li>
+
+<li><a href="/tags/Racket.html">Racket</a></li>
+
+<li><a href="/tags/RIPEMD.html">RIPEMD</a></li>
+
+<li><a href="/tags/SHA.html">SHA</a></li>
 
 <li><a href="/tags/signatures.html">signatures</a></li>
               </ul>
@@ -147,7 +155,7 @@
 </div>
 
 
- <p>In my case, I&rsquo;m supplying <code>priv_key</code> and <code>pub_key</code> is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a>, so it&rsquo;s just a matter of getting the right data representation. Here is the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h">header for <code>EC_POINT_mul</code></a> from the OpenSSL library:</p>
+ <p>In this case, I&rsquo;m supplying <code>priv_key</code>, and <code>pub_key</code> is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h">already defined the <code>secp256k1</code> curve</a>, so it&rsquo;s just a matter of getting the right data representation. Here is the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h">header for <code>EC_POINT_mul</code></a> from the OpenSSL library:</p>
 
 
  <div class="brush: c">
@@ -257,10 +265,7 @@
 45
 46
 47
-48
-49
-50
-51</pre></div></td>
+48</pre></div></td>
 
      <td class="code">
 
@@ -274,46 +279,43 @@
 <span class="cp">#define PRIV_KEY_LEN 32</span>
 <span class="cp">#define PUB_KEY_LEN 65</span>
 
-<span class="c1">// reads 2 hex chars at a time from in and writes as a byte to out</span>
-<span class="kt">void</span> <span class="nf">hex2bytes</span><span class="p">(</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">in</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">out</span> <span class="p">)</span>
-<span class="p">{</span>
-  <span class="k">for</span><span class="p">(</span> <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">,</span> <span class="n">in</span> <span class="o">+=</span> <span class="mi">2</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="n">sscanf</span><span class="p">(</span> <span class="n">in</span><span class="p">,</span> <span class="s">"%2hhx"</span><span class="p">,</span> <span class="n">out</span> <span class="o">+</span> <span class="n">i</span> <span class="p">);</span>
-  <span class="p">}</span>
-<span class="p">}</span>
-<span class="c1">// prints the given char array</span>
-<span class="kt">void</span> <span class="nf">print_chars</span><span class="p">(</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">in</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span> <span class="p">)</span>
-<span class="p">{</span>
-  <span class="k">for</span><span class="p">(</span> <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
-    <span class="n">printf</span><span class="p">(</span> <span class="s">"%c"</span><span class="p">,</span> <span class="n">in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">);</span>
-  <span class="p">}</span>
-  <span class="n">printf</span><span class="p">(</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span> <span class="p">);</span>
-<span class="p">}</span>
 <span class="c1">// calculates and returns the public key associated with the given private key</span>
-<span class="c1">// input private key is in hex</span>
-<span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">priv2pub</span><span class="p">(</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">priv_hex</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">len</span> <span class="p">)</span>
+<span class="c1">// - input private key and output public key are in hexadecimal</span>
+<span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">priv2pub</span><span class="p">(</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">priv_hex</span> <span class="p">)</span>
 <span class="p">{</span>
-  <span class="k">const</span> <span class="n">EC_GROUP</span> <span class="o">*</span><span class="n">ecgroup</span> <span class="o">=</span> <span class="n">EC_GROUP_new_by_curve_name</span><span class="p">(</span> <span class="n">NID_secp256k1</span> <span class="p">);</span>
+  <span class="n">EC_GROUP</span> <span class="o">*</span><span class="n">ecgrp</span> <span class="o">=</span> <span class="n">EC_GROUP_new_by_curve_name</span><span class="p">(</span> <span class="n">NID_secp256k1</span> <span class="p">);</span>
 
-  <span class="c1">// convert priv_key from hex to bytes to BIGNUM</span>
-  <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">privkey_bytes</span><span class="p">[</span><span class="n">PRIV_KEY_LEN</span><span class="p">];</span>
-  <span class="n">hex2bytes</span><span class="p">(</span> <span class="n">priv_hex</span><span class="p">,</span> <span class="n">PRIV_KEY_LEN</span><span class="p">,</span> <span class="n">privkey_bytes</span> <span class="p">);</span>
-  <span class="k">const</span> <span class="n">BIGNUM</span> <span class="o">*</span><span class="n">privkey_bn</span> <span class="o">=</span> <span class="n">BN_bin2bn</span><span class="p">(</span> <span class="n">privkey_bytes</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
+  <span class="c1">// convert priv key from BIGNUM to hexadecimal</span>
+  <span class="n">BIGNUM</span> <span class="o">*</span><span class="n">priv_bn</span> <span class="o">=</span> <span class="n">BN_new</span><span class="p">();</span>
+  <span class="n">BN_hex2bn</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">priv_bn</span><span class="p">,</span> <span class="n">priv_hex</span> <span class="p">);</span>
 
-  <span class="c1">// allocate pub_key</span>
-  <span class="n">EC_POINT</span> <span class="o">*</span><span class="n">pub_key</span> <span class="o">=</span> <span class="n">EC_POINT_new</span><span class="p">(</span> <span class="n">ecgroup</span> <span class="p">);</span>
+  <span class="c1">// allocate new pub key</span>
+  <span class="n">EC_POINT</span> <span class="o">*</span><span class="n">pub</span> <span class="o">=</span> <span class="n">EC_POINT_new</span><span class="p">(</span> <span class="n">ecgrp</span> <span class="p">);</span>
 
-  <span class="c1">// compute pub_key</span>
-  <span class="n">EC_POINT_mul</span><span class="p">(</span> <span class="n">ecgroup</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">,</span> <span class="n">privkey_bn</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
+  <span class="c1">// compute pub key from priv key and group</span>
+  <span class="n">EC_POINT_mul</span><span class="p">(</span> <span class="n">ecgrp</span><span class="p">,</span> <span class="n">pub</span><span class="p">,</span> <span class="n">priv_bn</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
 
-  <span class="c1">// convert pub_key from EC_POINT curve coordinate to hex</span>
-  <span class="k">return</span>
-    <span class="n">EC_POINT_point2hex</span><span class="p">(</span> <span class="n">ecgroup</span><span class="p">,</span> <span class="n">pub_key</span><span class="p">,</span> <span class="n">POINT_CONVERSION_UNCOMPRESSED</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
+  <span class="c1">// convert pub_key from EC_POINT curve coordinate to hexadecimal</span>
+  <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">ret</span> <span class="o">=</span>
+    <span class="n">EC_POINT_point2hex</span><span class="p">(</span> <span class="n">ecgrp</span><span class="p">,</span> <span class="n">pub</span><span class="p">,</span> <span class="n">POINT_CONVERSION_UNCOMPRESSED</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
+
+  <span class="n">EC_GROUP_free</span><span class="p">(</span> <span class="n">ecgrp</span> <span class="p">);</span> <span class="n">BN_free</span><span class="p">(</span> <span class="n">priv_bn</span> <span class="p">);</span> <span class="n">EC_POINT_free</span><span class="p">(</span> <span class="n">pub</span> <span class="p">);</span>
+
+  <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
 <span class="p">}</span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span> <span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[]</span> <span class="p">)</span>
 <span class="p">{</span>
-  <span class="n">print_chars</span><span class="p">(</span> <span class="n">priv2pub</span><span class="p">(</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">PRIV_KEY_LEN</span> <span class="p">),</span> <span class="n">PUB_KEY_LEN</span> <span class="o">*</span> <span class="mi">2</span> <span class="p">);</span>
+  <span class="c1">// compute pub key</span>
+  <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">pub_hex</span> <span class="o">=</span> <span class="n">priv2pub</span><span class="p">(</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">);</span>
+
+  <span class="c1">// print computed pub key</span>
+  <span class="k">for</span><span class="p">(</span> <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">PUB_KEY_LEN</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span> <span class="s">"%c"</span><span class="p">,</span> <span class="n">pub_hex</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">printf</span><span class="p">(</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span> <span class="p">);</span>
+
+  <span class="n">free</span><span class="p">(</span> <span class="n">pub_hex</span> <span class="p">);</span>
 
   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
@@ -322,10 +324,10 @@
 </div>
 
 
- <p>Bitcoin private keys are 32 bytes and public keys are 65 bytes. The input and output are in hexadecimal so I created a <code>hex2bytes</code> helper function. I had to then convert the private key again, from bytes to <code>BIGNUM</code>, which is OpenSSL&rsquo;s number representation for arbitrary precision arithmetic. Finally, I use another helper function, <code>print_chars</code>, to print the final result.</p>
+ <p>Bitcoin private keys are 32 bytes and public keys are 65 bytes. The function <code>priv2pub</code> computes the public key associated with the given private key. Both the input private key and the output public key is in hexadecimal. I had to first convert the private key to <code>BIGNUM</code>, which is OpenSSL&rsquo;s number representation for arbitrary precision arithmetic. After computing the public key, I then convert back to hex using <code>EC_POINT_point2hex</code>.</p>
 
 
- <p>To test, I borrowed a sample public/private key pair from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses">this Bitcoin wiki article</a>. The private key from the article is <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code> and the public key is <code>0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code>. Let&rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file <code>blog.c</code>.)</p>
+ <p>To test, I found a sample public/private key pair from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses">this Bitcoin wiki article</a>. The private key from the article is <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code> and the public key is <code>0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code>. Let&rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file <code>blog.c</code>.)</p>
 
 
  <pre><code>$ gcc -lcrypto -std=c99 blog.c
@@ -386,6 +388,9 @@ $ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 
   <ul class="pager">
 
+   <li class="previous">
+      <a href="/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/">&larr; <em>Adding OpenSSL bindings to Racket via its FFI</em></a>
+    </li>
 
    <li class="next">
       <a href="/blog/2014/03/07/verifying-andreas-s-fundraising-for-dorian-message/"><em>Verifying Andreas&rsquo;s &ldquo;Fundraising for Dorian&rdquo; Message</em> &rarr;</a>

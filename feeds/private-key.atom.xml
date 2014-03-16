@@ -19,7 +19,7 @@
  &lt;p&gt;The &lt;a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer"&gt;accepted Stack Overflow answer from the previous link&lt;/a&gt; says that in the &lt;code&gt;Q = dG&lt;/code&gt; equation, &lt;code&gt;Q&lt;/code&gt; is the public key and &lt;code&gt;d&lt;/code&gt; is the private key, but does not explain &lt;code&gt;G&lt;/code&gt;, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the &lt;a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"&gt;&lt;code&gt;secp256k1&lt;/code&gt; ECDSA curve&lt;/a&gt;.&lt;/p&gt;
  &lt;p&gt;Next, I looked at the &lt;a href="https://www.openssl.org/" title="OpenSSL"&gt;OpenSSL&lt;/a&gt; &lt;code&gt;libcrypto&lt;/code&gt; library, in the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c"&gt;function mentioned in the Stack Overflow post, &lt;code&gt;EC_KEY_generate_key&lt;/code&gt;&lt;/a&gt;. Here&amp;rsquo;s the line that performs the multiplication:&lt;/p&gt;
  &lt;pre class="brush: c"&gt;&lt;code&gt;EC_POINT_mul(eckey-&amp;gt;group, pub_key, priv_key, NULL, NULL, ctx);&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;In my case, I&amp;rsquo;m supplying &lt;code&gt;priv_key&lt;/code&gt; and &lt;code&gt;pub_key&lt;/code&gt; is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h"&gt;already defined the &lt;code&gt;secp256k1&lt;/code&gt; curve&lt;/a&gt;, so it&amp;rsquo;s just a matter of getting the right data representation. Here is the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h"&gt;header for &lt;code&gt;EC_POINT_mul&lt;/code&gt;&lt;/a&gt; from the OpenSSL library:&lt;/p&gt;
+ &lt;p&gt;In this case, I&amp;rsquo;m supplying &lt;code&gt;priv_key&lt;/code&gt;, and &lt;code&gt;pub_key&lt;/code&gt; is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h"&gt;already defined the &lt;code&gt;secp256k1&lt;/code&gt; curve&lt;/a&gt;, so it&amp;rsquo;s just a matter of getting the right data representation. Here is the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h"&gt;header for &lt;code&gt;EC_POINT_mul&lt;/code&gt;&lt;/a&gt; from the OpenSSL library:&lt;/p&gt;
  &lt;pre class="brush: c"&gt;&lt;code&gt;/** Computes r = generator * n + q * m
  *  \param  group  underlying EC_GROUP object
  *  \param  r      EC_POINT object for the result
@@ -40,51 +40,48 @@ int EC_POINT_mul(const EC_GROUP *group, EC_POINT *r, const BIGNUM *n, const EC_P
 #define PRIV_KEY_LEN 32
 #define PUB_KEY_LEN 65
 
-// reads 2 hex chars at a time from in and writes as a byte to out
-void hex2bytes( const unsigned char *in, size_t len, unsigned char *out )
-{
-  for( size_t i = 0; i &amp;lt; len; i++, in += 2 ) {
-    sscanf( in, "%2hhx", out + i );
-  }
-}
-// prints the given char array
-void print_chars( const unsigned char *in, size_t len )
-{
-  for( size_t i = 0; i &amp;lt; len; i++ ) {
-    printf( "%c", in[i] );
-  }
-  printf( "\n" );
-}
 // calculates and returns the public key associated with the given private key
-// input private key is in hex
-unsigned char *priv2pub( const unsigned char *priv_hex, size_t len )
+// - input private key and output public key are in hexadecimal
+unsigned char *priv2pub( const unsigned char *priv_hex )
 {
-  const EC_GROUP *ecgroup = EC_GROUP_new_by_curve_name( NID_secp256k1 );
-
-  // convert priv_key from hex to bytes to BIGNUM
-  unsigned char privkey_bytes[PRIV_KEY_LEN];
-  hex2bytes( priv_hex, PRIV_KEY_LEN, privkey_bytes );
-  const BIGNUM *privkey_bn = BN_bin2bn( privkey_bytes, len, NULL );
+  EC_GROUP *ecgrp = EC_GROUP_new_by_curve_name( NID_secp256k1 );
   
-  // allocate pub_key
-  EC_POINT *pub_key = EC_POINT_new( ecgroup );
+  // convert priv key from BIGNUM to hexadecimal
+  BIGNUM *priv_bn = BN_new();
+  BN_hex2bn( &amp;amp;priv_bn, priv_hex );
   
-  // compute pub_key
-  EC_POINT_mul( ecgroup, pub_key, privkey_bn, NULL, NULL, NULL );
-                                      
-  // convert pub_key from EC_POINT curve coordinate to hex
-  return
-    EC_POINT_point2hex( ecgroup, pub_key, POINT_CONVERSION_UNCOMPRESSED, NULL );
+  // allocate new pub key
+  EC_POINT *pub = EC_POINT_new( ecgrp );
+            
+  // compute pub key from priv key and group
+  EC_POINT_mul( ecgrp, pub, priv_bn, NULL, NULL, NULL );
+                           
+  // convert pub_key from EC_POINT curve coordinate to hexadecimal
+  unsigned char *ret =
+    EC_POINT_point2hex( ecgrp, pub, POINT_CONVERSION_UNCOMPRESSED, NULL );
+    
+  EC_GROUP_free( ecgrp ); BN_free( priv_bn ); EC_POINT_free( pub );
+  
+  return ret;
 }
-                                              
+
 int main( int argc, const unsigned char *argv[] )
 {
-  print_chars( priv2pub( argv[1], PRIV_KEY_LEN ), PUB_KEY_LEN * 2 );
+  // compute pub key
+  unsigned char *pub_hex = priv2pub( argv[1] );
+  
+  // print computed pub key
+  for( size_t i = 0; i &amp;lt; PUB_KEY_LEN * 2; i++ ) {
+    printf( "%c", pub_hex[i] );
+  }
+  printf( "\n" );
+  
+  free( pub_hex );
   
   return 0;
 }&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Bitcoin private keys are 32 bytes and public keys are 65 bytes. The input and output are in hexadecimal so I created a &lt;code&gt;hex2bytes&lt;/code&gt; helper function. I had to then convert the private key again, from bytes to &lt;code&gt;BIGNUM&lt;/code&gt;, which is OpenSSL&amp;rsquo;s number representation for arbitrary precision arithmetic. Finally, I use another helper function, &lt;code&gt;print_chars&lt;/code&gt;, to print the final result.&lt;/p&gt;
- &lt;p&gt;To test, I borrowed a sample public/private key pair from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses"&gt;this Bitcoin wiki article&lt;/a&gt;. The private key from the article is &lt;code&gt;18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725&lt;/code&gt; and the public key is &lt;code&gt;0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;. Let&amp;rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file &lt;code&gt;blog.c&lt;/code&gt;.)&lt;/p&gt;
+ &lt;p&gt;Bitcoin private keys are 32 bytes and public keys are 65 bytes. The function &lt;code&gt;priv2pub&lt;/code&gt; computes the public key associated with the given private key. Both the input private key and the output public key is in hexadecimal. I had to first convert the private key to &lt;code&gt;BIGNUM&lt;/code&gt;, which is OpenSSL&amp;rsquo;s number representation for arbitrary precision arithmetic. After computing the public key, I then convert back to hex using &lt;code&gt;EC_POINT_point2hex&lt;/code&gt;.&lt;/p&gt;
+ &lt;p&gt;To test, I found a sample public/private key pair from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses"&gt;this Bitcoin wiki article&lt;/a&gt;. The private key from the article is &lt;code&gt;18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725&lt;/code&gt; and the public key is &lt;code&gt;0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;. Let&amp;rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file &lt;code&gt;blog.c&lt;/code&gt;.)&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ gcc -lcrypto -std=c99 blog.c
 $ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;&lt;/pre&gt;

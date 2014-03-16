@@ -31,7 +31,7 @@ the line that performs the multiplication:
 EC_POINT_mul(eckey->group, pub_key, priv_key, NULL, NULL, ctx);
 ```
 
-In my case, I'm supplying `priv_key` and `pub_key` is the output
+In this case, I'm supplying `priv_key`, and `pub_key` is the output
 parameter, so I just need the appropriate group for the first
 parameter. OpenSSL has
 [already defined the `secp256k1` curve][obj_mac], so it's just a
@@ -73,59 +73,57 @@ error-checking and is obviously not production-quality):
 #define PRIV_KEY_LEN 32
 #define PUB_KEY_LEN 65
 
-// reads 2 hex chars at a time from in and writes as a byte to out
-void hex2bytes( const unsigned char *in, size_t len, unsigned char *out )
-{
-  for( size_t i = 0; i < len; i++, in += 2 ) {
-    sscanf( in, "%2hhx", out + i );
-  }
-}
-// prints the given char array
-void print_chars( const unsigned char *in, size_t len )
-{
-  for( size_t i = 0; i < len; i++ ) {
-    printf( "%c", in[i] );
-  }
-  printf( "\n" );
-}
 // calculates and returns the public key associated with the given private key
-// input private key is in hex
-unsigned char *priv2pub( const unsigned char *priv_hex, size_t len )
+// - input private key and output public key are in hexadecimal
+unsigned char *priv2pub( const unsigned char *priv_hex )
 {
-  const EC_GROUP *ecgroup = EC_GROUP_new_by_curve_name( NID_secp256k1 );
-
-  // convert priv_key from hex to bytes to BIGNUM
-  unsigned char privkey_bytes[PRIV_KEY_LEN];
-  hex2bytes( priv_hex, PRIV_KEY_LEN, privkey_bytes );
-  const BIGNUM *privkey_bn = BN_bin2bn( privkey_bytes, len, NULL );
+  EC_GROUP *ecgrp = EC_GROUP_new_by_curve_name( NID_secp256k1 );
   
-  // allocate pub_key
-  EC_POINT *pub_key = EC_POINT_new( ecgroup );
+  // convert priv key from BIGNUM to hexadecimal
+  BIGNUM *priv_bn = BN_new();
+  BN_hex2bn( &priv_bn, priv_hex );
   
-  // compute pub_key
-  EC_POINT_mul( ecgroup, pub_key, privkey_bn, NULL, NULL, NULL );
-										
-  // convert pub_key from EC_POINT curve coordinate to hex
-  return
-    EC_POINT_point2hex( ecgroup, pub_key, POINT_CONVERSION_UNCOMPRESSED, NULL );
+  // allocate new pub key
+  EC_POINT *pub = EC_POINT_new( ecgrp );
+			
+  // compute pub key from priv key and group
+  EC_POINT_mul( ecgrp, pub, priv_bn, NULL, NULL, NULL );
+							  
+  // convert pub_key from EC_POINT curve coordinate to hexadecimal
+  unsigned char *ret =
+    EC_POINT_point2hex( ecgrp, pub, POINT_CONVERSION_UNCOMPRESSED, NULL );
+	
+  EC_GROUP_free( ecgrp ); BN_free( priv_bn ); EC_POINT_free( pub );
+  
+  return ret;
 }
-											  
+
 int main( int argc, const unsigned char *argv[] )
 {
-  print_chars( priv2pub( argv[1], PRIV_KEY_LEN ), PUB_KEY_LEN * 2 );
+  // compute pub key
+  unsigned char *pub_hex = priv2pub( argv[1] );
+  
+  // print computed pub key
+  for( size_t i = 0; i < PUB_KEY_LEN * 2; i++ ) {
+    printf( "%c", pub_hex[i] );
+  }
+  printf( "\n" );
+  
+  free( pub_hex );
   
   return 0;
 }
 ```
 
 Bitcoin private keys are 32 bytes and public keys are 65 bytes. The
-input and output are in hexadecimal so I created a `hex2bytes` helper
-function. I had to then convert the private key again, from bytes to
-`BIGNUM`, which is OpenSSL's number representation for arbitrary
-precision arithmetic. Finally, I use another helper function,
-`print_chars`, to print the final result.
+function `priv2pub` computes the public key associated with the given
+private key. Both the input private key and the output public key is
+in hexadecimal. I had to first convert the private key to `BIGNUM`,
+which is OpenSSL's number representation for arbitrary precision
+arithmetic. After computing the public key, I then convert back to hex
+using `EC_POINT_point2hex`.
 
-To test, I borrowed a sample public/private key pair from
+To test, I found a sample public/private key pair from
 [this Bitcoin wiki article][wiki:address]. The private key from the
 article is
 `18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725` and

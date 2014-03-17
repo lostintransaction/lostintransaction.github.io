@@ -63,7 +63,7 @@ Racket `sha256` function that calls the C `SHA256` function:
     (_fun [input     : _bytes]
           [input-len : _ulong = (bytes-length input)]
           [output    : (_bytes o SHA256-DIGEST-LEN)]
-		  -> (_bytes o SHA256-DIGEST-LEN))))
+          -> (_bytes o SHA256-DIGEST-LEN))))
 ```
 
 The first argument to `get-ffi-obj` is the name of the C function and
@@ -91,14 +91,52 @@ output bytes.
 [racket:getffiobj]: http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29 "Racket docs: get-ffi-obj"
 [racket:fun]: http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29 "Racket docs: _fun"
 
-Here's the entire code to define a Racket module that exports `sha256`
-and `ripemd160` wrapper functions. Note that the functions that call
-to the C functions are now named `sha256/bytes` and `ripemd160/bytes`,
+Here's the code to define a Racket module that exports `sha256` and
+`ripemd160` wrapper functions. Note that the functions that call to
+the C functions are now named `sha256/bytes` and `ripemd160/bytes`,
 and these functions consume and produce bytes. We additionally define
 `sha256` and `ripemd160` functions which have optional keyword
 arguments for conversion of the input and output. `sha256` and
 `ripemd160` consume hexadecimal strings by default.
 
+```racket
+#lang racket/base
+(require ffi/unsafe openssl/libcrypto)
+(require (only-in openssl/sha1 hex-string->bytes
+                               bytes->hex-string))
+(provide (all-defined-out))
+
+(define SHA256-DIGEST-LEN 32)
+(define RIPEMD160-DIGEST-LEN 20)
+
+; from crypto/sha/sha.h:
+;   unsigned char *SHA256(const unsigned char *d, size_t n, unsigned char *md);
+(define sha256/bytes
+  (get-ffi-obj
+  'SHA256 libcrypto
+  (_fun [input     : _bytes]
+        [input-len : _ulong = (bytes-length input)]
+		[output    : (_bytes o SHA256-DIGEST-LEN)]
+		-> (_bytes o SHA256-DIGEST-LEN))))
+
+(define (sha256 input #:convert-input  [input->bytes hex-string->bytes]
+                      #:convert-output [bytes->output bytes->hex-string])
+  (bytes->output (sha256/bytes (input->bytes input))))
+
+; from crypto/ripemd/ripemd.h
+;   unsigned char *RIPEMD160(const unsigned char *d, size_t n, unsigned char *md);
+(define ripemd160/bytes
+  (get-ffi-obj
+  'RIPEMD160 libcrypto
+  (_fun [input     : _bytes]
+        [input-len : _ulong = (bytes-length input)]
+		[output    : (_bytes o RIPEMD160-DIGEST-LEN)]
+		-> (_bytes o RIPEMD160-DIGEST-LEN))))
+		
+(define (ripemd160 input #:convert-input  [input->bytes hex-string->bytes]
+                         #:convert-output [bytes->output bytes->hex-string])
+  (bytes->output (ripemd160/bytes (input->bytes input))))
+```
 
 ### Testing ###
 

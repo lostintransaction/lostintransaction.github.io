@@ -23,28 +23,28 @@
   (ffi-lib '(so "libcrypto") '("" "1.0.1e" "1.0.0" "1.0" "0.9.8b" "0.9.8" "0.9.7")))&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;The first argument specifies a dynamic C library and the second argument is a list of acceptable versions. See the documentation for &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"&gt;&lt;code&gt;ffi-lib&lt;/code&gt;&lt;/a&gt; for more details on its usage.&lt;/p&gt;
  &lt;h3 id="get-ffi-obj"&gt;&lt;code&gt;get-ffi-obj&lt;/code&gt;&lt;/h3&gt;
- &lt;p&gt;Let&amp;rsquo;s create a Racket wrapper function for the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"&gt;&lt;code&gt;SHA256&lt;/code&gt;&lt;/a&gt; C function. Here&amp;rsquo;s the C header:&lt;/p&gt;
+ &lt;p&gt;Let&amp;rsquo;s create a Racket wrapper function for the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"&gt;&lt;code&gt;SHA256&lt;/code&gt;&lt;/a&gt; C function. Here&amp;rsquo;s the header:&lt;/p&gt;
  &lt;pre class="brush: C"&gt;&lt;code&gt;unsigned char *SHA256( const unsigned char *d, size_t n, unsigned char *md );&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;To create a Racket wrapper function, we use the &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"&gt;&lt;code&gt;get-ffi-obj&lt;/code&gt;&lt;/a&gt; Racket function. Here&amp;rsquo;s one possible way to define a Racket &lt;code&gt;sha256&lt;/code&gt; function that calls the C &lt;code&gt;SHA256&lt;/code&gt; function:&lt;/p&gt;
+ &lt;p&gt;To create a Racket wrapper function, we use &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"&gt;&lt;code&gt;get-ffi-obj&lt;/code&gt;&lt;/a&gt;. Here&amp;rsquo;s one possible way to define a Racket &lt;code&gt;sha256&lt;/code&gt; function that calls the C &lt;code&gt;SHA256&lt;/code&gt; function:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define sha256
   (get-ffi-obj
     'SHA256 libcrypto
     (_fun [input     : _bytes]
-       [input-len : _ulong = (bytes-length input)]
-        [output    : (_bytes o SHA256-DIGEST-LEN)]
-         -&amp;gt; (_bytes o SHA256-DIGEST-LEN))))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;The first argument to &lt;code&gt;get-ffi-obj&lt;/code&gt; is the name of the C function and the second is the library hook that we created with &lt;code&gt;ffi-lib&lt;/code&gt;. The third argument is the type, which specifies how to mediate between Racket and C values. &lt;a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"&gt;&lt;code&gt;_fun&lt;/code&gt;&lt;/a&gt; specifies a funtion type and in this case the function has three arguments (each in brackets).&lt;/p&gt;
+          [input-len : _ulong = (bytes-length input)]
+          [output    : (_bytes o SHA256-DIGEST-LEN)]
+        -&amp;gt; (_bytes o SHA256-DIGEST-LEN))))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;The first argument to &lt;code&gt;get-ffi-obj&lt;/code&gt; is the name of the C function and the second is the library hook that we created with &lt;code&gt;ffi-lib&lt;/code&gt; earlier. The third argument is the type, which specifies how to mediate between Racket and C values. &lt;a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"&gt;&lt;code&gt;_fun&lt;/code&gt;&lt;/a&gt; specifies a function type and in this case the function has three arguments (each in brackets).&lt;/p&gt;
  &lt;p&gt;Examining the arguments:&lt;/p&gt;
  &lt;ol&gt;
   &lt;li&gt;
    &lt;p&gt;The first argument to the C &lt;code&gt;SHA256&lt;/code&gt; function is an array of input bytes. Accordingly, &lt;code&gt;get-ffi-obj&lt;/code&gt; specifies this with a &lt;code&gt;_bytes&lt;/code&gt; type.&lt;/p&gt;&lt;/li&gt;
   &lt;li&gt;
-   &lt;p&gt;The second argument is the length of the input byte array. The &lt;code&gt;=&lt;/code&gt; tells Racket how to calculate this argument automatically. This means that a caller of the Racket &lt;code&gt;sha256&lt;/code&gt; wrapper function only needs to provide the input bytes and not an additional length argument.&lt;/p&gt;&lt;/li&gt;
+   &lt;p&gt;The second argument is the length of the input byte array. The &lt;code&gt;=&lt;/code&gt; tells Racket how to calculate this argument automatically. This means that a caller of the Racket &lt;code&gt;sha256&lt;/code&gt; function only needs to provide the input bytes and not an additional length argument.&lt;/p&gt;&lt;/li&gt;
   &lt;li&gt;
-   &lt;p&gt;The third argument is the output byte array. In Racket, the &lt;code&gt;o&lt;/code&gt; indicates a return pointer and the &lt;code&gt;SHA256-DIGEST-LEN&lt;/code&gt; indicates the expected number of output bytes.&lt;/p&gt;&lt;/li&gt;&lt;/ol&gt;
+   &lt;p&gt;The third argument is the output byte array. The &lt;code&gt;o&lt;/code&gt; indicates a return pointer and &lt;code&gt;SHA256-DIGEST-LEN&lt;/code&gt; is the expected number of output bytes.&lt;/p&gt;&lt;/li&gt;&lt;/ol&gt;
  &lt;p&gt;Here&amp;rsquo;s the entire code to define a Racket module that exports &lt;code&gt;sha256&lt;/code&gt; and &lt;code&gt;ripemd160&lt;/code&gt; wrapper functions. Note that the functions that call to the C functions are now named &lt;code&gt;sha256/bytes&lt;/code&gt; and &lt;code&gt;ripemd160/bytes&lt;/code&gt;, and these functions consume and produce bytes. We additionally define &lt;code&gt;sha256&lt;/code&gt; and &lt;code&gt;ripemd160&lt;/code&gt; functions which have optional keyword arguments for conversion of the input and output. &lt;code&gt;sha256&lt;/code&gt; and &lt;code&gt;ripemd160&lt;/code&gt; consume hexadecimal strings by default.&lt;/p&gt;
  &lt;h3 id="testing"&gt;Testing&lt;/h3&gt;
- &lt;p&gt;To test our wrapper functions, let&amp;rsquo;s see if we can duplicate &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin Wiki: Technical background of version 1 Bitcoin addresses"&gt;this example&lt;/a&gt;, which converts a Bitcoin private key into an address. We covered &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key"&gt;how to calculate a public key from a private key&lt;/a&gt; in a previous post, so we start with the public key.&lt;/p&gt;
+ &lt;p&gt;To test our wrapper functions, let&amp;rsquo;s see if we can duplicate &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin Wiki: Technical background of version 1 Bitcoin addresses"&gt;this example&lt;/a&gt;, which converts a Bitcoin private key into an address. We covered &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key"&gt;how to calculate a public key from a private key&lt;/a&gt; in a previous post, so we start with the public key here.&lt;/p&gt;
  &lt;p&gt;For ease of comparison, here&amp;rsquo;s the sequence of expected hashes, copied from the Bitcoin wiki example:&lt;/p&gt;
  &lt;ol&gt;
   &lt;li&gt;public key: &lt;code&gt;0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;&lt;/li&gt;
@@ -64,14 +64,15 @@ Welcome to Racket v6.0.0.3.
 -&amp;gt; (ripemd160 (sha256 pub-key))
 "010966776006953d5567439e5e39f86a0d273bee"
 -&amp;gt; (define hash160 (ripemd160 (sha256 pub-key)))
--&amp;gt; (sha256 (string-append "00" hash160))
+-&amp;gt; (define hash160/extended (string-append "00" (ripemd160 (sha256 pub-key))))
+-&amp;gt; (sha256 hash160/extended)
 "445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
--&amp;gt; (sha256 (sha256 (string-append "00" hash160)))
+-&amp;gt; (sha256 (sha256 hash160/extended))
 "d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
--&amp;gt; (define checksum (substring (sha256 (sha256 (string-append "00" hash160))) 0 8))
+-&amp;gt; (define checksum (substring (sha256 (sha256 hash160/extended)) 0 8))
 -&amp;gt; checksum
 "d61967f6"
--&amp;gt; (define address/hex (string-append "00" hash160 checksum))
+-&amp;gt; (define address/hex (string-append hash160/extended checksum))
 -&amp;gt; address/hex
 "00010966776006953d5567439e5e39f86a0d273beed61967f6"
    &lt;/code&gt;&lt;/pre&gt;

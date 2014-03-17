@@ -46,32 +46,32 @@ argument is a list of acceptable versions. See the documentation for
 ### `get-ffi-obj` ###
 
 Let's create a Racket wrapper function for the
-[`SHA256`][openssl:sha256] C function. Here's the C header:
+[`SHA256`][openssl:sha256] C function. Here's the header:
 
 ```C
 unsigned char *SHA256( const unsigned char *d, size_t n, unsigned char *md );
 ```
 
-To create a Racket wrapper function, we use the
-[`get-ffi-obj`][racket:getffiobj] Racket function. Here's one possible
-way to define a Racket `sha256` function that calls the C `SHA256`
-function:
+To create a Racket wrapper function, we use
+[`get-ffi-obj`][racket:getffiobj]. Here's one possible way to define a
+Racket `sha256` function that calls the C `SHA256` function:
 
 ```racket
 (define sha256
   (get-ffi-obj
     'SHA256 libcrypto
-	(_fun [input     : _bytes]
-	      [input-len : _ulong = (bytes-length input)]
-		  [output    : (_bytes o SHA256-DIGEST-LEN)]
+    (_fun [input     : _bytes]
+          [input-len : _ulong = (bytes-length input)]
+          [output    : (_bytes o SHA256-DIGEST-LEN)]
 		  -> (_bytes o SHA256-DIGEST-LEN))))
 ```
 
 The first argument to `get-ffi-obj` is the name of the C function and
-the second is the library hook that we created with `ffi-lib`. The
-third argument is the type, which specifies how to mediate between
-Racket and C values. [`_fun`][racket:fun] specifies a funtion type and
-in this case the function has three arguments (each in brackets).
+the second is the library hook that we created with `ffi-lib`
+earlier. The third argument is the type, which specifies how to
+mediate between Racket and C values. [`_fun`][racket:fun] specifies a
+function type and in this case the function has three arguments (each
+in brackets).
 
 Examining the arguments:
 
@@ -80,12 +80,12 @@ bytes. Accordingly, `get-ffi-obj` specifies this with a `_bytes` type.
 
 2. The second argument is the length of the input byte array. The `=`
 tells Racket how to calculate this argument automatically. This means
-that a caller of the Racket `sha256` wrapper function only needs to
-provide the input bytes and not an additional length argument.
+that a caller of the Racket `sha256` function only needs to provide
+the input bytes and not an additional length argument.
 
-3. The third argument is the output byte array. In Racket, the `o`
-indicates a return pointer and the `SHA256-DIGEST-LEN` indicates the
-expected number of output bytes.
+3. The third argument is the output byte array. The `o` indicates a
+return pointer and `SHA256-DIGEST-LEN` is the expected number of
+output bytes.
 
 [openssl:sha256]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155 "OpenSSL source: crypto/sha/sha.h"
 [racket:getffiobj]: http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29 "Racket docs: get-ffi-obj"
@@ -102,7 +102,7 @@ arguments for conversion of the input and output. `sha256` and
 
 ### Testing ###
 
-To test our wrapper functions, let's see if we can duplicate [this example][bwiki], which converts a Bitcoin private key into an address. We covered [how to calculate a public key from a private key][lit:pubfrompriv] in a previous post, so we start with the public key.
+To test our wrapper functions, let's see if we can duplicate [this example][bwiki], which converts a Bitcoin private key into an address. We covered [how to calculate a public key from a private key][lit:pubfrompriv] in a previous post, so we start with the public key here.
 
 [bwiki]: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses "Bitcoin Wiki: Technical background of version 1 Bitcoin addresses"
 [lit:pubfrompriv]: http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/ "Deriving a Bitcoin Public Key From a Private Key"
@@ -130,14 +130,15 @@ the Racket REPL):
 	-> (ripemd160 (sha256 pub-key))
 	"010966776006953d5567439e5e39f86a0d273bee"
 	-> (define hash160 (ripemd160 (sha256 pub-key)))
-	-> (sha256 (string-append "00" hash160))
+	-> (define hash160/extended (string-append "00" (ripemd160 (sha256 pub-key))))
+	-> (sha256 hash160/extended)
 	"445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
-	-> (sha256 (sha256 (string-append "00" hash160)))
+	-> (sha256 (sha256 hash160/extended))
 	"d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
-	-> (define checksum (substring (sha256 (sha256 (string-append "00" hash160))) 0 8))
+	-> (define checksum (substring (sha256 (sha256 hash160/extended)) 0 8))
 	-> checksum
 	"d61967f6"
-	-> (define address/hex (string-append "00" hash160 checksum))
+	-> (define address/hex (string-append hash160/extended checksum))
 	-> address/hex
 	"00010966776006953d5567439e5e39f86a0d273beed61967f6"
 	   

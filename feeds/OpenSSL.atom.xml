@@ -17,31 +17,64 @@
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=OpenSSL&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F15%2Fadding-openssl-bindings-to-racket-via-its-ffi%2F" height="1" width="1" /&gt;
  &lt;p&gt;Programming in C is often useful but it&amp;rsquo;s also occasionally nice to program with a higher-level language where you don&amp;rsquo;t need to constantly worry about things like overflow or freeing memory. I enjoy using &lt;a href="http://racket-lang.org"&gt;Racket&lt;/a&gt;, a LISP dialect, and I use it to experiment with Bitcoin.&lt;/p&gt;
  &lt;p&gt;Unfortunately, Racket doesn&amp;rsquo;t have a complete crypto library, but it does have an &lt;a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI"&gt;FFI&lt;/a&gt; that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, &lt;a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2"&gt;SHA&amp;ndash;256&lt;/a&gt; and &lt;a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD"&gt;RIPEMD&amp;ndash;160&lt;/a&gt;.&lt;/p&gt;
- &lt;p&gt;The &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"&gt;&lt;code&gt;ffi-lib&lt;/code&gt;&lt;/a&gt; Racket function in the &lt;code&gt;ffi/unsafe&lt;/code&gt; module creates a path for Racket code to call into a specified C library. Racket actually already has some bindings for OpenSSL functions (but not the ones I want), so I&amp;rsquo;m going to cheat a little and use the &lt;a href="https://github.com/plt/racket/blob/8b4c5d3debbe41c90e37e5ffdc55fb8ab3635f92/racket/collects/openssl/libcrypto.rkt" title="Racket source: openssl/libcrypto.rkt"&gt;already-available &lt;code&gt;libcrypto&lt;/code&gt; hook&lt;/a&gt;. Here&amp;rsquo;s the exact call to &lt;code&gt;ffi-lib&lt;/code&gt;:&lt;/p&gt;
+ &lt;p&gt;The &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"&gt;&lt;code&gt;ffi-lib&lt;/code&gt;&lt;/a&gt; Racket function in the &lt;code&gt;ffi/unsafe&lt;/code&gt; module creates a Racket value representing the given C library. Racket actually already defines &lt;a href="https://github.com/plt/racket/blob/8b4c5d3debbe41c90e37e5ffdc55fb8ab3635f92/racket/collects/openssl/libcrypto.rkt" title="Racket source: openssl/libcrypto.rkt"&gt;an identifier &lt;code&gt;libcrypto&lt;/code&gt;&lt;/a&gt;, which is bound to a value representing the OpenSSL &lt;code&gt;libcrypto&lt;/code&gt; library (Racket already has some wrapper functions that call &lt;code&gt;libcrypto&lt;/code&gt; C functions, but not for &lt;code&gt;SHA256&lt;/code&gt; or &lt;code&gt;RIPEMD160&lt;/code&gt;). Here&amp;rsquo;s the exact call to &lt;code&gt;ffi-lib&lt;/code&gt;:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define libcrypto
   (ffi-lib libcrypto-so '("" "1.0.1e" "1.0.0" "1.0" "0.9.8b" "0.9.8" "0.9.7")))&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;The first argument is the name of the C library and the second argument is a list of acceptable versions.&lt;/p&gt;
- &lt;p&gt;Let&amp;rsquo;s create a Racket binding for a specific C function, for example &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"&gt;&lt;code&gt;SHA256&lt;/code&gt;&lt;/a&gt;. Here&amp;rsquo;s the header in C:&lt;/p&gt;
+ &lt;p&gt;Let&amp;rsquo;s create a Racket wrapper function for the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"&gt;&lt;code&gt;SHA256&lt;/code&gt;&lt;/a&gt; C function. Here&amp;rsquo;s the C header:&lt;/p&gt;
  &lt;pre class="brush: C"&gt;&lt;code&gt;unsigned char *SHA256( const unsigned char *d, size_t n, unsigned char *md );&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;To create the Racket binding, we use the &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"&gt;&lt;code&gt;get-ffi-obj&lt;/code&gt;&lt;/a&gt; Racket function. Here&amp;rsquo;s the binding for SHA&amp;ndash;256 might look like:&lt;/p&gt;
+ &lt;p&gt;To create a Racket wrapper function, we use the &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"&gt;&lt;code&gt;get-ffi-obj&lt;/code&gt;&lt;/a&gt; Racket function. Here&amp;rsquo;s one possible way to define a Racket &lt;code&gt;sha256&lt;/code&gt; function that calls the C &lt;code&gt;SHA256&lt;/code&gt; function:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define sha256
   (get-ffi-obj
     'SHA256 libcrypto
     (_fun [input     : _bytes]
        [input-len : _ulong = (bytes-length input)]
         [output    : (_bytes o SHA256-DIGEST-LEN)]
-         -&amp;gt; _bytes
-          -&amp;gt; (make-sized-byte-string output SHA256-DIGEST-LEN))))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;The first argument is the name of the C function and the second is the library hook that we created with &lt;code&gt;ffi-lib&lt;/code&gt;. The third argument is the type, which specifies how to mediate between Racket and C values. The function type is &lt;a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"&gt;&lt;code&gt;_fun&lt;/code&gt;&lt;/a&gt; and in this case the function has three arguments (each one specified in brackets).&lt;/p&gt;
+         -&amp;gt; (_bytes o SHA256-DIGEST-LEN))))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;The first argument to &lt;code&gt;get-ffi-obj&lt;/code&gt; is the name of the C function and the second is the library hook that we created with &lt;code&gt;ffi-lib&lt;/code&gt;. The third argument is the type, which specifies how to mediate between Racket and C values. &lt;a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"&gt;&lt;code&gt;_fun&lt;/code&gt;&lt;/a&gt; specifies a funtion type and in this case the function has three arguments (each in brackets).&lt;/p&gt;
  &lt;p&gt;Examining the arguments:&lt;/p&gt;
  &lt;ol&gt;
   &lt;li&gt;
-   &lt;p&gt;The C first argument is an array of input bytes and we use &lt;code&gt;_bytes&lt;/code&gt; to indicate this in Racket.&lt;/p&gt;&lt;/li&gt;
+   &lt;p&gt;The first argument to the C &lt;code&gt;SHA256&lt;/code&gt; function is an array of input bytes. Accordingly, &lt;code&gt;get-ffi-obj&lt;/code&gt; specifies this with a &lt;code&gt;_bytes&lt;/code&gt; type.&lt;/p&gt;&lt;/li&gt;
   &lt;li&gt;
-   &lt;p&gt;The second argument specifies the length of the input byte array. The &lt;code&gt;=&lt;/code&gt; tells Racket how to calculate this argument automatically. That means a caller of the Racket &lt;code&gt;sha256&lt;/code&gt; wrapper function can provide the input bytes without a separate length argument.&lt;/p&gt;&lt;/li&gt;
+   &lt;p&gt;The second argument is the length of the input byte array. The &lt;code&gt;=&lt;/code&gt; tells Racket how to calculate this argument automatically. This means that a caller of the Racket &lt;code&gt;sha256&lt;/code&gt; wrapper function only needs to provide the input bytes and not an additional length argument.&lt;/p&gt;&lt;/li&gt;
   &lt;li&gt;
    &lt;p&gt;The third argument is the output byte array. In Racket, the &lt;code&gt;o&lt;/code&gt; indicates a return pointer and the &lt;code&gt;SHA256-DIGEST-LEN&lt;/code&gt; indicates the expected number of output bytes.&lt;/p&gt;&lt;/li&gt;&lt;/ol&gt;
- &lt;p&gt;TODO: - Don&amp;rsquo;t need id on some args (like input-len). Only need id if you want to refer to it later. Not sure I need &lt;code&gt;make-sized-byte-string&lt;/code&gt; for output. I think (_bytes o SHA256-DIGEST-LEN) is suffiient. - make these changes in crypto.rkt&lt;/p&gt;&lt;/html&gt;</content></entry>
+ &lt;p&gt;Here&amp;rsquo;s the entire code to define a Racket module that exports &lt;code&gt;sha256&lt;/code&gt; and &lt;code&gt;ripemd160&lt;/code&gt; wrapper functions. Note that the functions that call to the C functions are now named &lt;code&gt;sha256/bytes&lt;/code&gt; and &lt;code&gt;ripemd160/bytes&lt;/code&gt;, and these functions consume and produce bytes. We additionally define &lt;code&gt;sha256&lt;/code&gt; and &lt;code&gt;ripemd160&lt;/code&gt; functions which have optional keyword arguments for conversion of the input and output. &lt;code&gt;sha256&lt;/code&gt; and &lt;code&gt;ripemd160&lt;/code&gt; consume hexadecimal strings by default.&lt;/p&gt;
+ &lt;h3 id="testing"&gt;Testing&lt;/h3&gt;
+ &lt;p&gt;To test our wrapper functions, let&amp;rsquo;s see if we can duplicate &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin Wiki: Technical background of version 1 Bitcoin addresses"&gt;this example&lt;/a&gt;, which converts a Bitcoin private key into an address. We covered &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key"&gt;how to calculate a public key from a private key&lt;/a&gt; in a previous post, so we start with the public key.&lt;/p&gt;
+ &lt;p&gt;For ease of comparison, here&amp;rsquo;s the sequence of expected hashes, copied from the Bitcoin wiki example:&lt;/p&gt;
+ &lt;ol&gt;
+  &lt;li&gt;public key: &lt;code&gt;0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;SHA&amp;ndash;256: &lt;code&gt;600FFE422B4E00731A59557A5CCA46CC183944191006324A447BDB2D98D4B408&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;RIPEMD&amp;ndash;160: &lt;code&gt;010966776006953D5567439E5E39F86A0D273BEE&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;prepend &lt;code&gt;0x00&lt;/code&gt;: &lt;code&gt;00010966776006953D5567439E5E39F86A0D273BEE&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;SHA&amp;ndash;256: &lt;code&gt;445C7A8007A93D8733188288BB320A8FE2DEBD2AE1B47F0F50BC10BAE845C094&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;SHA&amp;ndash;256 (bold checksum): &lt;code&gt;__D61967F6__3C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;checksum + #4 = (hex) address: &lt;code&gt;00010966776006953D5567439E5E39F86A0D273BEED61967F6&lt;/code&gt;&lt;/li&gt;&lt;/ol&gt;
+ &lt;p&gt;And here&amp;rsquo;s what the computations look like with our new library (using the Racket REPL):&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ racket
+Welcome to Racket v6.0.0.3.
+-&amp;gt; (require "crypto.rkt")
+-&amp;gt; (define pub-key "0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6")
+-&amp;gt; (sha256 pub-key)
+"600ffe422b4e00731a59557a5cca46cc183944191006324a447bdb2d98d4b408"
+-&amp;gt; (ripemd160 (sha256 pub-key))
+"010966776006953d5567439e5e39f86a0d273bee"
+-&amp;gt; (define hash160 (ripemd160 (sha256 pub-key)))
+-&amp;gt; (sha256 (string-append "00" hash160))
+"445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
+-&amp;gt; (sha256 (sha256 (string-append "00" hash160)))
+"d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
+-&amp;gt; (define checksum (substring (sha256 (sha256 (string-append "00" hash160))) 0 8))
+-&amp;gt; checksum
+"d61967f6"
+-&amp;gt; (define address/hex (string-append "00" hash160 checksum))
+-&amp;gt; address/hex
+"00010966776006953d5567439e5e39f86a0d273beed61967f6"
+   &lt;/code&gt;&lt;/pre&gt;
+ &lt;h3 id="software"&gt;Software&lt;/h3&gt;
+ &lt;p&gt;In this post, I&amp;rsquo;m using OpenSSL 1.0.1e, Racket 6.0.0.3, and running Debian 7.0.&lt;/p&gt;&lt;/html&gt;</content></entry>
  <entry>
   <title type="text">Deriving a Bitcoin Public Key From a Private Key</title>
   <link rel="alternate" href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/?utm_source=OpenSSL&amp;utm_medium=Atom" />

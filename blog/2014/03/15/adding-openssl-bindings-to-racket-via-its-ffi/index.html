@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Adding OpenSSL bindings to Racket via its FFI</title>
-    <meta name="description" content="Programming in C is often useful but it's also occasionally nice to program with a higher-level language where you don't need to constantly worry about things like overflow or freeing memory. I enjoy using Racket, a LISP dialect, and I use it to experiment with Bitcoin. Unfortunately, Racket doesn't have a complete crypto library, but it does have an FFI that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, SHA-256 and RIPEMD-160. ...">
+    <meta name="description" content="C programming has its uses but it's also sometimes nice to program with a higher-level language where you don't need to constantly worry about things like overflow or freeing memory. I enjoy using Racket, a LISP dialect, when experimenting with Bitcoin. Unfortunately, Racket doesn't have a complete crypto librar.It does have, however, an FFI that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, SHA-256 and RIPEMD-160. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -122,13 +122,16 @@
   </header>
 
 
- <p>Programming in C is often useful but it&rsquo;s also occasionally nice to program with a higher-level language where you don&rsquo;t need to constantly worry about things like overflow or freeing memory. I enjoy using <a href="http://racket-lang.org">Racket</a>, a LISP dialect, and I use it to experiment with Bitcoin.</p>
+ <p>C programming has its uses but it&rsquo;s also sometimes nice to program with a higher-level language where you don&rsquo;t need to constantly worry about things like overflow or freeing memory. I enjoy using <a href="http://racket-lang.org">Racket</a>, a LISP dialect, when experimenting with Bitcoin.</p>
 
 
- <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto library, but it does have an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
+ <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto librar.It does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
 
 
- <p>The <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code></a> Racket function in the <code>ffi/unsafe</code> module creates a Racket value representing the given C library. Racket actually already defines <a href="https://github.com/plt/racket/blob/8b4c5d3debbe41c90e37e5ffdc55fb8ab3635f92/racket/collects/openssl/libcrypto.rkt" title="Racket source: openssl/libcrypto.rkt">an identifier <code>libcrypto</code></a>, which is bound to a value representing the OpenSSL <code>libcrypto</code> library (Racket already has some wrapper functions that call <code>libcrypto</code> C functions, but not for <code>SHA256</code> or <code>RIPEMD160</code>). Here&rsquo;s the exact call to <code>ffi-lib</code>:</p>
+ <h3 id="ffi-lib"><code>ffi-lib</code></h3>
+
+
+ <p>The <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code></a> Racket function in the <code>ffi/unsafe</code> module creates a Racket value that represents the given C library. Racket actually already defines <a href="https://github.com/plt/racket/blob/8b4c5d3debbe41c90e37e5ffdc55fb8ab3635f92/racket/collects/openssl/libcrypto.rkt" title="Racket source: openssl/libcrypto.rkt">a <code>libcrypto</code> identifier</a>, which represents the OpenSSL <code>libcrypto</code> library (Racket has wrapper functions for some <code>libcrypto</code> C functions, but not for <code>SHA256</code> or <code>RIPEMD160</code>). Here&rsquo;s how to define a Racket value representing the <code>libcrypto</code> library using <code>ffi-lib</code>:</p>
 
 
  <div class="brush: racket">
@@ -151,13 +154,16 @@
       <div class="source">
 
        <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">libcrypto</span>
-  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._ffi-lib))" style="color: inherit">ffi-lib</a></span> <span class="nv">libcrypto-so</span> <span class="o">'</span><span class="p">(</span><span class="s">""</span> <span class="s">"1.0.1e"</span> <span class="s">"1.0.0"</span> <span class="s">"1.0"</span> <span class="s">"0.9.8b"</span> <span class="s">"0.9.8"</span> <span class="s">"0.9.7"</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._ffi-lib))" style="color: inherit">ffi-lib</a></span> <span class="o">'</span><span class="p">(</span><span class="nv">so</span> <span class="s">"libcrypto"</span><span class="p">)</span> <span class="o">'</span><span class="p">(</span><span class="s">""</span> <span class="s">"1.0.1e"</span> <span class="s">"1.0.0"</span> <span class="s">"1.0"</span> <span class="s">"0.9.8b"</span> <span class="s">"0.9.8"</span> <span class="s">"0.9.7"</span><span class="p">)))</span>
 </pre></div>
 </td></tr></tbody></table>
 </div>
 
 
- <p>The first argument is the name of the C library and the second argument is a list of acceptable versions.</p>
+ <p>The first argument specifies a dynamic C library and the second argument is a list of acceptable versions. See the documentation for <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code></a> for more details on its usage.</p>
+
+
+ <h3 id="get-ffi-obj"><code>get-ffi-obj</code></h3>
 
 
  <p>Let&rsquo;s create a Racket wrapper function for the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"><code>SHA256</code></a> C function. Here&rsquo;s the C header:</p>

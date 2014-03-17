@@ -277,7 +277,7 @@
 
   <li>SHA&ndash;256: <code>445C7A8007A93D8733188288BB320A8FE2DEBD2AE1B47F0F50BC10BAE845C094</code></li>
 
-  <li>SHA&ndash;256 (bold checksum): <code>__D61967F6__3C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30</code></li>
+  <li>SHA&ndash;256 (bold checksum): <code>__D61967F6__ 3C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30</code></li>
 
   <li>checksum + #4 = (hex) address: <code>00010966776006953D5567439E5E39F86A0D273BEED61967F6</code></li></ol>
 
@@ -294,7 +294,7 @@ Welcome to Racket v6.0.0.3.
 -&gt; (ripemd160 (sha256 pub-key))
 "010966776006953d5567439e5e39f86a0d273bee"
 -&gt; (define hash160 (ripemd160 (sha256 pub-key)))
--&gt; (define hash160/extended (string-append "00" (ripemd160 (sha256 pub-key))))
+-&gt; (define hash160/extended (string-append "00" hash160))
 -&gt; (sha256 hash160/extended)
 "445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
 -&gt; (sha256 (sha256 hash160/extended))

@@ -115,7 +115,7 @@ from the Bitcoin wiki example:
 3. RIPEMD-160: `010966776006953D5567439E5E39F86A0D273BEE`
 4. prepend `0x00`: `00010966776006953D5567439E5E39F86A0D273BEE`
 5. SHA-256: `445C7A8007A93D8733188288BB320A8FE2DEBD2AE1B47F0F50BC10BAE845C094`
-6. SHA-256 (bold checksum): `__D61967F6__3C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30`
+6. SHA-256 (bold checksum): `__D61967F6__ 3C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30`
 7. checksum + #4 = (hex) address: `00010966776006953D5567439E5E39F86A0D273BEED61967F6`
 
 And here's what the computations look like with our new library (using
@@ -130,7 +130,7 @@ the Racket REPL):
 	-> (ripemd160 (sha256 pub-key))
 	"010966776006953d5567439e5e39f86a0d273bee"
 	-> (define hash160 (ripemd160 (sha256 pub-key)))
-	-> (define hash160/extended (string-append "00" (ripemd160 (sha256 pub-key))))
+	-> (define hash160/extended (string-append "00" hash160))
 	-> (sha256 hash160/extended)
 	"445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
 	-> (sha256 (sha256 hash160/extended))

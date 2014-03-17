@@ -52,7 +52,7 @@
   &lt;li&gt;RIPEMD&amp;ndash;160: &lt;code&gt;010966776006953D5567439E5E39F86A0D273BEE&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;prepend &lt;code&gt;0x00&lt;/code&gt;: &lt;code&gt;00010966776006953D5567439E5E39F86A0D273BEE&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;SHA&amp;ndash;256: &lt;code&gt;445C7A8007A93D8733188288BB320A8FE2DEBD2AE1B47F0F50BC10BAE845C094&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;SHA&amp;ndash;256 (bold checksum): &lt;code&gt;__D61967F6__3C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;SHA&amp;ndash;256 (bold checksum): &lt;code&gt;__D61967F6__ 3C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;checksum + #4 = (hex) address: &lt;code&gt;00010966776006953D5567439E5E39F86A0D273BEED61967F6&lt;/code&gt;&lt;/li&gt;&lt;/ol&gt;
  &lt;p&gt;And here&amp;rsquo;s what the computations look like with our new library (using the Racket REPL):&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
@@ -64,7 +64,7 @@ Welcome to Racket v6.0.0.3.
 -&amp;gt; (ripemd160 (sha256 pub-key))
 "010966776006953d5567439e5e39f86a0d273bee"
 -&amp;gt; (define hash160 (ripemd160 (sha256 pub-key)))
--&amp;gt; (define hash160/extended (string-append "00" (ripemd160 (sha256 pub-key))))
+-&amp;gt; (define hash160/extended (string-append "00" hash160))
 -&amp;gt; (sha256 hash160/extended)
 "445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
 -&amp;gt; (sha256 (sha256 hash160/extended))

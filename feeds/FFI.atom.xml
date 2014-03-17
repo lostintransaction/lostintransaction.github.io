@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+ <title type="text">Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'FFI'</title>
+ <link rel="self" href="http://www.lostintransaction.com/feeds/FFI.atom.xml" />
+ <link href="http://www.lostintransaction.com/tags/FFI.html" />
+ <id>urn:http-www-lostintransaction-com:-tags-FFI-html</id>
+ <updated>2014-03-15T04:09:45Z</updated>
+ <entry>
+  <title type="text">Adding OpenSSL bindings to Racket via its FFI</title>
+  <link rel="alternate" href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/?utm_source=FFI&amp;utm_medium=Atom" />
+  <id>urn:http-www-lostintransaction-com:-blog-2014-03-15-adding-openssl-bindings-to-racket-via-its-ffi</id>
+  <published>2014-03-15T04:09:45Z</published>
+  <updated>2014-03-15T04:09:45Z</updated>
+  <author>
+   <name>The Unknown Author</name></author>
+  <content type="html">
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=FFI&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F15%2Fadding-openssl-bindings-to-racket-via-its-ffi%2F" height="1" width="1" /&gt;
+ &lt;p&gt;Programming in C is often useful but it&amp;rsquo;s also occasionally nice to program with a higher-level language where you don&amp;rsquo;t need to constantly worry about things like overflow or freeing memory. I enjoy using &lt;a href="http://racket-lang.org"&gt;Racket&lt;/a&gt;, a LISP dialect, and I use it to experiment with Bitcoin.&lt;/p&gt;
+ &lt;p&gt;Unfortunately, Racket doesn&amp;rsquo;t have a complete crypto library, but it does have an &lt;a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI"&gt;FFI&lt;/a&gt; that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, &lt;a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2"&gt;SHA&amp;ndash;256&lt;/a&gt; and &lt;a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD"&gt;RIPEMD&amp;ndash;160&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;The &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"&gt;&lt;code&gt;ffi-lib&lt;/code&gt;&lt;/a&gt; Racket function in the &lt;code&gt;ffi/unsafe&lt;/code&gt; module creates a path for Racket code to call into a specified C library. Racket actually already has some bindings for OpenSSL functions (but not the ones I want), so I&amp;rsquo;m going to cheat a little and use the &lt;a href="https://github.com/plt/racket/blob/8b4c5d3debbe41c90e37e5ffdc55fb8ab3635f92/racket/collects/openssl/libcrypto.rkt" title="Racket source: openssl/libcrypto.rkt"&gt;already-available &lt;code&gt;libcrypto&lt;/code&gt; hook&lt;/a&gt;. Here&amp;rsquo;s the exact call to &lt;code&gt;ffi-lib&lt;/code&gt;:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define libcrypto
+  (ffi-lib libcrypto-so '("" "1.0.1e" "1.0.0" "1.0" "0.9.8b" "0.9.8" "0.9.7")))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;The first argument is the name of the C library and the second argument is a list of acceptable versions.&lt;/p&gt;
+ &lt;p&gt;Let&amp;rsquo;s create a Racket binding for a specific C function, for example &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"&gt;&lt;code&gt;SHA256&lt;/code&gt;&lt;/a&gt;. Here&amp;rsquo;s the header in C:&lt;/p&gt;
+ &lt;pre class="brush: C"&gt;&lt;code&gt;unsigned char *SHA256( const unsigned char *d, size_t n, unsigned char *md );&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;To create the Racket binding, we use the &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"&gt;&lt;code&gt;get-ffi-obj&lt;/code&gt;&lt;/a&gt; Racket function. Here&amp;rsquo;s the binding for SHA&amp;ndash;256 might look like:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define sha256
+  (get-ffi-obj
+    'SHA256 libcrypto
+    (_fun [input     : _bytes]
+       [input-len : _ulong = (bytes-length input)]
+        [output    : (_bytes o SHA256-DIGEST-LEN)]
+         -&amp;gt; _bytes
+          -&amp;gt; (make-sized-byte-string output SHA256-DIGEST-LEN))))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;The first argument is the name of the C function and the second is the library hook that we created with &lt;code&gt;ffi-lib&lt;/code&gt;. The third argument is the type, which specifies how to mediate between Racket and C values. The function type is &lt;a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"&gt;&lt;code&gt;_fun&lt;/code&gt;&lt;/a&gt; and in this case the function has three arguments (each one specified in brackets).&lt;/p&gt;
+ &lt;p&gt;Examining the arguments:&lt;/p&gt;
+ &lt;ol&gt;
+  &lt;li&gt;
+   &lt;p&gt;The C first argument is an array of input bytes and we use &lt;code&gt;_bytes&lt;/code&gt; to indicate this in Racket.&lt;/p&gt;&lt;/li&gt;
+  &lt;li&gt;
+   &lt;p&gt;The second argument specifies the length of the input byte array. The &lt;code&gt;=&lt;/code&gt; tells Racket how to calculate this argument automatically. That means a caller of the Racket &lt;code&gt;sha256&lt;/code&gt; wrapper function can provide the input bytes without a separate length argument.&lt;/p&gt;&lt;/li&gt;
+  &lt;li&gt;
+   &lt;p&gt;The third argument is the output byte array. In Racket, the &lt;code&gt;o&lt;/code&gt; indicates a return pointer and the &lt;code&gt;SHA256-DIGEST-LEN&lt;/code&gt; indicates the expected number of output bytes.&lt;/p&gt;&lt;/li&gt;&lt;/ol&gt;
+ &lt;p&gt;TODO: - Don&amp;rsquo;t need id on some args (like input-len). Only need id if you want to refer to it later. Not sure I need &lt;code&gt;make-sized-byte-string&lt;/code&gt; for output. I think (_bytes o SHA256-DIGEST-LEN) is suffiient. - make these changes in crypto.rkt&lt;/p&gt;&lt;/html&gt;</content></entry></feed>

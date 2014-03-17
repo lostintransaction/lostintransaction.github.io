@@ -115,6 +115,26 @@
 
  <header>
 
+  <h2><a href="/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/">Adding OpenSSL bindings to Racket via its FFI</a></h2>
+
+  <p class="date-and-tags">
+   <time datetime="2014-03-15" pubdate="true">2014-03-15</time> :: <span class="tags"><a href="/tags/OpenSSL.html">OpenSSL</a>, <a href="/tags/C.html">C</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/FFI.html">FFI</a>, <a href="/tags/hashes.html">hashes</a>, <a href="/tags/SHA.html">SHA</a>, <a href="/tags/RIPEMD.html">RIPEMD</a></span></p>
+  </header>
+
+
+ <p>Programming in C is often useful but it&rsquo;s also occasionally nice to program with a higher-level language where you don&rsquo;t need to constantly worry about things like overflow or freeing memory. I enjoy using <a href="http://racket-lang.org">Racket</a>, a LISP dialect, and I use it to experiment with Bitcoin.</p>
+
+
+ <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto library, but it does have an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
+
+
+ <footer class="read-more"><a href="/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/">&hellip;more&hellip;</a></footer>
+</article>
+
+<article>
+
+ <header>
+
   <h2><a href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">Deriving a Bitcoin Public Key From a Private Key</a></h2>
 
   <p class="date-and-tags">

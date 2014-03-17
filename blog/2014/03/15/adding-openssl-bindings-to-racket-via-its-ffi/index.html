@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8">
+    <title>Adding OpenSSL bindings to Racket via its FFI</title>
+    <meta name="description" content="Programming in C is often useful but it's also occasionally nice to program with a higher-level language where you don't need to constantly worry about things like overflow or freeing memory. I enjoy using Racket, a LISP dialect, and I use it to experiment with Bitcoin. Unfortunately, Racket doesn't have a complete crypto library, but it does have an FFI that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, SHA-256 and RIPEMD-160. ...">
+    <meta name="author"      content="The Unknown Blogger">
+    <meta name="keywords"    content="OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD">
+    <meta name="viewport"    content="width=device-width, initial-scale=1.0">
+    <link rel="icon"      href="/favicon.ico">
+    <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/">
+    <link rel="next" href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/pygments.css">
+    <link rel="stylesheet" type="text/css" href="/css/scribble.css">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
+    <!-- Feeds -->
+    <link ref="alternate" type="application/atom+xml"
+          href="/feeds/all.atom.xml" title="Atom Feed">
+    <link ref="alternate" type="application/rss+xml"
+          href="/feeds/all.rss.xml" title="RSS Feed">
+    <!-- JS -->
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-48721117-3']);
+      _gaq.push(['_setDomainName', 'www.lostintransaction.com']);
+      _gaq.push(['_trackPageview']);
+      setTimeout(function(){_gaq.push(['_trackEvent', '30_seconds', 'read'])}, 30000); // http://drawingablank.me/blog/fix-your-bounce-rate.html
+      (function() {
+          var ga = document.createElement('script');
+          ga.type = 'text/javascript'; ga.async = true;
+          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- A standard Twitter Bootstrap nav bar -->
+    <header class="navbar navbar-default navbar-inverse"
+            role="banner">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button"
+                  class="navbar-toggle"
+                  data-toggle="collapse"
+                  data-target=".our-nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a href="/index.html" class="navbar-brand">Lost in Transaction</a>
+        </div>
+        <div class="collapse navbar-collapse our-nav-collapse"
+             role="navigation">
+          <ul class="nav navbar-nav">
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                Tags <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="/index.html">All Posts</a></li>
+
+<li><a href="/tags/Andreas-Antonopoulos.html">Andreas Antonopoulos</a></li>
+
+<li><a href="/tags/C.html">C</a></li>
+
+<li><a href="/tags/elliptic-curve.html">elliptic curve</a></li>
+
+<li><a href="/tags/FFI.html">FFI</a></li>
+
+<li><a href="/tags/hashes.html">hashes</a></li>
+
+<li><a href="/tags/MultiBit.html">MultiBit</a></li>
+
+<li><a href="/tags/OpenSSL.html">OpenSSL</a></li>
+
+<li><a href="/tags/private-key.html">private key</a></li>
+
+<li><a href="/tags/public-key.html">public key</a></li>
+
+<li><a href="/tags/Racket.html">Racket</a></li>
+
+<li><a href="/tags/RIPEMD.html">RIPEMD</a></li>
+
+<li><a href="/tags/SHA.html">SHA</a></li>
+
+<li><a href="/tags/signatures.html">signatures</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="/About.html">About</a>
+            </li> 
+            <li><a href="/feeds/all.atom.xml">Atom</a></li>
+            <li><a href="/feeds/all.rss.xml">RSS</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+
+        <!-- Main column -->
+        <div id="content" class="col-md-12">
+
+
+
+
+
+
+<article>
+
+ <header>
+
+  <h1>Adding OpenSSL bindings to Racket via its FFI</h1>
+
+  <p class="date-and-tags">
+   <time datetime="2014-03-15" pubdate="true">2014-03-15</time> :: <span class="tags"><a href="/tags/OpenSSL.html">OpenSSL</a>, <a href="/tags/C.html">C</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/FFI.html">FFI</a>, <a href="/tags/hashes.html">hashes</a>, <a href="/tags/SHA.html">SHA</a>, <a href="/tags/RIPEMD.html">RIPEMD</a></span></p>
+  </header>
+
+
+ <p>Programming in C is often useful but it&rsquo;s also occasionally nice to program with a higher-level language where you don&rsquo;t need to constantly worry about things like overflow or freeing memory. I enjoy using <a href="http://racket-lang.org">Racket</a>, a LISP dialect, and I use it to experiment with Bitcoin.</p>
+
+
+ <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto library, but it does have an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
+
+
+ <p>The <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code></a> Racket function in the <code>ffi/unsafe</code> module creates a path for Racket code to call into a specified C library. Racket actually already has some bindings for OpenSSL functions (but not the ones I want), so I&rsquo;m going to cheat a little and use the <a href="https://github.com/plt/racket/blob/8b4c5d3debbe41c90e37e5ffdc55fb8ab3635f92/racket/collects/openssl/libcrypto.rkt" title="Racket source: openssl/libcrypto.rkt">already-available <code>libcrypto</code> hook</a>. Here&rsquo;s the exact call to <code>ffi-lib</code>:</p>
+
+
+ <div class="brush: racket">
+
+  <table class="sourcetable">
+
+   <tbody>
+
+    <tr>
+
+     <td class="linenos">
+
+      <div class="linenodiv">
+
+       <pre>1
+2</pre></div></td>
+
+     <td class="code">
+
+      <div class="source">
+
+       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">libcrypto</span>
+  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._ffi-lib))" style="color: inherit">ffi-lib</a></span> <span class="nv">libcrypto-so</span> <span class="o">'</span><span class="p">(</span><span class="s">""</span> <span class="s">"1.0.1e"</span> <span class="s">"1.0.0"</span> <span class="s">"1.0"</span> <span class="s">"0.9.8b"</span> <span class="s">"0.9.8"</span> <span class="s">"0.9.7"</span><span class="p">)))</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+
+ <p>The first argument is the name of the C library and the second argument is a list of acceptable versions.</p>
+
+
+ <p>Let&rsquo;s create a Racket binding for a specific C function, for example <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"><code>SHA256</code></a>. Here&rsquo;s the header in C:</p>
+
+
+ <div class="brush: C">
+
+  <table class="sourcetable">
+
+   <tbody>
+
+    <tr>
+
+     <td class="linenos">
+
+      <div class="linenodiv">
+
+       <pre>1</pre></div></td>
+
+     <td class="code">
+
+      <div class="source">
+
+       <pre>unsigned char *SHA256( const unsigned char *d, size_t n, unsigned char *md );
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+
+ <p>To create the Racket binding, we use the <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"><code>get-ffi-obj</code></a> Racket function. Here&rsquo;s the binding for SHA&ndash;256 might look like:</p>
+
+
+ <div class="brush: racket">
+
+  <table class="sourcetable">
+
+   <tbody>
+
+    <tr>
+
+     <td class="linenos">
+
+      <div class="linenodiv">
+
+       <pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td>
+
+     <td class="code">
+
+      <div class="source">
+
+       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">sha256</span>
+  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._get-ffi-obj))" style="color: inherit">get-ffi-obj</a></span>
+    <span class="ss">'SHA256</span> <span class="nv">libcrypto</span>
+    <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__fun))" style="color: inherit">_fun</a></span> <span class="p">[</span><span class="nf">input</span>     <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span><span class="p">]</span>
+       <span class="p">[</span><span class="nf">input-len</span> <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/Numeric_Types.html#(def._((lib._ffi/unsafe..rkt).__ulong))" style="color: inherit">_ulong</a></span> <span class="nv"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3d))" style="color: inherit">=</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes-length))" style="color: inherit">bytes-length</a> </span><span class="nv">input</span><span class="p">)]</span>
+        <span class="p">[</span><span class="nf"><a href="http://docs.racket-lang.org/scribble-pp/text.html#(def._((lib._scribble/text..rkt)._output))" style="color: inherit">output</a></span>    <span class="nv">:</span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span> <span class="nv">o</span> <span class="nv">SHA256-DIGEST-LEN</span><span class="p">)]</span>
+         <span class="nv"><a href="http://docs.racket-lang.org/reference/function-contracts.html#(form._((lib._racket/contract/base..rkt)._-~3e))" style="color: inherit">-&gt;</a></span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span>
+          <span class="nv"><a href="http://docs.racket-lang.org/reference/function-contracts.html#(form._((lib._racket/contract/base..rkt)._-~3e))" style="color: inherit">-&gt;</a></span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_pointer-funcs.html#(def._((quote._~23~25foreign)._make-sized-byte-string))" style="color: inherit">make-sized-byte-string</a></span> <span class="nv"><a href="http://docs.racket-lang.org/scribble-pp/text.html#(def._((lib._scribble/text..rkt)._output))" style="color: inherit">output</a></span> <span class="nv">SHA256-DIGEST-LEN</span><span class="p">))))</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+
+ <p>The first argument is the name of the C function and the second is the library hook that we created with <code>ffi-lib</code>. The third argument is the type, which specifies how to mediate between Racket and C values. The function type is <a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"><code>_fun</code></a> and in this case the function has three arguments (each one specified in brackets).</p>
+
+
+ <p>Examining the arguments:</p>
+
+
+ <ol>
+
+  <li>
+
+   <p>The C first argument is an array of input bytes and we use <code>_bytes</code> to indicate this in Racket.</p></li>
+
+  <li>
+
+   <p>The second argument specifies the length of the input byte array. The <code>=</code> tells Racket how to calculate this argument automatically. That means a caller of the Racket <code>sha256</code> wrapper function can provide the input bytes without a separate length argument.</p></li>
+
+  <li>
+
+   <p>The third argument is the output byte array. In Racket, the <code>o</code> indicates a return pointer and the <code>SHA256-DIGEST-LEN</code> indicates the expected number of output bytes.</p></li></ol>
+
+
+ <p>TODO: - Don&rsquo;t need id on some args (like input-len). Only need id if you want to refer to it later. Not sure I need <code>make-sized-byte-string</code> for output. I think (_bytes o SHA256-DIGEST-LEN) is suffiient. - make these changes in crypto.rkt</p>
+
+ <footer>
+
+  <script type="text/javascript">
+      !function(d,s,id){
+          var js,fjs=d.getElementsByTagName(s)[0];
+          if(!d.getElementById(id)){
+              js=d.createElement(s);
+              js.id=id;
+              js.src="//platform.twitter.com/widgets.js";
+              fjs.parentNode.insertBefore(js,fjs);
+          }
+      }(document,"script","twitter-wjs");
+    </script>
+    <a class="twitter-share-button" data-dnt="true" data-url="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/" href="https://twitter.com/share">
+      "Tweet"</a>
+
+  <script src="https://apis.google.com/js/plusone.js" type="text/javascript"></script>
+
+  <g:plusone href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/" size="medium"></g:plusone>
+
+  <script type="text/javascript">
+      var disqus_shortname = 'lostintransaction';
+      (function() {
+          var dsq = document.createElement('script');
+          dsq.type = 'text/javascript';
+          dsq.async = true;
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+
+  <div id="disqus_thread"></div>
+
+  <ul class="pager">
+
+
+   <li class="next">
+      <a href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/"><em>Deriving a Bitcoin Public Key From a Private Key</em> &rarr;</a>
+    </li>
+    </ul>
+  </footer>
+</article>
+        </div>
+      </div>
+      <footer>
+        <hr />
+        <p>Lost in Transaction: A neophyte explores Bitcoin.</p>
+        <p><a href="https://twitter.com/sixconfirms"
+              class="twitter-follow-button"
+              data-show-count="false"
+              data-lang="en">
+             "Follow sixconfirms"
+           </a>
+           <script type="text/javascript">
+             !function(d,s,id){
+                 var js,fjs=d.getElementsByTagName(s)[0];
+                 if(!d.getElementById(id)){
+                     js=d.createElement(s);
+                     js.id=id;
+                     js.src="//platform.twitter.com/widgets.js";
+                     fjs.parentNode.insertBefore(js,fjs);
+                 }
+             }(document,"script","twitter-wjs");
+           </script></p>
+        <p>Site generated
+        by <a href="https://github.com/greghendershott/frog">Frog</a>,
+        the <strong>fr</strong>ozen bl<strong>og</strong> tool.</p>
+        <p>Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
+<!--        <p><em>Your legal notice here</em>.</p>-->
+        <p><em>Don't believe anything you read here</em>.</p>
+        <p><a href="bitcoin:18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS">18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS</a></p>
+      </footer>
+    </div>
+    <!-- </body> JS -->
+    <script type="text/javascript" src="//code.jquery.com/jquery.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+  </body>
+</html>

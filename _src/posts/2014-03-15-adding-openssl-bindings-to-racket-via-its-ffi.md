@@ -142,6 +142,11 @@ the Racket REPL):
 	-> address/hex
 	"00010966776006953d5567439e5e39f86a0d273beed61967f6"
 	   
+In the next post, I'll experiment with
+[Base58Check encoding][bwiki:b58] and decoding.
+
+[bwiki: b58]: https://en.bitcoin.it/wiki/Base58Check_encoding "Bitcoin wiki: Base58Check encoding"
+
 ### Software ###
 
 In this post, I'm using OpenSSL 1.0.1e, Racket 6.0.0.3, and running Debian

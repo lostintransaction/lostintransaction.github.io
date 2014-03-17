@@ -76,5 +76,6 @@ Welcome to Racket v6.0.0.3.
 -&amp;gt; address/hex
 "00010966776006953d5567439e5e39f86a0d273beed61967f6"
    &lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;In the next post, I&amp;rsquo;ll experiment with [Base58Check encoding][bwiki:b58] and decoding.&lt;/p&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
  &lt;p&gt;In this post, I&amp;rsquo;m using OpenSSL 1.0.1e, Racket 6.0.0.3, and running Debian 7.0.&lt;/p&gt;&lt;/html&gt;</content></entry></feed>

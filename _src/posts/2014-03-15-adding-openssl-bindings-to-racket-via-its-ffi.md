@@ -145,7 +145,7 @@ the Racket REPL):
 In the next post, I'll experiment with
 [Base58Check encoding][bwiki:b58] and decoding.
 
-[bwiki: b58]: https://en.bitcoin.it/wiki/Base58Check_encoding "Bitcoin wiki: Base58Check encoding"
+[bwiki:b58]: https://en.bitcoin.it/wiki/Base58Check_encoding "Bitcoin wiki: Base58Check encoding"
 
 ### Software ###
 

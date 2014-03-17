@@ -42,7 +42,7 @@
    &lt;p&gt;The second argument is the length of the input byte array. The &lt;code&gt;=&lt;/code&gt; tells Racket how to calculate this argument automatically. This means that a caller of the Racket &lt;code&gt;sha256&lt;/code&gt; function only needs to provide the input bytes and not an additional length argument.&lt;/p&gt;&lt;/li&gt;
   &lt;li&gt;
    &lt;p&gt;The third argument is the output byte array. The &lt;code&gt;o&lt;/code&gt; indicates a return pointer and &lt;code&gt;SHA256-DIGEST-LEN&lt;/code&gt; is the expected number of output bytes.&lt;/p&gt;&lt;/li&gt;&lt;/ol&gt;
- &lt;p&gt;Here&amp;rsquo;s the code to define a Racket module that exports &lt;code&gt;sha256&lt;/code&gt; and &lt;code&gt;ripemd160&lt;/code&gt; wrapper functions. Note that the functions that call to the C functions are now named &lt;code&gt;sha256/bytes&lt;/code&gt; and &lt;code&gt;ripemd160/bytes&lt;/code&gt;, and these functions consume and produce bytes. We additionally define &lt;code&gt;sha256&lt;/code&gt; and &lt;code&gt;ripemd160&lt;/code&gt; functions which have optional keyword arguments for conversion of the input and output. &lt;code&gt;sha256&lt;/code&gt; and &lt;code&gt;ripemd160&lt;/code&gt; consume hexadecimal strings by default.&lt;/p&gt;
+ &lt;p&gt;Here&amp;rsquo;s the code to define a Racket module that exports &lt;code&gt;sha256&lt;/code&gt; and &lt;code&gt;ripemd160&lt;/code&gt; wrapper functions. Note that the functions that call to the C functions are now named &lt;code&gt;sha256/bytes&lt;/code&gt; and &lt;code&gt;ripemd160/bytes&lt;/code&gt;, and these functions consume and produce bytes. We additionally define &lt;code&gt;sha256&lt;/code&gt; and &lt;code&gt;ripemd160&lt;/code&gt; functions which have optional keyword arguments for conversion of the input and output. These functions consume and produce hexadecimal strings by default.&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;#lang racket/base
 (require ffi/unsafe openssl/libcrypto)
 (require (only-in openssl/sha1 hex-string-&amp;gt;bytes
@@ -60,7 +60,7 @@
   (_fun [input     : _bytes]
         [input-len : _ulong = (bytes-length input)]
         [output    : (_bytes o SHA256-DIGEST-LEN)]
-     -&amp;gt; (_bytes o SHA256-DIGEST-LEN))))
+        -&amp;gt; (_bytes o SHA256-DIGEST-LEN))))
 
 (define (sha256 input #:convert-input  [input-&amp;gt;bytes hex-string-&amp;gt;bytes]
                       #:convert-output [bytes-&amp;gt;output bytes-&amp;gt;hex-string])
@@ -73,9 +73,9 @@
   'RIPEMD160 libcrypto
   (_fun [input     : _bytes]
         [input-len : _ulong = (bytes-length input)]
-      [output    : (_bytes o RIPEMD160-DIGEST-LEN)]
-      -&amp;gt; (_bytes o RIPEMD160-DIGEST-LEN))))
-      
+        [output    : (_bytes o RIPEMD160-DIGEST-LEN)]
+        -&amp;gt; (_bytes o RIPEMD160-DIGEST-LEN))))
+       
 (define (ripemd160 input #:convert-input  [input-&amp;gt;bytes hex-string-&amp;gt;bytes]
                          #:convert-output [bytes-&amp;gt;output bytes-&amp;gt;hex-string])
   (bytes-&amp;gt;output (ripemd160/bytes (input-&amp;gt;bytes input))))&lt;/code&gt;&lt;/pre&gt;

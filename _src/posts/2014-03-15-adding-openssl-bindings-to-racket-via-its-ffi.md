@@ -96,8 +96,8 @@ Here's the code to define a Racket module that exports `sha256` and
 the C functions are now named `sha256/bytes` and `ripemd160/bytes`,
 and these functions consume and produce bytes. We additionally define
 `sha256` and `ripemd160` functions which have optional keyword
-arguments for conversion of the input and output. `sha256` and
-`ripemd160` consume hexadecimal strings by default.
+arguments for conversion of the input and output. These functions
+consume and produce hexadecimal strings by default.
 
 ```racket
 #lang racket/base
@@ -117,7 +117,7 @@ arguments for conversion of the input and output. `sha256` and
   (_fun [input     : _bytes]
         [input-len : _ulong = (bytes-length input)]
 		[output    : (_bytes o SHA256-DIGEST-LEN)]
-		-> (_bytes o SHA256-DIGEST-LEN))))
+        -> (_bytes o SHA256-DIGEST-LEN))))
 
 (define (sha256 input #:convert-input  [input->bytes hex-string->bytes]
                       #:convert-output [bytes->output bytes->hex-string])
@@ -130,8 +130,8 @@ arguments for conversion of the input and output. `sha256` and
   'RIPEMD160 libcrypto
   (_fun [input     : _bytes]
         [input-len : _ulong = (bytes-length input)]
-		[output    : (_bytes o RIPEMD160-DIGEST-LEN)]
-		-> (_bytes o RIPEMD160-DIGEST-LEN))))
+        [output    : (_bytes o RIPEMD160-DIGEST-LEN)]
+        -> (_bytes o RIPEMD160-DIGEST-LEN))))
 		
 (define (ripemd160 input #:convert-input  [input->bytes hex-string->bytes]
                          #:convert-output [bytes->output bytes->hex-string])

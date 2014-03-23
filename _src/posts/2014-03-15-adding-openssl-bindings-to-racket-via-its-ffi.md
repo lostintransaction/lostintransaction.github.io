@@ -2,17 +2,17 @@
     Date: 2014-03-15T04:09:45
     Tags: OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD
 
-C programming has its uses but it's also sometimes nice to program
-with a higher-level language where you don't need to constantly worry
-about things like overflow or freeing memory. I enjoy using
-[Racket](http://racket-lang.org), a LISP dialect, when experimenting
-with Bitcoin.
+C is the right tool for many programming tasks but other times it's
+nice to let the language automatically handle things like
+arbitrary-precision arithmetic and memory
+management. [Racket](http://racket-lang.org), a LISP dialect, has such
+features and I enjoy using it when experimenting with Bitcoin.
 
-Unfortunately, Racket doesn't have a complete crypto librar.It does
-have, however, an [FFI][racketffi] that enables Racket code to
-directly call C functions. In this post, I create Racket bindings for
-two important hashing functions used by Bitcoin, [SHA-256][wiki:sha]
-and [RIPEMD-160][wiki:ripemd].
+Racket doesn't have a complete crypto library but it does have,
+however, an [FFI][racketffi] that enables Racket code to directly call
+C functions. In this post, I create Racket bindings for two important
+hashing functions used by Bitcoin, [SHA-256][wiki:sha] and
+[RIPEMD-160][wiki:ripemd].
 
 [racketffi]: http://docs.racket-lang.org/foreign/index.html "Racket FFI"
 [wiki:sha]: http://en.wikipedia.org/wiki/SHA-2 "Wikipedia: SHA-2"
@@ -23,22 +23,24 @@ and [RIPEMD-160][wiki:ripemd].
 ### `ffi-lib` ###
 
 The [`ffi-lib`][racket:ffilib] Racket function in the `ffi/unsafe`
-module creates a Racket value that represents the given C
-library. Racket actually already defines
-[a `libcrypto` identifier][plt:libcrypto], which represents the
-OpenSSL `libcrypto` library (Racket has wrapper functions for some
-`libcrypto` C functions, but not for `SHA256` or `RIPEMD160`). Here's
-how to define a Racket value representing the `libcrypto` library
-using `ffi-lib`:
+module creates a Racket value a given C library. For example, the
+following defines a Racket value representing the `libcrypto` OpenSSL
+library:
 
 ```racket
 (define libcrypto
   (ffi-lib '(so "libcrypto") '("" "1.0.1e" "1.0.0" "1.0" "0.9.8b" "0.9.8" "0.9.7")))
 ```
 
-The first argument specifies a dynamic C library and the second
-argument is a list of acceptable versions. See the documentation for
-[`ffi-lib`][racket:ffilib] for more details on its usage.
+The first argument to `ffi-lib` specifies a dynamic C library and the
+second argument is a list of acceptable version numbers. Check the
+[`ffi-lib`][racket:ffilib] documentation for more details on its
+usage.
+
+The above [`libcrypto` Racket identifier][plt:libcrypto], which is
+bound to the OpenSSL `libcrypto` library, is already pre-defined in
+the standard Racket distribution (Racket has wrapper functions for
+some `libcrypto` C functions, but not for `SHA256` or `RIPEMD160`).
 
 [racket:ffilib]: http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29 "Racket docs: ffi-lib"
 [plt:libcrypto]: https://github.com/plt/racket/blob/8b4c5d3debbe41c90e37e5ffdc55fb8ab3635f92/racket/collects/openssl/libcrypto.rkt "Racket source: openssl/libcrypto.rkt"

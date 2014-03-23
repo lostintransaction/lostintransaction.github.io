@@ -4,14 +4,14 @@
 
     <meta charset="utf-8">
     <title>Adding OpenSSL bindings to Racket via its FFI</title>
-    <meta name="description" content="C programming has its uses but it's also sometimes nice to program with a higher-level language where you don't need to constantly worry about things like overflow or freeing memory. I enjoy using Racket, a LISP dialect, when experimenting with Bitcoin. Unfortunately, Racket doesn't have a complete crypto librar.It does have, however, an FFI that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, SHA-256 and RIPEMD-160. ...">
+    <meta name="description" content="C is the right tool for many programming tasks but other times it's nice to let the language automatically handle things like arbitrary-precision arithmetic and memory management. Racket, a LISP dialect, has such features and I enjoy using it when experimenting with Bitcoin. Racket doesn't have a complete crypto library but it does have, however, an FFI that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, SHA-256 and RIPEMD-160. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
     <link rel="icon"      href="/favicon.ico">
     <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/">
     <link rel="next" href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">
-
+    <link rel="prev" href="/blog/2014/03/18/base58check-encoding-and-decoding/">
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/css/pygments.css">
@@ -65,6 +65,10 @@
                 <li><a href="/index.html">All Posts</a></li>
 
 <li><a href="/tags/Andreas-Antonopoulos.html">Andreas Antonopoulos</a></li>
+
+<li><a href="/tags/Base58Check.html">Base58Check</a></li>
+
+<li><a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a></li>
 
 <li><a href="/tags/C.html">C</a></li>
 
@@ -122,16 +126,16 @@
   </header>
 
 
- <p>C programming has its uses but it&rsquo;s also sometimes nice to program with a higher-level language where you don&rsquo;t need to constantly worry about things like overflow or freeing memory. I enjoy using <a href="http://racket-lang.org">Racket</a>, a LISP dialect, when experimenting with Bitcoin.</p>
+ <p>C is the right tool for many programming tasks but other times it&rsquo;s nice to let the language automatically handle things like arbitrary-precision arithmetic and memory management. <a href="http://racket-lang.org">Racket</a>, a LISP dialect, has such features and I enjoy using it when experimenting with Bitcoin.</p>
 
 
- <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto librar.It does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
+ <p>Racket doesn&rsquo;t have a complete crypto library but it does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
 
 
  <h3 id="ffi-lib"><code>ffi-lib</code></h3>
 
 
- <p>The <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code></a> Racket function in the <code>ffi/unsafe</code> module creates a Racket value that represents the given C library. Racket actually already defines <a href="https://github.com/plt/racket/blob/8b4c5d3debbe41c90e37e5ffdc55fb8ab3635f92/racket/collects/openssl/libcrypto.rkt" title="Racket source: openssl/libcrypto.rkt">a <code>libcrypto</code> identifier</a>, which represents the OpenSSL <code>libcrypto</code> library (Racket has wrapper functions for some <code>libcrypto</code> C functions, but not for <code>SHA256</code> or <code>RIPEMD160</code>). Here&rsquo;s how to define a Racket value representing the <code>libcrypto</code> library using <code>ffi-lib</code>:</p>
+ <p>The <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code></a> Racket function in the <code>ffi/unsafe</code> module creates a Racket value a given C library. For example, the following defines a Racket value representing the <code>libcrypto</code> OpenSSL library:</p>
 
 
  <div class="brush: racket">
@@ -160,7 +164,10 @@
 </div>
 
 
- <p>The first argument specifies a dynamic C library and the second argument is a list of acceptable versions. See the documentation for <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code></a> for more details on its usage.</p>
+ <p>The first argument to <code>ffi-lib</code> specifies a dynamic C library and the second argument is a list of acceptable version numbers. Check the <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code></a> documentation for more details on its usage.</p>
+
+
+ <p>The above <a href="https://github.com/plt/racket/blob/8b4c5d3debbe41c90e37e5ffdc55fb8ab3635f92/racket/collects/openssl/libcrypto.rkt" title="Racket source: openssl/libcrypto.rkt"><code>libcrypto</code> Racket identifier</a>, which is bound to the OpenSSL <code>libcrypto</code> library, is already pre-defined in the standard Racket distribution (Racket has wrapper functions for some <code>libcrypto</code> C functions, but not for <code>SHA256</code> or <code>RIPEMD160</code>).</p>
 
 
  <h3 id="get-ffi-obj"><code>get-ffi-obj</code></h3>
@@ -402,7 +409,7 @@ Welcome to Racket v6.0.0.3.
    </code></pre>
 
 
- <p>In the next post, I&rsquo;ll experiment with <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a> and decoding.</p>
+ <p>So far, from the public key, we&rsquo;ve computed the Bitcoin address in hexadecimal format. The last step from the Bitcoin wiki article converts to <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a>, which is by far the more common address representation. We&rsquo;ll save that topic for another post!</p>
 
 
  <h3 id="software">Software</h3>
@@ -445,6 +452,9 @@ Welcome to Racket v6.0.0.3.
 
   <ul class="pager">
 
+   <li class="previous">
+      <a href="/blog/2014/03/18/base58check-encoding-and-decoding/">&larr; <em>Base58Check Encoding and Decoding</em></a>
+    </li>
 
    <li class="next">
       <a href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/"><em>Deriving a Bitcoin Public Key From a Private Key</em> &rarr;</a>

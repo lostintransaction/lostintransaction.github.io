@@ -24,7 +24,7 @@ and [RIPEMD-160][wiki:ripemd].
 ### `ffi-lib` ###
 
 The [`ffi-lib`][racket:ffilib] function creates a Racket value through
-which programmers can access functions in a given C library. For
+which programmers can access functions in the specified C library. For
 example, the following code evaluates to a Racket value for the
 OpenSSL `libcrypto` library:
 
@@ -32,9 +32,10 @@ OpenSSL `libcrypto` library:
 (ffi-lib '(so "libcrypto") '("" "1.0.1e" "1.0.0" "1.0" "0.9.8b" "0.9.8" "0.9.7"))
 ```
 
-The first argument to `ffi-lib` specifies a dynamic C library and the
-second argument is a list of acceptable version numbers. (Check the
-[`ffi-lib` documentation][racket:ffilib] for more details on its use.)
+Here the first argument to `ffi-lib` specifies a dynamic C library and
+the second argument is a list of acceptable version numbers. (Check
+the [`ffi-lib` documentation][racket:ffilib] for other possible use
+cases.)
 
 The standard Racket distribution pre-defines an identifier (also named
 `librypto`) that is bound to the `libcrypto` library (Racket comes

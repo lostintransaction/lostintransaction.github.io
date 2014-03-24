@@ -7,13 +7,11 @@ higher-level language that automatically handles things like
 arbitrary-precision arithmetic and memory
 management. [Racket](http://racket-lang.org), a LISP dialect, has
 linguistic support for these features (and more) and I enjoy using it
-to experiment with Bitcoin.
-
-Racket doesn't have a complete crypto library but it does have an
-[FFI][racketffi] that enables Racket code to directly call C
-functions. In this post, I create Racket bindings for two important
-hashing functions used by Bitcoin, [SHA-256][wiki:sha] and
-[RIPEMD-160][wiki:ripemd].
+to experiment with Bitcoin. However, Racket doesn't have a complete
+crypto library but it does have an [FFI][racketffi] that enables
+Racket code to directly call C functions. In this post, I create
+Racket bindings for two important hashing functions used by Bitcoin,
+[SHA-256][wiki:sha] and [RIPEMD-160][wiki:ripemd].
 
 [racketffi]: http://docs.racket-lang.org/foreign/index.html "Racket FFI"
 [wiki:sha]: http://en.wikipedia.org/wiki/SHA-2 "Wikipedia: SHA-2"

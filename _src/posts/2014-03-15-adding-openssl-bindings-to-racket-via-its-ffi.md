@@ -2,15 +2,16 @@
     Date: 2014-03-15T04:09:45
     Tags: OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD
 
-C is the right tool for many programming tasks but other times it's
-nice to let the language automatically handle things like
+C is great for many programming tasks but sometimes it's nice to use a
+higher-level language that automatically handles various things like
 arbitrary-precision arithmetic and memory
-management. [Racket](http://racket-lang.org), a LISP dialect, has such
-features and I enjoy using it when experimenting with Bitcoin.
+management. [Racket](http://racket-lang.org), a LISP dialect, has
+linguistic support for these features and I enjoy using it to
+experiment with Bitcoin.
 
-Racket doesn't have a complete crypto library but it does have,
-however, an [FFI][racketffi] that enables Racket code to directly call
-C functions. In this post, I create Racket bindings for two important
+Racket doesn't have a complete crypto library but it does have an
+[FFI][racketffi] that enables Racket code to directly call C
+functions. In this post, I create Racket bindings for two important
 hashing functions used by Bitcoin, [SHA-256][wiki:sha] and
 [RIPEMD-160][wiki:ripemd].
 
@@ -22,10 +23,10 @@ hashing functions used by Bitcoin, [SHA-256][wiki:sha] and
 
 ### `ffi-lib` ###
 
-The [`ffi-lib`][racket:ffilib] Racket function in the `ffi/unsafe`
-module creates a Racket value a given C library. For example, the
-following defines a Racket value representing the `libcrypto` OpenSSL
-library:
+The [`ffi-lib`][racket:ffilib] function in the `ffi/unsafe` module
+creates a Racket value through which programmers can access functions in a
+given C library. For example, the following code defines a Racket value
+representing the `libcrypto` OpenSSL library:
 
 ```racket
 (define libcrypto
@@ -39,8 +40,9 @@ usage.
 
 The above [`libcrypto` Racket identifier][plt:libcrypto], which is
 bound to the OpenSSL `libcrypto` library, is already pre-defined in
-the standard Racket distribution (Racket has wrapper functions for
-some `libcrypto` C functions, but not for `SHA256` or `RIPEMD160`).
+the standard Racket distribution (Racket comes with wrapper functions
+for some `libcrypto` C functions, but not for `SHA256` or
+`RIPEMD160`).
 
 [racket:ffilib]: http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29 "Racket docs: ffi-lib"
 [plt:libcrypto]: https://github.com/plt/racket/blob/8b4c5d3debbe41c90e37e5ffdc55fb8ab3635f92/racket/collects/openssl/libcrypto.rkt "Racket source: openssl/libcrypto.rkt"

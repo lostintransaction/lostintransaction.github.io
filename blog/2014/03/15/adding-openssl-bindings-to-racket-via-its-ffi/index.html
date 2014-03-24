@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Adding OpenSSL bindings to Racket via its FFI</title>
-    <meta name="description" content="C is great for many programming tasks but sometimes it's nice to use a higher-level language that automatically handles things like arbitrary-precision arithmetic and memory management. Racket, a LISP dialect, has linguistic support for these features (and more) and I enjoy using it to experiment with Bitcoin. However, Racket doesn't have a complete crypto library but it does have an FFI that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, SHA-256 and RIPEMD-160. ...">
+    <meta name="description" content="C is great for many programming tasks but sometimes it's nice to use a higher-level language that automatically handles things like arbitrary-precision arithmetic and memory management. Racket, a LISP dialect, has linguistic support for these features (and more) and I enjoy using it to experiment with Bitcoin. Unfortunately, Racket doesn't have a complete crypto library. It does have, however, an FFI that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, SHA-256 and RIPEMD-160. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -126,7 +126,10 @@
   </header>
 
 
- <p>C is great for many programming tasks but sometimes it&rsquo;s nice to use a higher-level language that automatically handles things like arbitrary-precision arithmetic and memory management. <a href="http://racket-lang.org">Racket</a>, a LISP dialect, has linguistic support for these features (and more) and I enjoy using it to experiment with Bitcoin. However, Racket doesn&rsquo;t have a complete crypto library but it does have an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
+ <p>C is great for many programming tasks but sometimes it&rsquo;s nice to use a higher-level language that automatically handles things like arbitrary-precision arithmetic and memory management. <a href="http://racket-lang.org">Racket</a>, a LISP dialect, has linguistic support for these features (and more) and I enjoy using it to experiment with Bitcoin.</p>
+
+
+ <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto library. It does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
 
 
  <h3 id="ffi-lib"><code>ffi-lib</code></h3>

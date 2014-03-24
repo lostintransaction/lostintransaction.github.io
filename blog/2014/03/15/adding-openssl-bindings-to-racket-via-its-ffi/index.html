@@ -135,7 +135,7 @@
  <h3 id="ffi-lib"><code>ffi-lib</code></h3>
 
 
- <p>The <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code></a> function creates a Racket value through which programmers can access functions in a given C library. For example, the following code evaluates to a Racket value for the OpenSSL <code>libcrypto</code> library:</p>
+ <p>The <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code></a> function creates a Racket value through which programmers can access functions in the specified C library. For example, the following code evaluates to a Racket value for the OpenSSL <code>libcrypto</code> library:</p>
 
 
  <div class="brush: racket">
@@ -162,7 +162,7 @@
 </div>
 
 
- <p>The first argument to <code>ffi-lib</code> specifies a dynamic C library and the second argument is a list of acceptable version numbers. (Check the <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code> documentation</a> for more details on its use.)</p>
+ <p>Here the first argument to <code>ffi-lib</code> specifies a dynamic C library and the second argument is a list of acceptable version numbers. (Check the <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code> documentation</a> for other possible use cases.)</p>
 
 
  <p>The standard Racket distribution pre-defines an identifier (also named <code>librypto</code>) that is bound to the <code>libcrypto</code> library (Racket comes with wrapper functions for some <code>libcrypto</code> C functions, but not for <code>SHA256</code> or <code>RIPEMD160</code>).</p>

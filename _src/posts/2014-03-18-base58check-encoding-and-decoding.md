@@ -136,12 +136,12 @@ hex `1`s. Here's an updated definition of `hex-str->base58-str`:
 
 ```racket
 (define (num->base58-str n)
-  (if (zero? n) "" (num->base58-str.v0 n)))
+  (if (zero? n) "" (num->base58-strv0 n)))
 																			 
 (define (hex-str->base58-str hstr)
   (define num-leading-ones (quotient (count-leading-zeros hstr) 2))
   (define leading-ones (make-string num-leading-ones #\1))
-  (string-append leading-ones (hex-str->base58-str.v0 hstr)))
+  (string-append leading-ones (hex-str->base58-strv0 hstr)))
 ```  
 
 Trying our example again yields the expected result:

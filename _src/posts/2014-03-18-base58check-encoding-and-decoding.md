@@ -200,6 +200,8 @@ And trying it on our example returns the expected result:
     $ racket
     Welcome to Racket v6.0.0.3.
     -> (require "base58.rkt")
-    -> (base58-str->hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
+    -> (hex-str->base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
+    "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
+	-> (base58-str->hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
     "00010966776006953D5567439E5E39F86A0D273BEED61967F6"
    

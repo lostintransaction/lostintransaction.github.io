@@ -134,6 +134,7 @@ leading `1` character to the base-58 address for each leading zero
 *byte* in the hex string, ie, one leading base-58 `1` per two leading
 hex `1`s. Here's an updated definition of `hex-str->base58-str`:
 
+
 ```racket
 (define (num->base58-str n)
   (if (zero? n) "" (num->base58-str.v0 n)))
@@ -142,6 +143,7 @@ hex `1`s. Here's an updated definition of `hex-str->base58-str`:
   (define leading-ones (make-string num-leading-ones #\1))
   (string-append leading-ones (hex-str->base58-str.v0 hstr)))
 ```  
+
 
 Trying our example again yields the expected result:
 

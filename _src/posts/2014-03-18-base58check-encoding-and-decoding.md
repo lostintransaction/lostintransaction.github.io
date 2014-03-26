@@ -158,39 +158,6 @@ Trying our example again yields the expected result:
 To convert from base-58 to hex, we do the reverse of the above steps:
 convert from base-58 to base-10, and then from base-10 to hex.
 
-```racket
-(define (num->hex-char n)
-  (when (or (< n 0) (>= n 16))
-    (error 'num->hex-char "cannot convert to hex: ~a\n" n))
-  (string-ref HEX-CHARS n))
-(define (num->hex-str n)
-  (if (zero? n) "" 
-      (list->string
-	  (reverse
-	    (let loop ([n n])
-		  (define-values (q r) (quotient/remainder n 16))
-		  (if (zero? q)
-              (list (num->hex-char r))
-			  (cons (num->hex-char r) (loop q))))))))
-																			 
-(define (base58-str->num str)
-  (for/fold ([num 0]) ([d str]) (+ (* 58 num) (base58-char->num d))))
-								
-(define (count-leading ch str)
-  (for/sum ([c str] #:break (not (eq? c ch))) 1))
-  
-(define (base58-str->hex-str b58str)
-  (define hex-str (base58-str->hex-str/num b58str))
-  (define zeros-from-b58str (* 2 (count-leading #\1 b58str)))
-  (define num-leading-zeros
-  (if (even? (string-length hex-str))
-      zeros-from-b58str
-	  (add1 zeros-from-b58str))) ; to make hex str byte aligned
-  (define leading-zeros-str (make-string num-leading-zeros #\0))
-  (string-append leading-zeros-str hex-str))
-(define (base58-str->hex-str/num b58str)
-  (num->hex-str (base58-str->num b58str)))
-```
 
 And trying it on our example returns the expected result:
 

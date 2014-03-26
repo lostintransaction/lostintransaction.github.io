@@ -75,28 +75,66 @@ Welcome to Racket v6.0.0.3.
 "6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;We got the wrong answer! What happened? It turns out that the leading zeros matter when a hex string is viewed as a Bitcoin address. But when we converted to base&amp;ndash;10, the leading zeros got lost since they don&amp;rsquo;t matter for numbers.&lt;/p&gt;
  &lt;p&gt;To complete the base&amp;ndash;58 conversion, we count the number of leading zeros in the hex string. The Bitcoin reference implementation adds one leading &lt;code&gt;1&lt;/code&gt; character to the base&amp;ndash;58 address for each leading zero &lt;em&gt;byte&lt;/em&gt; in the hex string, ie, one leading base&amp;ndash;58 &lt;code&gt;1&lt;/code&gt; per two leading hex &lt;code&gt;1&lt;/code&gt;s. Here&amp;rsquo;s an updated definition of &lt;code&gt;hex-str-&amp;gt;base58-str&lt;/code&gt;:&lt;/p&gt;
- &lt;p&gt;&lt;code&gt;racket
-(define (num-&amp;gt;base58-str n)
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (num-&amp;gt;base58-str n)
   (if (zero? n) "" (num-&amp;gt;base58-str.v0 n)))
 (define (hex-str-&amp;gt;base58-str hstr)
   (define num-leading-ones (quotient (count-leading-zeros hstr) 2))
   (define leading-ones (make-string num-leading-ones #\1))
-  (string-append leading-ones (hex-str-&amp;gt;base58-str.v0 hstr)))&lt;/code&gt;&lt;/p&gt;
- &lt;p&gt;Trying our example again yields the expected result:&lt;/p&gt;
- &lt;pre&gt;&lt;code&gt;$ racket
-Welcome to Racket v6.0.0.3.
--&amp;gt; (require "base58.rkt")
--&amp;gt; (hex-str-&amp;gt;base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
-"16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"&lt;/code&gt;&lt;/pre&gt;
- &lt;h3 id="decoding"&gt;Decoding&lt;/h3&gt;
- &lt;p&gt;To convert from base&amp;ndash;58 to hex, we do the reverse of the above steps: convert from base&amp;ndash;58 to base&amp;ndash;10, and then from base&amp;ndash;10 to hex.&lt;/p&gt;
+  (string-append leading-ones (hex-str-&amp;gt;base58-str.v0 hstr)))
+```  
+
+
+Trying our example again yields the expected result:
+
+    $ racket
+ Welcome to Racket v6.0.0.3.
+    -&amp;gt; (require "base58.rkt")
+  -&amp;gt; (hex-str-&amp;gt;base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
+  "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
+
+### Decoding ###
+
+To convert from base-58 to hex, we do the reverse of the above steps:
+convert from base-58 to base-10, and then from base-10 to hex.
+
+```racket
+(define (num-&amp;gt;hex-char n)
+  (when (or (&amp;lt; n 0) (&amp;gt;= n 16))
+    (error 'num-&amp;gt;hex-char "cannot convert to hex: ~a\n" n))
+  (string-ref HEX-CHARS n))
+(define (num-&amp;gt;hex-str n)
+  (if (zero? n) "" 
+      (list-&amp;gt;string
+     (reverse
+     (let loop ([n n])
+        (define-values (q r) (quotient/remainder n 16))
+        (if (zero? q)
+              (list (num-&amp;gt;hex-char r))
+           (cons (num-&amp;gt;hex-char r) (loop q))))))))
+                                                                           
+(define (base58-str-&amp;gt;num str)
+  (for/fold ([num 0]) ([d str]) (+ (* 58 num) (base58-char-&amp;gt;num d))))
+                              
+(define (count-leading ch str)
+  (for/sum ([c str] #:break (not (eq? c ch))) 1))
+  
+(define (base58-str-&amp;gt;hex-str b58str)
+  (define hex-str (base58-str-&amp;gt;hex-str/num b58str))
+  (define zeros-from-b58str (* 2 (count-leading #\1 b58str)))
+  (define num-leading-zeros
+  (if (even? (string-length hex-str))
+      zeros-from-b58str
+    (add1 zeros-from-b58str))) ; to make hex str byte aligned
+  (define leading-zeros-str (make-string num-leading-zeros #\0))
+  (string-append leading-zeros-str hex-str))
+(define (base58-str-&amp;gt;hex-str/num b58str)
+  (num-&amp;gt;hex-str (base58-str-&amp;gt;num b58str)))&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;And trying it on our example returns the expected result:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
 -&amp;gt; (require "base58.rkt")
 -&amp;gt; (base58-str-&amp;gt;hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
-"00010966776006953D5567439E5E39F86A0D273BEED61967F6"&lt;/code&gt;&lt;/pre&gt;&lt;!--TODO:
-1. hex string must be byte-aligned (ie even number of digits)--&gt;&lt;/html&gt;</content></entry>
+"00010966776006953D5567439E5E39F86A0D273BEED61967F6"&lt;/code&gt;&lt;/pre&gt;&lt;/html&gt;</content></entry>
  <entry>
   <title type="text">Adding OpenSSL bindings to Racket via its FFI</title>
   <link rel="alternate" href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/?utm_source=Racket&amp;utm_medium=Atom" />

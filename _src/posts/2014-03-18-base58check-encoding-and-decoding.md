@@ -113,7 +113,7 @@ list of base-58 digits. The digits are computed in reverse order so
 they are reversed before converting back to a string.
 
 Let's test our code. Following
-[the same example from the Bitcoin wiki][bwiki:addr], the hex address
+[the same example from the Bitcoin wiki], the hex address
 `00010966776006953D5567439E5E39F86A0D273BEED61967F6` in Base58Check is
 `16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM`.
 
@@ -128,6 +128,11 @@ zeros matter when a hex string is viewed as a Bitcoin address. But
 when we converted to base-10, the leading zeros got lost since they
 don't matter for numbers.
 
+To complete the base-58 conversion, we count the number of leading
+zeros in the hex string. The Bitcoin reference implementation adds one
+leading `1` character to the base-58 address for each leading zero
+*byte* in the hex string, ie, one leading base-58 `1` per two leading
+hex `1`s. Here's an updated definition of `hex-str->base58-str`:
 
 ```racket
 (define (num->base58-str n)

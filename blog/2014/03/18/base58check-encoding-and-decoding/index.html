@@ -276,7 +276,7 @@ Welcome to Racket v6.0.0.3.
  <p>The <code>hex-str-&gt;base58-str.v0</code> function starts by converting the hex string to a base&ndash;10 number using the previously defined <code>hex-str-&gt;num</code> function. It then calls <code>num-&gt;base58-str.v0</code> to convert the base&ndash;10 number to the base&ndash;58 digits. The <code>num-&gt;base58-str.v0</code> function repeatedly performs <code>modulo 58</code> and integer division operations in a loop. The <code>modulo</code> operation computes the next base&ndash;58 digit and the division computes the number to use in the next iteration. The <code>quotient/remainder</code> Racket function conveniently performs both the modulo and division in one step. The end result of the <code>loop</code> is a list of base&ndash;58 digits. The digits are computed in reverse order so they are reversed before converting back to a string.</p>
 
 
- <p>Let&rsquo;s test our code. Following <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses">the same example from the Bitcoin wiki</a>, the hex address <code>00010966776006953D5567439E5E39F86A0D273BEED61967F6</code> in Base58Check is <code>16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM</code>.</p>
+ <p>Let&rsquo;s test our code. Following [the same example from the Bitcoin wiki], the hex address <code>00010966776006953D5567439E5E39F86A0D273BEED61967F6</code> in Base58Check is <code>16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM</code>.</p>
 
 
  <pre><code>$ racket
@@ -287,6 +287,9 @@ Welcome to Racket v6.0.0.3.
 
 
  <p>We got the wrong answer! What happened? It turns out that the leading zeros matter when a hex string is viewed as a Bitcoin address. But when we converted to base&ndash;10, the leading zeros got lost since they don&rsquo;t matter for numbers.</p>
+
+
+ <p>To complete the base&ndash;58 conversion, we count the number of leading zeros in the hex string. The Bitcoin reference implementation adds one leading <code>1</code> character to the base&ndash;58 address for each leading zero <em>byte</em> in the hex string, ie, one leading base&ndash;58 <code>1</code> per two leading hex <code>1</code>s. Here&rsquo;s an updated definition of <code>hex-str-&gt;base58-str</code>:</p>
 
 
  <div class="brush: racket">

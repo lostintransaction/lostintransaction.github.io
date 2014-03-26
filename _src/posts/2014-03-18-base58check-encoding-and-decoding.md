@@ -155,10 +155,11 @@ Trying our example again yields the expected result:
 
 ### Decoding ###
 
-To convert from base-58 to hex, we do the reverse of the above steps:
-convert from base-58 to base-10, and then from base-10 to hex.
+To convert from base-58 back to hex, we reverse the above steps. We
+first convert from base-58 to base-10 and then from base-10 to hex.
 
 ```racket
+(define HEX-CHARS "0123456789ABCDEF")
 (define (num->hex-char n)
   (when (or (< n 0) (>= n 16))
     (error 'num->hex-char "cannot convert to hex: ~a\n" n))

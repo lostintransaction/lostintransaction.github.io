@@ -343,7 +343,7 @@ Welcome to Racket v6.0.0.3.
  <h3 id="decoding">Decoding</h3>
 
 
- <p>To convert from base&ndash;58 to hex, we do the reverse of the above steps: convert from base&ndash;58 to base&ndash;10, and then from base&ndash;10 to hex.</p>
+ <p>To convert from base&ndash;58 back to hex, we reverse the above steps. We first convert from base&ndash;58 to base&ndash;10 and then from base&ndash;10 to hex.</p>
 
 
  <div class="brush: racket">
@@ -388,20 +388,22 @@ Welcome to Racket v6.0.0.3.
 28
 29
 30
-31</pre></div></td>
+31
+32</pre></div></td>
 
      <td class="code">
 
       <div class="source">
 
-       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">num-&gt;hex-char</span> <span class="nv">n</span><span class="p">)</span>
+       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">HEX-CHARS</span> <span class="s">"0123456789ABCDEF"</span><span class="p">)</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">num-&gt;hex-char</span> <span class="nv">n</span><span class="p">)</span>
   <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/when_unless.html#(form._((lib._racket/private/letstx-scheme..rkt)._when))" style="color: inherit">when</a> </span><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3c))" style="color: inherit">&lt;</a> </span><span class="nv">n</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3e~3d))" style="color: inherit">&gt;=</a> </span><span class="nv">n</span> <span class="mi">16</span><span class="p">))</span>
     <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/exns.html#(def._((quote._~23~25kernel)._error))" style="color: inherit">error</a> </span><span class="ss">'num-&gt;hex-char</span> <span class="s">"cannot <a href="http://docs.racket-lang.org/file/convertible.html#(def._((lib._file/convertible..rkt)._convert))" style="color: inherit">convert</a> to hex: ~a\n"</span> <span class="nv">n</span><span class="p">))</span>
   <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-ref))" style="color: inherit">string-ref</a> </span><span class="nv">HEX-CHARS</span> <span class="nv">n</span><span class="p">))</span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">num-&gt;hex-str</span> <span class="nv">n</span><span class="p">)</span>
   <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((quote._~23~25kernel)._if))" style="color: inherit">if</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/number-types.html#(def._((quote._~23~25kernel)._zero~3f))" style="color: inherit">zero?</a> </span><span class="nv">n</span><span class="p">)</span> <span class="s">""</span> 
       <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._list-~3estring))" style="color: inherit">list-&gt;string</a></span>
-    <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((lib._racket/private/list..rkt)._reverse))" style="color: inherit">reverse</a></span>
+      <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((lib._racket/private/list..rkt)._reverse))" style="color: inherit">reverse</a></span>
      <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/let.html#(form._((lib._racket/private/letstx-scheme..rkt)._let))" style="color: inherit">let</a> </span><span class="nv">loop</span> <span class="p">([</span><span class="nf">n</span> <span class="nv">n</span><span class="p">])</span>
         <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((quote._~23~25kernel)._define-values))" style="color: inherit">define-values</a> </span><span class="p">(</span><span class="nf">q</span> <span class="nv">r</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._quotient/remainder))" style="color: inherit">quotient/remainder</a> </span><span class="nv">n</span> <span class="mi">16</span><span class="p">))</span>
         <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((quote._~23~25kernel)._if))" style="color: inherit">if</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/number-types.html#(def._((quote._~23~25kernel)._zero~3f))" style="color: inherit">zero?</a> </span><span class="nv">q</span><span class="p">)</span>

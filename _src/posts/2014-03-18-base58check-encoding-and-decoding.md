@@ -174,6 +174,8 @@ first convert from base-58 to base-10 and then from base-10 to hex.
               (list (num->hex-char r))
 			  (cons (num->hex-char r) (loop q))))))))
 																			 
+(define (base58-char->num c)
+  (for/last ([c58 (in-string BASE58-CHARS)] [n 58] #:final (char=? c c58)) n))
 (define (base58-str->num str)
   (for/fold ([num 0]) ([d str]) (+ (* 58 num) (base58-char->num d))))
 								

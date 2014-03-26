@@ -389,7 +389,9 @@ Welcome to Racket v6.0.0.3.
 29
 30
 31
-32</pre></div></td>
+32
+33
+34</pre></div></td>
 
      <td class="code">
 
@@ -410,6 +412,8 @@ Welcome to Racket v6.0.0.3.
               <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((quote._~23~25kernel)._list))" style="color: inherit">list</a> </span><span class="p">(</span><span class="nf">num-&gt;hex-char</span> <span class="nv">r</span><span class="p">))</span>
            <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((quote._~23~25kernel)._cons))" style="color: inherit">cons</a> </span><span class="p">(</span><span class="nf">num-&gt;hex-char</span> <span class="nv">r</span><span class="p">)</span> <span class="p">(</span><span class="nf">loop</span> <span class="nv">q</span><span class="p">))))))))</span>
 
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">base58-char-&gt;num</span> <span class="nv">c</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/for.html#(form._((lib._racket/private/base..rkt)._for/last))" style="color: inherit">for/last</a></span> <span class="p">([</span><span class="nf">c58</span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/sequences.html#(def._((lib._racket/private/base..rkt)._in-string))" style="color: inherit">in-string</a></span> <span class="nv">BASE58-CHARS</span><span class="p">)]</span> <span class="p">[</span><span class="nf">n</span> <span class="mi">58</span><span class="p">]</span> <span class="kd">#:final</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/characters.html#(def._((quote._~23~25kernel)._char~3d~3f))" style="color: inherit">char=?</a> </span><span class="nv">c</span> <span class="nv">c58</span><span class="p">))</span> <span class="nv">n</span><span class="p">))</span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">base58-str-&gt;num</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">)</span>
   <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/for.html#(form._((lib._racket/private/base..rkt)._for/fold))" style="color: inherit">for/fold</a></span> <span class="p">([</span><span class="nf">num</span> <span class="mi">0</span><span class="p">])</span> <span class="p">([</span><span class="nf">d</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">])</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._+))" style="color: inherit">+</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._*))" style="color: inherit">*</a> </span><span class="mi">58</span> <span class="nv">num</span><span class="p">)</span> <span class="p">(</span><span class="nf">base58-char-&gt;num</span> <span class="nv">d</span><span class="p">))))</span>
 

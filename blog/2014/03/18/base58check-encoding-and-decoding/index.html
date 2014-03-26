@@ -300,13 +300,12 @@ Welcome to Racket v6.0.0.3.
   (define num-leading-ones (quotient (count-leading-zeros hstr) 2))
   (define leading-ones (make-string num-leading-ones #\1))
   (string-append leading-ones (hex-str-&gt;base58-str.v0 hstr)))
-```  
-
+``` 
 
 Trying our example again yields the expected result:
 
     $ racket
- Welcome to Racket v6.0.0.3.
+   Welcome to Racket v6.0.0.3.
     -&gt; (require "base58.rkt")
   -&gt; (hex-str-&gt;base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
   "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"

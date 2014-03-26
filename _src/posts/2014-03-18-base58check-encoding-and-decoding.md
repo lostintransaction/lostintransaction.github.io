@@ -160,6 +160,7 @@ first convert from base-58 to base-10 and then from base-10 to hex.
 
 ```racket
 (define HEX-CHARS "0123456789ABCDEF")
+
 (define (num->hex-char n)
   (when (or (< n 0) (>= n 16))
     (error 'num->hex-char "cannot convert to hex: ~a\n" n))
@@ -167,12 +168,12 @@ first convert from base-58 to base-10 and then from base-10 to hex.
 (define (num->hex-str n)
   (if (zero? n) "" 
       (list->string
-	  (reverse
-	    (let loop ([n n])
-		  (define-values (q r) (quotient/remainder n 16))
-		  (if (zero? q)
-              (list (num->hex-char r))
-			  (cons (num->hex-char r) (loop q))))))))
+        (reverse
+          (let loop ([n n])
+            (define-values (q r) (quotient/remainder n 16))
+			(if (zero? q)
+                (list (num->hex-char r))
+				(cons (num->hex-char r) (loop q))))))))
 																			 
 (define (base58-char->num c)
   (for/last ([c58 (in-string BASE58-CHARS)] [n 58] #:final (char=? c c58)) n))
@@ -205,3 +206,4 @@ And trying it on our example returns the expected result:
 	-> (base58-str->hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
     "00010966776006953D5567439E5E39F86A0D273BEED61967F6"
    
+<!--todo: explain decode code-->

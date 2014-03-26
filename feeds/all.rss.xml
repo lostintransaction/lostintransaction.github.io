@@ -91,6 +91,7 @@ Welcome to Racket v6.0.0.3.
  &lt;h3 id="decoding"&gt;Decoding&lt;/h3&gt;
  &lt;p&gt;To convert from base&amp;ndash;58 back to hex, we reverse the above steps. We first convert from base&amp;ndash;58 to base&amp;ndash;10 and then from base&amp;ndash;10 to hex.&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define HEX-CHARS "0123456789ABCDEF")
+
 (define (num-&amp;gt;hex-char n)
   (when (or (&amp;lt; n 0) (&amp;gt;= n 16))
     (error 'num-&amp;gt;hex-char "cannot convert to hex: ~a\n" n))
@@ -98,13 +99,13 @@ Welcome to Racket v6.0.0.3.
 (define (num-&amp;gt;hex-str n)
   (if (zero? n) "" 
       (list-&amp;gt;string
-      (reverse
-     (let loop ([n n])
-        (define-values (q r) (quotient/remainder n 16))
-        (if (zero? q)
-              (list (num-&amp;gt;hex-char r))
-           (cons (num-&amp;gt;hex-char r) (loop q))))))))
-                                                                           
+        (reverse
+          (let loop ([n n])
+            (define-values (q r) (quotient/remainder n 16))
+          (if (zero? q)
+                (list (num-&amp;gt;hex-char r))
+             (cons (num-&amp;gt;hex-char r) (loop q))))))))
+                                                                             
 (define (base58-char-&amp;gt;num c)
   (for/last ([c58 (in-string BASE58-CHARS)] [n 58] #:final (char=? c c58)) n))
 (define (base58-str-&amp;gt;num str)
@@ -131,7 +132,7 @@ Welcome to Racket v6.0.0.3.
 -&amp;gt; (hex-str-&amp;gt;base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
 "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
 -&amp;gt; (base58-str-&amp;gt;hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
-"00010966776006953D5567439E5E39F86A0D273BEED61967F6"&lt;/code&gt;&lt;/pre&gt;&lt;/html&gt;</description></item>
+"00010966776006953D5567439E5E39F86A0D273BEED61967F6"&lt;/code&gt;&lt;/pre&gt;&lt;!--todo: explain decode code--&gt;&lt;/html&gt;</description></item>
   <item>
    <title>Adding OpenSSL bindings to Racket via its FFI</title>
    <link>http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/?utm_source=all&amp;utm_medium=RSS</link>

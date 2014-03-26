@@ -66,6 +66,10 @@
 
 <li><a href="/tags/Andreas-Antonopoulos.html">Andreas Antonopoulos</a></li>
 
+<li><a href="/tags/Base58Check.html">Base58Check</a></li>
+
+<li><a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a></li>
+
 <li><a href="/tags/C.html">C</a></li>
 
 <li><a href="/tags/elliptic-curve.html">elliptic curve</a></li>
@@ -122,10 +126,10 @@
   </header>
 
 
- <p>C programming has its uses but it&rsquo;s also sometimes nice to program with a higher-level language where you don&rsquo;t need to constantly worry about things like overflow or freeing memory. I enjoy using <a href="http://racket-lang.org">Racket</a>, a LISP dialect, when experimenting with Bitcoin.</p>
+ <p>C is great for many programming tasks but sometimes it&rsquo;s nice to use a higher-level language that automatically handles things like arbitrary-precision arithmetic and memory management. <a href="http://racket-lang.org">Racket</a>, a LISP dialect, has linguistic support for these features (and more) and I enjoy using it to experiment with Bitcoin.</p>
 
 
- <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto librar.It does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
+ <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto library. It does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
 
 
  <footer class="read-more"><a href="/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/">&hellip;more&hellip;</a></footer>

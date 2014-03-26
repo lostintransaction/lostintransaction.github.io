@@ -75,7 +75,7 @@ the second argument is the library value that we created earlier with
 `ffi-lib`. The third argument is the type, which specifies how to
 mediate between Racket and C values. [`_fun`][racket:fun] is the
 function type and in this case the function has three arguments
-(conventionally delimited with brackets).
+(each delimited with brackets by convention).
 
 Examining the types of the arguments:
 
@@ -84,12 +84,13 @@ bytes. Accordingly, we give `get-ffi-obj` a `_bytes` type for this
 argument.
 
 2. The second argument is the length of the input byte array. The `=`
-tells Racket how to calculate this argument automatically. Thus a
-caller of the `sha256` Racket function need not provide this argument.
+and the following expression describe how to calculate this argument
+automatically. Thus a caller of the `sha256` Racket function need not
+provide this argument.
 
 3. The third argument is the output byte array. The `o` indicates a
 return pointer and is followed by the expected length of the output
-array, which should be 32 bytes. We define a constant
+array, which should be 32 bytes here. We define a constant
 `SHA256-DIGEST-LEN` which is analogous to
 [the `SHA256_DIGEST_LENGTH` constant][openssl:sha256const] in the C
 library.

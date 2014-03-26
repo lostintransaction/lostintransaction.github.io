@@ -4,10 +4,11 @@
 
 In previous posts, we looked at
 [computing a Bitcoin public key from a private key][LiT:pubfrompriv],
-and then [computing a Bitcoin address from a public key]. However, our
+and then
+[computing a Bitcoin address from a public key][LiT:ffi]. However, our
 experiments dealt with hexadecimal representations of keys and
-addresses, which is not the representation familiar to the public. In
-practice, Bitcoin addresses use the more human-readable
+addresses, which is not the representation familiar to most Bitcoin
+users. In practice, Bitcoin addresses use the more human-readable
 [Base58Check][bwiki:b58] encoding, which we explore in this post.
 
 [LiT:pubfrompriv]: http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/ "Deriving a Bitcoin Public Key From a Private Key"
@@ -29,19 +30,17 @@ Here is the rationale for choosing Base58Check encoding, taken from
 [bitcoinsrc]: https://github.com/bitcoin/bitcoin/blob/f76c122e2eac8ef66f69d142231bd33c88a24c50/src/base58.h#L7-L12 "src/base58.h"
 
 Basically, addresses should be easy for humans to read and
-handle. Let's implement Base58Check encoding and decoding. Our code
-will resemble the Bitcoin C++ code, but we will instead use
-[Racket](http://racket-lang.org), so we can avoid the hassle of
-`BIGNUM`s.
+handle. Let's implement Base58Check encoding and decoding. We use
+[Racket](http://racket-lang.org) to avoid the hassle of `BIGNUM`s.
 
 ### Encoding ###
 
 To convert from hexadecimal to Base58Check, we repeat `modulo 58` and
-division operations on the hex string until we reach
-zero. Unfortunately, Racket (or any other language I know) has no
-built-in modulo and division operations for hex strings. It's much
-easier to first convert to a base-10 number. Here's a Racket function
-`hex-str->num` that converts from hex to base-10.
+division operations on the hex string until we reach zero. Racket (nor
+any other language) does not come with modulo and division operations
+on hex strings, however, so it's much easier to convert to a base-10
+number first. Here's a Racket function `hex-str->num` that converts
+from hex to base-10.
 
 ```racket
 (define ASCII-ZERO (char->integer #\0))
@@ -125,12 +124,16 @@ we expect the hex address
 	"6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
 
 We got the wrong answer! What happened? It turns out that the leading
-zeros in the hex address have meaning, but these zeros get lost when
-we converted the hex string to a base-10 number. To get the proper
-base-58 address, we count the number of leading zeros in the hex
-string. The rule is that the base-58 address should have one leading
-"1" character per leading zero *byte*, ie, one leading base-58 "1" per
-two leading hex "0"s. Here's an updated `hex-str->base58-str` function definition:
+zeros matter when a hex string is viewed as a Bitcoin address, but not
+when the hex string is viewed as a number. When we converted from hex
+to base-10, we were treating the hex string as a number and the
+leading zeros got lost. 
+
+To complete the base-58 conversion, we count the number of leading
+zeros in the hex string. The Bitcoin reference implementation adds one
+leading `1` character to the base-58 address for each leading zero
+*byte* in the hex string, ie, one leading base-58 `1` per two leading
+hex "0"s. Here's an updated `hex-str->base58-str` function definition:
 
 ```racket
 (define (num->base58-str n)
@@ -155,7 +158,47 @@ Trying our example again yields the expected result:
 To convert from base-58 to hex, we do the reverse of the above steps:
 convert from base-58 to base-10, and then from base-10 to hex.
 
+```racket
+(define (num->hex-char n)
+  (when (or (< n 0) (>= n 16))
+    (error 'num->hex-char "cannot convert to hex: ~a\n" n))
+  (string-ref HEX-CHARS n))
+(define (num->hex-str n)
+  (if (zero? n) "" 
+      (list->string
+	  (reverse
+	    (let loop ([n n])
+		  (define-values (q r) (quotient/remainder n 16))
+		  (if (zero? q)
+              (list (num->hex-char r))
+			  (cons (num->hex-char r) (loop q))))))))
+																			 
+(define (base58-str->num str)
+  (for/fold ([num 0]) ([d str]) (+ (* 58 num) (base58-char->num d))))
+								
+(define (count-leading ch str)
+  (for/sum ([c str] #:break (not (eq? c ch))) 1))
+  
+(define (base58-str->hex-str b58str)
+  (define hex-str (base58-str->hex-str/num b58str))
+  (define zeros-from-b58str (* 2 (count-leading #\1 b58str)))
+  (define num-leading-zeros
+  (if (even? (string-length hex-str))
+      zeros-from-b58str
+	  (add1 zeros-from-b58str))) ; to make hex str byte aligned
+  (define leading-zeros-str (make-string num-leading-zeros #\0))
+  (string-append leading-zeros-str hex-str))
+(define (base58-str->hex-str/num b58str)
+  (num->hex-str (base58-str->num b58str)))
+```
 
-TODO:
-1. try example -- wrong
-2. hex string must be byte-aligned (ie even number of digits)
+And trying it on our example returns the expected result:
+
+    $ racket
+    Welcome to Racket v6.0.0.3.
+    -> (require "base58.rkt")
+    -> (base58-str->hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
+    "00010966776006953D5567439E5E39F86A0D273BEED61967F6"
+   
+<!--TODO:
+1. hex string must be byte-aligned (ie even number of digits)-->

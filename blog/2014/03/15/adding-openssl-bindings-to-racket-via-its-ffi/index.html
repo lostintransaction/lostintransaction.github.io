@@ -241,7 +241,7 @@
 </div>
 
 
- <p>The first argument to <code>get-ffi-obj</code> is the name of the C function and the second argument is the library value that we created earlier with <code>ffi-lib</code>. The third argument is the type, which specifies how to mediate between Racket and C values. <a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"><code>_fun</code></a> is the function type and in this case the function has three arguments (conventionally delimited with brackets).</p>
+ <p>The first argument to <code>get-ffi-obj</code> is the name of the C function and the second argument is the library value that we created earlier with <code>ffi-lib</code>. The third argument is the type, which specifies how to mediate between Racket and C values. <a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"><code>_fun</code></a> is the function type and in this case the function has three arguments (each delimited with brackets by convention).</p>
 
 
  <p>Examining the types of the arguments:</p>
@@ -255,11 +255,11 @@
 
   <li>
 
-   <p>The second argument is the length of the input byte array. The <code>=</code> tells Racket how to calculate this argument automatically. Thus a caller of the <code>sha256</code> Racket function need not provide this argument.</p></li>
+   <p>The second argument is the length of the input byte array. The <code>=</code> and the following expression describe how to calculate this argument automatically. Thus a caller of the <code>sha256</code> Racket function need not provide this argument.</p></li>
 
   <li>
 
-   <p>The third argument is the output byte array. The <code>o</code> indicates a return pointer and is followed by the expected length of the output array, which should be 32 bytes. We define a constant <code>SHA256-DIGEST-LEN</code> which is analogous to <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133" title="OpenSSL source: crypto/sha/sha.h">the <code>SHA256_DIGEST_LENGTH</code> constant</a> in the C library.</p></li></ol>
+   <p>The third argument is the output byte array. The <code>o</code> indicates a return pointer and is followed by the expected length of the output array, which should be 32 bytes here. We define a constant <code>SHA256-DIGEST-LEN</code> which is analogous to <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133" title="OpenSSL source: crypto/sha/sha.h">the <code>SHA256_DIGEST_LENGTH</code> constant</a> in the C library.</p></li></ol>
 
 
  <h3 id="all-together">All Together</h3>

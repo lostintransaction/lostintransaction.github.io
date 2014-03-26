@@ -6,7 +6,7 @@
     <title>Lost in Transaction: A neophyte explores Bitcoin (page 1)</title>
     <meta name="description" content="Lost in Transaction: A neophyte explores Bitcoin (page 1)">
     <meta name="author"      content="The Unknown Blogger">
-    <meta name="keywords"    content="FFI, Andreas Antonopoulos, public key, signatures, RIPEMD, private key, elliptic curve, Racket, OpenSSL, hashes, C, SHA, MultiBit">
+    <meta name="keywords"    content="FFI, Andreas Antonopoulos, public key, Base58Check, signatures, RIPEMD, private key, elliptic curve, Racket, Bitcoin addresses, OpenSSL, hashes, C, SHA, MultiBit">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
     <link rel="icon"      href="/favicon.ico">
     <link rel="canonical" href="http://www.lostintransaction.com/index.html">
@@ -66,6 +66,10 @@
 
 <li><a href="/tags/Andreas-Antonopoulos.html">Andreas Antonopoulos</a></li>
 
+<li><a href="/tags/Base58Check.html">Base58Check</a></li>
+
+<li><a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a></li>
+
 <li><a href="/tags/C.html">C</a></li>
 
 <li><a href="/tags/elliptic-curve.html">elliptic curve</a></li>
@@ -120,6 +124,23 @@
 
  <header>
 
+  <h2><a href="/blog/2014/03/18/base58check-encoding-and-decoding/">Base58Check Encoding and Decoding</a></h2>
+
+  <p class="date-and-tags">
+   <time datetime="2014-03-18" pubdate="true">2014-03-18</time> :: <span class="tags"><a href="/tags/Base58Check.html">Base58Check</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a></span></p>
+  </header>
+
+
+ <p>In previous posts, we looked at <a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key">computing a Bitcoin public key from a private key</a>, and then <a href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/" title="Adding OpenSSL bindings to Racket via its FFI">computing a Bitcoin address from a public key</a>. However, our experiments dealt with hexadecimal representations of keys and addresses, which is not the representation familiar to most Bitcoin users. In practice, Bitcoin addresses use the more human-readable <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Base58Check encoding">Base58Check</a> encoding, which we explore in this post.</p>
+
+
+ <footer class="read-more"><a href="/blog/2014/03/18/base58check-encoding-and-decoding/">&hellip;more&hellip;</a></footer>
+</article>
+
+<article>
+
+ <header>
+
   <h2><a href="/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/">Adding OpenSSL bindings to Racket via its FFI</a></h2>
 
   <p class="date-and-tags">
@@ -127,10 +148,10 @@
   </header>
 
 
- <p>C programming has its uses but it&rsquo;s also sometimes nice to program with a higher-level language where you don&rsquo;t need to constantly worry about things like overflow or freeing memory. I enjoy using <a href="http://racket-lang.org">Racket</a>, a LISP dialect, when experimenting with Bitcoin.</p>
+ <p>C is great for many programming tasks but sometimes it&rsquo;s nice to use a higher-level language that automatically handles things like arbitrary-precision arithmetic and memory management. <a href="http://racket-lang.org">Racket</a>, a LISP dialect, has linguistic support for these features (and more) and I enjoy using it to experiment with Bitcoin.</p>
 
 
- <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto librar.It does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
+ <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto library. It does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
 
 
  <footer class="read-more"><a href="/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/">&hellip;more&hellip;</a></footer>

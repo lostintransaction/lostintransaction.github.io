@@ -3,13 +3,13 @@
   <head>
 
     <meta charset="utf-8">
-    <title>Posts tagged 'elliptic curve' (page 1)</title>
-    <meta name="description" content="Posts tagged 'elliptic curve' (page 1)">
+    <title>Posts tagged 'Bitcoin addresses' (page 1)</title>
+    <meta name="description" content="Posts tagged 'Bitcoin addresses' (page 1)">
     <meta name="author"      content="The Unknown Blogger">
-    <meta name="keywords"    content="elliptic curve">
+    <meta name="keywords"    content="Bitcoin addresses">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
     <link rel="icon"      href="/favicon.ico">
-    <link rel="canonical" href="http://www.lostintransaction.com/tags/elliptic-curve.html">
+    <link rel="canonical" href="http://www.lostintransaction.com/tags/Bitcoin-addresses.html">
 
 
     <!-- CSS -->
@@ -19,9 +19,9 @@
     <link rel="stylesheet" type="text/css" href="/css/custom.css">
     <!-- Feeds -->
     <link ref="alternate" type="application/atom+xml"
-          href="/feeds/elliptic-curve.atom.xml" title="Atom Feed">
+          href="/feeds/Bitcoin-addresses.atom.xml" title="Atom Feed">
     <link ref="alternate" type="application/rss+xml"
-          href="/feeds/elliptic-curve.rss.xml" title="RSS Feed">
+          href="/feeds/Bitcoin-addresses.rss.xml" title="RSS Feed">
     <!-- JS -->
     <script type="text/javascript">
       var _gaq = _gaq || [];
@@ -98,8 +98,8 @@
             <li>
               <a href="/About.html">About</a>
             </li> 
-            <li><a href="/feeds/elliptic-curve.atom.xml">Atom</a></li>
-            <li><a href="/feeds/elliptic-curve.rss.xml">RSS</a></li>
+            <li><a href="/feeds/Bitcoin-addresses.atom.xml">Atom</a></li>
+            <li><a href="/feeds/Bitcoin-addresses.rss.xml">RSS</a></li>
           </ul>
         </div>
       </div>
@@ -112,31 +112,31 @@
 
 
 
-          <h1>Posts tagged <em>elliptic curve</em></h1>
+          <h1>Posts tagged <em>Bitcoin addresses</em></h1>
 
 
 <article>
 
  <header>
 
-  <h2><a href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">Deriving a Bitcoin Public Key From a Private Key</a></h2>
+  <h2><a href="/blog/2014/03/18/base58check-encoding-and-decoding/">Base58Check Encoding and Decoding</a></h2>
 
   <p class="date-and-tags">
-   <time datetime="2014-03-14" pubdate="true">2014-03-14</time> :: <span class="tags"><a href="/tags/public-key.html">public key</a>, <a href="/tags/private-key.html">private key</a>, <a href="/tags/elliptic-curve.html">elliptic curve</a>, <a href="/tags/OpenSSL.html">OpenSSL</a>, <a href="/tags/C.html">C</a></span></p>
+   <time datetime="2014-03-18" pubdate="true">2014-03-18</time> :: <span class="tags"><a href="/tags/Base58Check.html">Base58Check</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a></span></p>
   </header>
 
 
- <p>I&rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I know they are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but they leave out some details. I wanted to experiment for myself, so this post describes how to derive a public key from a private key with runnable C code.</p>
+ <p>In previous posts, we looked at <a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key">computing a Bitcoin public key from a private key</a>, and then <a href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/" title="Adding OpenSSL bindings to Racket via its FFI">computing a Bitcoin address from a public key</a>. However, our experiments dealt with hexadecimal representations of keys and addresses, which is not the representation familiar to most Bitcoin users. In practice, Bitcoin addresses use the more human-readable <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Base58Check encoding">Base58Check</a> encoding, which we explore in this post.</p>
 
 
- <footer class="read-more"><a href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">&hellip;more&hellip;</a></footer>
+ <footer class="read-more"><a href="/blog/2014/03/18/base58check-encoding-and-decoding/">&hellip;more&hellip;</a></footer>
 </article>
 
 <footer>
  <ul class="pagination">
   <li class="disabled"><a href="#">
     <quote>&larr;</quote></a></li>
-  <li class="active"><a href="/tags/elliptic-curve.html">1</a></li>
+  <li class="active"><a href="/tags/Bitcoin-addresses.html">1</a></li>
   <li class="disabled"><a href="#">
     <quote>&rarr;</quote></a></li></ul></footer>
         </div>

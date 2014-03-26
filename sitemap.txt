@@ -1,3 +1,4 @@
+http://www.lostintransaction.com/blog/2014/03/18/base58check-encoding-and-decoding/
 http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/
 http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/
 http://www.lostintransaction.com/blog/2014/03/07/verifying-andreas-s-fundraising-for-dorian-message/

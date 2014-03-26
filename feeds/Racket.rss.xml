@@ -104,8 +104,8 @@ Welcome to Racket v6.0.0.3.
             (define-values (q r) (quotient/remainder n 16))
             (if (zero? q)
                 (list (num-&amp;gt;hex-char r))
-               (cons (num-&amp;gt;hex-char r) (loop q))))))))
-                                                                             
+                (cons (num-&amp;gt;hex-char r) (loop q))))))))
+                                                                            
 (define (base58-char-&amp;gt;num c)
   (for/last ([c58 (in-string BASE58-CHARS)] [n 58] #:final (char=? c c58)) n))
 (define (base58-str-&amp;gt;num str)

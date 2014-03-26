@@ -173,7 +173,7 @@ first convert from base-58 to base-10 and then from base-10 to hex.
             (define-values (q r) (quotient/remainder n 16))
             (if (zero? q)
                 (list (num->hex-char r))
-				(cons (num->hex-char r) (loop q))))))))
+                (cons (num->hex-char r) (loop q))))))))
 																			 
 (define (base58-char->num c)
   (for/last ([c58 (in-string BASE58-CHARS)] [n 58] #:final (char=? c c58)) n))

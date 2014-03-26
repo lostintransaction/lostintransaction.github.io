@@ -130,9 +130,9 @@ don't matter for numbers.
 
 To complete the base-58 conversion, we count the number of leading
 zeros in the hex string. The Bitcoin reference implementation adds one
-leading `1` character to the base-58 address for each leading zero
-*byte* in the hex string, ie, one leading base-58 `1` per two leading
-hex `1`s. Here's an updated definition of `hex-str->base58-str`:
+leading '1' character to the base-58 address for each leading zero
+*byte* in the hex string, ie, one leading base-58 '1' per two leading
+hex '1's. Here's an updated definition of `hex-str->base58-str`:
 
 ```racket
 (define (count-leading-zeros str)

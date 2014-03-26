@@ -289,7 +289,7 @@ Welcome to Racket v6.0.0.3.
  <p>We got the wrong answer! What happened? It turns out that the leading zeros matter when a hex string is viewed as a Bitcoin address. But when we converted to base&ndash;10, the leading zeros got lost since they don&rsquo;t matter for numbers.</p>
 
 
- <p>To complete the base&ndash;58 conversion, we count the number of leading zeros in the hex string. The Bitcoin reference implementation adds one leading <code>1</code> character to the base&ndash;58 address for each leading zero <em>byte</em> in the hex string, ie, one leading base&ndash;58 <code>1</code> per two leading hex <code>1</code>s. Here&rsquo;s an updated definition of <code>hex-str-&gt;base58-str</code>:</p>
+ <p>To complete the base&ndash;58 conversion, we count the number of leading zeros in the hex string. The Bitcoin reference implementation adds one leading &lsquo;1&rsquo; character to the base&ndash;58 address for each leading zero <em>byte</em> in the hex string, ie, one leading base&ndash;58 &lsquo;1&rsquo; per two leading hex &rsquo;1&rsquo;s. Here&rsquo;s an updated definition of <code>hex-str-&gt;base58-str</code>:</p>
 
 
  <div class="brush: racket">

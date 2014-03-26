@@ -113,7 +113,7 @@ list of base-58 digits. The digits are computed in reverse order so
 they are reversed before converting back to a string.
 
 Let's test our code. Following
-[the same example from the Bitcoin wiki], the hex address
+[the same example from the Bitcoin wiki][bwiki:addr], the hex address
 `00010966776006953D5567439E5E39F86A0D273BEED61967F6` in Base58Check is
 `16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM`.
 
@@ -134,14 +134,6 @@ leading `1` character to the base-58 address for each leading zero
 *byte* in the hex string, ie, one leading base-58 `1` per two leading
 hex `1`s. Here's an updated definition of `hex-str->base58-str`:
 
-```racket
-(define (num->base58-str n)
-  (if (zero? n) "" (num->base58-str.v0 n)))
-(define (hex-str->base58-str hstr)
-  (define num-leading-ones (quotient (count-leading-zeros hstr) 2))
-  (define leading-ones (make-string num-leading-ones #\1))
-  (string-append leading-ones (hex-str->base58-str.v0 hstr)))
-```  
 
 
 Trying our example again yields the expected result:

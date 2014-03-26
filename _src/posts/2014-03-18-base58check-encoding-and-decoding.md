@@ -171,7 +171,7 @@ first convert from base-58 to base-10 and then from base-10 to hex.
         (reverse
           (let loop ([n n])
             (define-values (q r) (quotient/remainder n 16))
-			(if (zero? q)
+            (if (zero? q)
                 (list (num->hex-char r))
 				(cons (num->hex-char r) (loop q))))))))
 																			 
@@ -189,7 +189,7 @@ first convert from base-58 to base-10 and then from base-10 to hex.
   (define num-leading-zeros
   (if (even? (string-length hex-str))
       zeros-from-b58str
-	  (add1 zeros-from-b58str))) ; to make hex str byte aligned
+      (add1 zeros-from-b58str))) ; to make hex str byte aligned
   (define leading-zeros-str (make-string num-leading-zeros #\0))
   (string-append leading-zeros-str hex-str))
 (define (base58-str->hex-str/num b58str)

@@ -73,7 +73,6 @@ Welcome to Racket v6.0.0.3.
 -&amp;gt; (hex-str-&amp;gt;base58-str.v0 "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
 "6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;We got the wrong answer! What happened? It turns out that the leading zeros matter when a hex string is viewed as a Bitcoin address. But when we converted to base&amp;ndash;10, the leading zeros got lost since they don&amp;rsquo;t matter for numbers.&lt;/p&gt;
- &lt;p&gt;To complete the base&amp;ndash;58 conversion, we count the number of leading zeros in the hex string. The Bitcoin reference implementation adds one leading &lt;code&gt;1&lt;/code&gt; character to the base&amp;ndash;58 address for each leading zero &lt;em&gt;byte&lt;/em&gt; in the hex string, ie, one leading base&amp;ndash;58 &lt;code&gt;1&lt;/code&gt; per two leading hex &lt;code&gt;1&lt;/code&gt;s. Here&amp;rsquo;s an updated definition of &lt;code&gt;hex-str-&amp;gt;base58-str&lt;/code&gt;:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (num-&amp;gt;base58-str n)
   (if (zero? n) "" (num-&amp;gt;base58-str.v0 n)))
 (define (hex-str-&amp;gt;base58-str hstr)

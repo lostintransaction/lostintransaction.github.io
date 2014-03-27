@@ -28,22 +28,22 @@
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define ASCII-ZERO (char-&amp;gt;integer #\0))
 
 ;; converts a hex digit [0-9A-Fa-f] to a number from 0 to 15
-(define (hex-char-&amp;gt;num c)
+(define (hex-char-&amp;gt;num.v0 c)
   (if (char-numeric? c)
       (- (char-&amp;gt;integer c) ASCII-ZERO)
-   (match c
+    (match c
      [(or #\a #\A) 10]
       [(or #\b #\B) 11]
       [(or #\c #\C) 12]
       [(or #\d #\D) 13]
       [(or #\e #\E) 14]
       [(or #\f #\F) 15]
-      [_ (error 'hex-char-&amp;gt;num "invalid hex char: ~a\n" c)])))
-       
+      [_ (error 'hex-char-&amp;gt;num.v0 "invalid hex char: ~a\n" c)])))
+        
 (define (hex-str-&amp;gt;num hstr)
   (for/fold ([num 0]) ([h (in-string hstr)])
-    (+ (* 16 num) (hex-char-&amp;gt;num h))))        &lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;The &lt;code&gt;fold/for&lt;/code&gt; form keeps an intermediate result &lt;code&gt;num&lt;/code&gt; that is initially 0 and then for each hex digit, multiplies the intermediate result by 16 and adds to it the base&amp;ndash;10 representation of that digit, as computed by the &lt;code&gt;hex-char-&amp;gt;num&lt;/code&gt; function.&lt;/p&gt;
+    (+ (* 16 num) (hex-char-&amp;gt;num.v0 h))))     &lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;The &lt;code&gt;fold/for&lt;/code&gt; form keeps an intermediate result &lt;code&gt;num&lt;/code&gt; that is initially 0 and then for each hex digit, multiplies the intermediate result by 16 and adds to it the base&amp;ndash;10 representation of that digit, as computed by the &lt;code&gt;hex-char-&amp;gt;num.v0&lt;/code&gt; function.&lt;/p&gt;
  &lt;p&gt;Let&amp;rsquo;s take a sample Bitcoin address (from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses"&gt;here&lt;/a&gt;) and see what the base&amp;ndash;10 equivalent is (the above code is saved to a file &lt;code&gt;base58.rkt&lt;/code&gt; with &lt;code&gt;hex-str-&amp;gt;num&lt;/code&gt; exported):&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
@@ -90,28 +90,45 @@ Welcome to Racket v6.0.0.3.
 "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"&lt;/code&gt;&lt;/pre&gt;
  &lt;h3 id="decoding"&gt;Decoding&lt;/h3&gt;
  &lt;p&gt;To convert from base&amp;ndash;58 back to hex, we reverse the above steps. We first convert from base&amp;ndash;58 to base&amp;ndash;10 and then from base&amp;ndash;10 to hex.&lt;/p&gt;
- &lt;pre class="brush: racket"&gt;&lt;code&gt;(define HEX-CHARS "0123456789ABCDEF")
+ &lt;p&gt;The conversion from hex or base&amp;ndash;58 strings into numbers is similar, so we can abstract the common parts into a separate function:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (baseN-char-&amp;gt;num ch #:CHARS [CHARS ""] #:c=? [c=? char=?])
+  (define base (string-length CHARS))
+  (define index (for/first ([(c n) (in-indexed CHARS)] #:when (c=? c ch)) n))
+  (or index (error 'char-&amp;gt;num "invalid base-~a char: ~a\n" base ch)))
 
-(define (num-&amp;gt;hex-char n)
-  (when (or (&amp;lt; n 0) (&amp;gt;= n 16))
-    (error 'num-&amp;gt;hex-char "cannot convert to hex: ~a\n" n))
-  (string-ref HEX-CHARS n))
+(define HEX-CHARS "0123456789ABCDEF")
+(define (upcase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
+
+(define (hex-char-&amp;gt;num c) 
+  (baseN-char-&amp;gt;num c #:CHARS HEX-CHARS #:c=? upcase=?))
+(define (base58-char-&amp;gt;num c) 
+  (baseN-char-&amp;gt;num c #:CHARS BASE58-CHARS))
+         
+(define (baseN-str-&amp;gt;num str #:base [N 10] #:digit-&amp;gt;num [digit-&amp;gt;num identity])
+  (for/fold ([num 0]) ([d str]) (+ (* N num) (digit-&amp;gt;num d))))
+
+(define (hex-str-&amp;gt;num hstr)
+  (baseN-str-&amp;gt;num hstr #:base 16 #:digit-&amp;gt;num hex-char-&amp;gt;num))
+(define (base58-str-&amp;gt;num b58str)
+  (baseN-str-&amp;gt;num b58str #:base 58 #:digit-&amp;gt;num base58-char-&amp;gt;num))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Similarly, the conversion from base&amp;ndash;10 to hex and base&amp;ndash;10 to base&amp;ndash;58 strings share mostly common code:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (num-&amp;gt;baseN-str n #:base [N 10] #:num-&amp;gt;char [num-&amp;gt;char identity])
+  (if (zero? n) "" (nonzero-num-&amp;gt;baseN-str n #:base N #:num-&amp;gt;char num-&amp;gt;char)))
+(define (nonzero-num-&amp;gt;baseN-str n #:base [N 10] #:num-&amp;gt;char [num-&amp;gt;char identity])
+  (list-&amp;gt;string
+    (reverse
+      (let loop ([n n])
+        (define-values (q r) (quotient/remainder n N))
+        (if (zero? q)
+            (list (num-&amp;gt;char r))
+            (cons (num-&amp;gt;char r) (loop q)))))))
+
+(define (num-&amp;gt;base58-str n)
+  (num-&amp;gt;baseN-str n #:base 58 #:num-&amp;gt;char num-&amp;gt;base58-char))
 (define (num-&amp;gt;hex-str n)
-  (if (zero? n) "" 
-      (list-&amp;gt;string
-        (reverse
-          (let loop ([n n])
-            (define-values (q r) (quotient/remainder n 16))
-            (if (zero? q)
-                (list (num-&amp;gt;hex-char r))
-                (cons (num-&amp;gt;hex-char r) (loop q))))))))
-                                                                            
-(define (base58-char-&amp;gt;num c)
-  (for/last ([c58 (in-string BASE58-CHARS)] [n 58] #:final (char=? c c58)) n))
-(define (base58-str-&amp;gt;num str)
-  (for/fold ([num 0]) ([d str]) (+ (* 58 num) (base58-char-&amp;gt;num d))))
-                              
-(define (count-leading ch str)
+  (num-&amp;gt;baseN-str n #:base 16 #:num-&amp;gt;char num-&amp;gt;hex-char))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Finally we put the functions together to complete the conversion. Of course, we can&amp;rsquo;t forget to add back the leading zeros, like before.&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (count-leading ch str)
   (for/sum ([c str] #:break (not (eq? c ch))) 1))
   
 (define (base58-str-&amp;gt;hex-str b58str)

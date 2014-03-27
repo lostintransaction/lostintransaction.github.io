@@ -45,7 +45,7 @@ easier to convert to a base-10 number first. Here's a Racket function
 (define ASCII-ZERO (char->integer #\0))
 
 ;; converts a hex digit [0-9A-Fa-f] to a number from 0 to 15
-(define (hex-char->num c)
+(define (hex-char->num.v0 c)
   (if (char-numeric? c)
       (- (char->integer c) ASCII-ZERO)
 	  (match c
@@ -55,17 +55,17 @@ easier to convert to a base-10 number first. Here's a Racket function
 		[(or #\d #\D) 13]
 		[(or #\e #\E) 14]
 		[(or #\f #\F) 15]
-		[_ (error 'hex-char->num "invalid hex char: ~a\n" c)])))
+		[_ (error 'hex-char->num.v0 "invalid hex char: ~a\n" c)])))
 		
 (define (hex-str->num hstr)
   (for/fold ([num 0]) ([h (in-string hstr)])
-    (+ (* 16 num) (hex-char->num h))))		
+    (+ (* 16 num) (hex-char->num.v0 h))))		
 ```
 
 The `fold/for` form keeps an intermediate result `num` that is
 initially 0 and then for each hex digit, multiplies the intermediate
 result by 16 and adds to it the base-10 representation of that
-digit, as computed by the `hex-char->num` function.
+digit, as computed by the `hex-char->num.v0` function.
 
 Let's take a sample Bitcoin address (from [here][bwiki:addr]) and see
 what the base-10 equivalent is (the above code is saved to a file
@@ -156,30 +156,59 @@ Trying our example again yields the expected result:
 ### Decoding ###
 
 To convert from base-58 back to hex, we reverse the above steps. We
-first convert from base-58 to base-10 and then from base-10 to hex.
+first convert from base-58 to base-10 and then from base-10 to
+hex. 
+
+The conversion from hex or base-58 strings into numbers is
+similar, so we can abstract the common parts into a separate function:
 
 ```racket
-(define HEX-CHARS "0123456789ABCDEF")
+(define (baseN-char->num ch #:CHARS [CHARS ""] #:c=? [c=? char=?])
+  (define base (string-length CHARS))
+  (define index (for/first ([(c n) (in-indexed CHARS)] #:when (c=? c ch)) n))
+  (or index (error 'char->num "invalid base-~a char: ~a\n" base ch)))
 
-(define (num->hex-char n)
-  (when (or (< n 0) (>= n 16))
-    (error 'num->hex-char "cannot convert to hex: ~a\n" n))
-  (string-ref HEX-CHARS n))
+(define HEX-CHARS "0123456789ABCDEF")
+(define (upcase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
+
+(define (hex-char->num c) 
+  (baseN-char->num c #:CHARS HEX-CHARS #:c=? upcase=?))
+(define (base58-char->num c) 
+  (baseN-char->num c #:CHARS BASE58-CHARS))
+			
+(define (baseN-str->num str #:base [N 10] #:digit->num [digit->num identity])
+  (for/fold ([num 0]) ([d str]) (+ (* N num) (digit->num d))))
+
+(define (hex-str->num hstr)
+  (baseN-str->num hstr #:base 16 #:digit->num hex-char->num))
+(define (base58-str->num b58str)
+  (baseN-str->num b58str #:base 58 #:digit->num base58-char->num))
+```
+
+Similarly, the conversion from base-10 to hex and base-10 to base-58 strings share mostly common code:
+
+```racket
+(define (num->baseN-str n #:base [N 10] #:num->char [num->char identity])
+  (if (zero? n) "" (nonzero-num->baseN-str n #:base N #:num->char num->char)))
+(define (nonzero-num->baseN-str n #:base [N 10] #:num->char [num->char identity])
+  (list->string
+    (reverse
+      (let loop ([n n])
+        (define-values (q r) (quotient/remainder n N))
+        (if (zero? q)
+            (list (num->char r))
+            (cons (num->char r) (loop q)))))))
+
+(define (num->base58-str n)
+  (num->baseN-str n #:base 58 #:num->char num->base58-char))
 (define (num->hex-str n)
-  (if (zero? n) "" 
-      (list->string
-        (reverse
-          (let loop ([n n])
-            (define-values (q r) (quotient/remainder n 16))
-            (if (zero? q)
-                (list (num->hex-char r))
-                (cons (num->hex-char r) (loop q))))))))
-																			 
-(define (base58-char->num c)
-  (for/last ([c58 (in-string BASE58-CHARS)] [n 58] #:final (char=? c c58)) n))
-(define (base58-str->num str)
-  (for/fold ([num 0]) ([d str]) (+ (* 58 num) (base58-char->num d))))
-								
+  (num->baseN-str n #:base 16 #:num->char num->hex-char))
+```
+
+Finally we put the functions together to complete the conversion. Of
+course, we can't forget to add back the leading zeros, like before.
+
+```racket
 (define (count-leading ch str)
   (for/sum ([c str] #:break (not (eq? c ch))) 1))
   

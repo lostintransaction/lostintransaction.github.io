@@ -149,4 +149,6 @@ Welcome to Racket v6.0.0.3.
 -&amp;gt; (hex-str-&amp;gt;base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
 "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
 -&amp;gt; (base58-str-&amp;gt;hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
-"00010966776006953D5567439E5E39F86A0D273BEED61967F6"&lt;/code&gt;&lt;/pre&gt;&lt;!--todo: explain decode code--&gt;&lt;/html&gt;</description></item></channel></rss>
+"00010966776006953D5567439E5E39F86A0D273BEED61967F6"&lt;/code&gt;&lt;/pre&gt;
+ &lt;h3 id="software"&gt;Software&lt;/h3&gt;
+ &lt;p&gt;All the code from this post is available here. Examples were run with Racket 6.0.0.3 executing in Debian 7.0.&lt;/p&gt;&lt;!--todo: explain decode code--&gt;&lt;/html&gt;</description></item></channel></rss>

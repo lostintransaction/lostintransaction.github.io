@@ -235,5 +235,10 @@ And trying it on our example returns the expected result:
     "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
 	-> (base58-str->hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
     "00010966776006953D5567439E5E39F86A0D273BEED61967F6"
-   
+
+### Software
+
+All the code from this post is available here. Examples were run with
+Racket 6.0.0.3 executing in Debian 7.0.
+
 <!--todo: explain decode code-->

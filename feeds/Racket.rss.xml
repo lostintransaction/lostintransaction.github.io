@@ -111,7 +111,7 @@ Welcome to Racket v6.0.0.3.
   (baseN-str-&amp;gt;num hstr #:base 16 #:digit-&amp;gt;num hex-char-&amp;gt;num))
 (define (base58-str-&amp;gt;num b58str)
   (baseN-str-&amp;gt;num b58str #:base 58 #:digit-&amp;gt;num base58-char-&amp;gt;num))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Similarly, the conversion from base&amp;ndash;10 to hex and base&amp;ndash;10 to base&amp;ndash;58 strings share mostly common code:&lt;/p&gt;
+ &lt;p&gt;Similarly, the conversion from base&amp;ndash;10 to hex resembles the conversion from base&amp;ndash;10 to base&amp;ndash;58:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (num-&amp;gt;baseN-str n #:base [N 10] #:num-&amp;gt;char [num-&amp;gt;char identity])
   (if (zero? n) "" (nonzero-num-&amp;gt;baseN-str n #:base N #:num-&amp;gt;char num-&amp;gt;char)))
 (define (nonzero-num-&amp;gt;baseN-str n #:base [N 10] #:num-&amp;gt;char [num-&amp;gt;char identity])

@@ -185,7 +185,8 @@ similar, so we can abstract the common parts into a separate function:
   (baseN-str->num b58str #:base 58 #:digit->num base58-char->num))
 ```
 
-Similarly, the conversion from base-10 to hex and base-10 to base-58 strings share mostly common code:
+Similarly, the conversion from base-10 to hex resembles the conversion
+from base-10 to base-58:
 
 ```racket
 (define (num->baseN-str n #:base [N 10] #:num->char [num->char identity])

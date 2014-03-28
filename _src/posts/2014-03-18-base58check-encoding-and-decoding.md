@@ -58,7 +58,12 @@ easier to convert to a base-10 number first. Here's a Racket function
 The `fold/for` form defines an intermediate result `num` that is
 initially 0 and then for each hex character, multiplies the
 intermediate result by 16 and adds to it the base-10 representation of
-that hex character, as computed by `hex-char->num.v0`.
+that hex character, as computed by `hex-char->num.v0`. The
+`hex-char->num.v0` function converts a hex character to a number by
+computing the position of the character in the `HEX-CHARS` constant
+string, or throws an error if the input character is not valid
+hex. Note that `hex-char->num.v0` accepts both upper and lowercase hex
+characters.
 
 Let's see what the (hex) Bitcoin address from
 [this Bitcoin Wiki article][bwiki:addr]) is in base-10 (the above code
@@ -72,13 +77,15 @@ is saved to a file `base58.rkt` with `hex-str->num.v0` exported):
     -> (hex-str->num.v0 "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
     25420294593250030202636073700053352635053786165627414518
 
-It's much easier to convert from base-10 to Base58Check because now we
-can use base-10 modulo and divide. Here's an initial attempt at
-converting to base-58:
+We can now use base-10 modulo and divide to convert from base-10 to
+Base58Check. Here's an initial attempt at converting to base-58:
 
 ```racket
 (define BASE58-CHARS "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
-(define (num->base58-char b) (string-ref BASE58-CHARS b))
+(define (num->base58-char.v0 n)
+  (when (or (< n 0) (>= n 58))
+    (error 'num->base58-char "cannot convert to base-58: ~a\n" n))
+  (string-ref BASE58-CHARS n))
   
 (define (num->base58-str.v0 n)
   (list->string
@@ -86,20 +93,20 @@ converting to base-58:
 	  (let loop ([n n])
 	    (define-values (q r) (quotient/remainder n 58))
 		(if (zero? q)
-            (list (num->base58-char r))
-			(cons (num->base58-char r) (loop q)))))))
+            (list (num->base58-char.v0 r))
+			(cons (num->base58-char.v0 r) (loop q)))))))
 
 (define (hex-str->base58-str.v0 hstr) 
-  (num->base58-str.v0 (hex-str->num hstr)))
+  (num->base58-str.v0 (hex-str->num.v0 hstr)))
 ```
 
 The `hex-str->base58-str.v0` function starts by converting the hex
-string to a base-10 number using the previously defined `hex-str->num`
-function. It then calls `num->base58-str.v0` to convert the base-10
-number to the base-58 digits. The `num->base58-str.v0` function
-repeatedly performs `modulo 58` and integer division operations in a
-loop. The `modulo` operation computes the next base-58 digit and the
-division computes the number to use in the next iteration. The
+string to a base-10 number using the previously defined
+`hex-str->num.v0`. It then calls `num->base58-str.v0` to convert the
+base-10 number to base-58. The `num->base58-str.v0` function
+repeatedly performs `modulo 58` and integer division operations on the
+given number. The `modulo` operation computes the next base-58 digit
+and the division computes the number to use in the next iteration. The
 `quotient/remainder` Racket function conveniently performs both the
 modulo and division in one step. The end result of the `loop` is a
 list of base-58 digits. The digits are computed in reverse order so

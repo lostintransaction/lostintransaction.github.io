@@ -37,29 +37,32 @@
       
 (define (hex-str-&amp;gt;num.v0 hstr)
   (for/fold ([num 0]) ([ch hstr]) (+ (* 16 num) (hex-char-&amp;gt;num.v0 ch))))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;The &lt;code&gt;fold/for&lt;/code&gt; form defines an intermediate result &lt;code&gt;num&lt;/code&gt; that is initially 0 and then for each hex character, multiplies the intermediate result by 16 and adds to it the base&amp;ndash;10 representation of that hex character, as computed by &lt;code&gt;hex-char-&amp;gt;num.v0&lt;/code&gt;.&lt;/p&gt;
+ &lt;p&gt;The &lt;code&gt;fold/for&lt;/code&gt; form defines an intermediate result &lt;code&gt;num&lt;/code&gt; that is initially 0 and then for each hex character, multiplies the intermediate result by 16 and adds to it the base&amp;ndash;10 representation of that hex character, as computed by &lt;code&gt;hex-char-&amp;gt;num.v0&lt;/code&gt;. The &lt;code&gt;hex-char-&amp;gt;num.v0&lt;/code&gt; function converts a hex character to a number by computing the position of the character in the &lt;code&gt;HEX-CHARS&lt;/code&gt; constant string, or throws an error if the input character is not valid hex. Note that &lt;code&gt;hex-char-&amp;gt;num.v0&lt;/code&gt; accepts both upper and lowercase hex characters.&lt;/p&gt;
  &lt;p&gt;Let&amp;rsquo;s see what the (hex) Bitcoin address from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses"&gt;this Bitcoin Wiki article&lt;/a&gt;) is in base&amp;ndash;10 (the above code is saved to a file &lt;code&gt;base58.rkt&lt;/code&gt; with &lt;code&gt;hex-str-&amp;gt;num.v0&lt;/code&gt; exported):&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
 -&amp;gt; (require "base58.rkt")
 -&amp;gt; (hex-str-&amp;gt;num.v0 "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
 25420294593250030202636073700053352635053786165627414518&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;It&amp;rsquo;s much easier to convert from base&amp;ndash;10 to Base58Check because now we can use base&amp;ndash;10 modulo and divide. Here&amp;rsquo;s an initial attempt at converting to base&amp;ndash;58:&lt;/p&gt;
+ &lt;p&gt;We can now use base&amp;ndash;10 modulo and divide to convert from base&amp;ndash;10 to Base58Check. Here&amp;rsquo;s an initial attempt at converting to base&amp;ndash;58:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define BASE58-CHARS "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
-(define (num-&amp;gt;base58-char b) (string-ref BASE58-CHARS b))
+(define (num-&amp;gt;base58-char.v0 n)
+  (when (or (&amp;lt; n 0) (&amp;gt;= n 58))
+    (error 'num-&amp;gt;base58-char "cannot convert to base-58: ~a\n" n))
+  (string-ref BASE58-CHARS n))
   
 (define (num-&amp;gt;base58-str.v0 n)
   (list-&amp;gt;string
     (reverse
-      (let loop ([n n])
+   (let loop ([n n])
         (define-values (q r) (quotient/remainder n 58))
         (if (zero? q)
-            (list (num-&amp;gt;base58-char r))
-          (cons (num-&amp;gt;base58-char r) (loop q)))))))
+            (list (num-&amp;gt;base58-char.v0 r))
+           (cons (num-&amp;gt;base58-char.v0 r) (loop q)))))))
 
 (define (hex-str-&amp;gt;base58-str.v0 hstr) 
-  (num-&amp;gt;base58-str.v0 (hex-str-&amp;gt;num hstr)))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;The &lt;code&gt;hex-str-&amp;gt;base58-str.v0&lt;/code&gt; function starts by converting the hex string to a base&amp;ndash;10 number using the previously defined &lt;code&gt;hex-str-&amp;gt;num&lt;/code&gt; function. It then calls &lt;code&gt;num-&amp;gt;base58-str.v0&lt;/code&gt; to convert the base&amp;ndash;10 number to the base&amp;ndash;58 digits. The &lt;code&gt;num-&amp;gt;base58-str.v0&lt;/code&gt; function repeatedly performs &lt;code&gt;modulo 58&lt;/code&gt; and integer division operations in a loop. The &lt;code&gt;modulo&lt;/code&gt; operation computes the next base&amp;ndash;58 digit and the division computes the number to use in the next iteration. The &lt;code&gt;quotient/remainder&lt;/code&gt; Racket function conveniently performs both the modulo and division in one step. The end result of the &lt;code&gt;loop&lt;/code&gt; is a list of base&amp;ndash;58 digits. The digits are computed in reverse order so they are reversed before converting back to a string.&lt;/p&gt;
+  (num-&amp;gt;base58-str.v0 (hex-str-&amp;gt;num.v0 hstr)))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;The &lt;code&gt;hex-str-&amp;gt;base58-str.v0&lt;/code&gt; function starts by converting the hex string to a base&amp;ndash;10 number using the previously defined &lt;code&gt;hex-str-&amp;gt;num.v0&lt;/code&gt;. It then calls &lt;code&gt;num-&amp;gt;base58-str.v0&lt;/code&gt; to convert the base&amp;ndash;10 number to base&amp;ndash;58. The &lt;code&gt;num-&amp;gt;base58-str.v0&lt;/code&gt; function repeatedly performs &lt;code&gt;modulo 58&lt;/code&gt; and integer division operations on the given number. The &lt;code&gt;modulo&lt;/code&gt; operation computes the next base&amp;ndash;58 digit and the division computes the number to use in the next iteration. The &lt;code&gt;quotient/remainder&lt;/code&gt; Racket function conveniently performs both the modulo and division in one step. The end result of the &lt;code&gt;loop&lt;/code&gt; is a list of base&amp;ndash;58 digits. The digits are computed in reverse order so they are reversed before converting back to a string.&lt;/p&gt;
  &lt;p&gt;Let&amp;rsquo;s test our code. Following &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses"&gt;the same example from the Bitcoin wiki&lt;/a&gt;, the hex address &lt;code&gt;00010966776006953D5567439E5E39F86A0D273BEED61967F6&lt;/code&gt; in Base58Check is &lt;code&gt;16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM&lt;/code&gt;.&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.

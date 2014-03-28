@@ -193,7 +193,7 @@
 </div>
 
 
- <p>The <code>fold/for</code> form defines an intermediate result <code>num</code> that is initially 0 and then for each hex character, multiplies the intermediate result by 16 and adds to it the base&ndash;10 representation of that hex character, as computed by <code>hex-char-&gt;num.v0</code>.</p>
+ <p>The <code>fold/for</code> form defines an intermediate result <code>num</code> that is initially 0 and then for each hex character, multiplies the intermediate result by 16 and adds to it the base&ndash;10 representation of that hex character, as computed by <code>hex-char-&gt;num.v0</code>. The <code>hex-char-&gt;num.v0</code> function converts a hex character to a number by computing the position of the character in the <code>HEX-CHARS</code> constant string, or throws an error if the input character is not valid hex. Note that <code>hex-char-&gt;num.v0</code> accepts both upper and lowercase hex characters.</p>
 
 
  <p>Let&rsquo;s see what the (hex) Bitcoin address from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses">this Bitcoin Wiki article</a>) is in base&ndash;10 (the above code is saved to a file <code>base58.rkt</code> with <code>hex-str-&gt;num.v0</code> exported):</p>
@@ -206,7 +206,7 @@ Welcome to Racket v6.0.0.3.
 25420294593250030202636073700053352635053786165627414518</code></pre>
 
 
- <p>It&rsquo;s much easier to convert from base&ndash;10 to Base58Check because now we can use base&ndash;10 modulo and divide. Here&rsquo;s an initial attempt at converting to base&ndash;58:</p>
+ <p>We can now use base&ndash;10 modulo and divide to convert from base&ndash;10 to Base58Check. Here&rsquo;s an initial attempt at converting to base&ndash;58:</p>
 
 
  <div class="brush: racket">
@@ -234,32 +234,38 @@ Welcome to Racket v6.0.0.3.
 11
 12
 13
-14</pre></div></td>
+14
+15
+16
+17</pre></div></td>
 
      <td class="code">
 
       <div class="source">
 
        <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">BASE58-CHARS</span> <span class="s">"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"</span><span class="p">)</span>
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">num-&gt;base58-char</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-ref))" style="color: inherit">string-ref</a> </span><span class="nv">BASE58-CHARS</span> <span class="nv">b</span><span class="p">))</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">num-&gt;base58-char</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">n</span><span class="p">)</span>
+  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/when_unless.html#(form._((lib._racket/private/letstx-scheme..rkt)._when))" style="color: inherit">when</a> </span><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3c))" style="color: inherit">&lt;</a> </span><span class="nv">n</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3e~3d))" style="color: inherit">&gt;=</a> </span><span class="nv">n</span> <span class="mi">58</span><span class="p">))</span>
+    <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/exns.html#(def._((quote._~23~25kernel)._error))" style="color: inherit">error</a> </span><span class="ss">'num-&gt;base58-char</span> <span class="s">"cannot <a href="http://docs.racket-lang.org/file/convertible.html#(def._((lib._file/convertible..rkt)._convert))" style="color: inherit">convert</a> to base-58: ~a\n"</span> <span class="nv">n</span><span class="p">))</span>
+  <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-ref))" style="color: inherit">string-ref</a> </span><span class="nv">BASE58-CHARS</span> <span class="nv">n</span><span class="p">))</span>
 
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">num-&gt;base58-str</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">n</span><span class="p">)</span>
   <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._list-~3estring))" style="color: inherit">list-&gt;string</a></span>
     <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((lib._racket/private/list..rkt)._reverse))" style="color: inherit">reverse</a></span>
-      <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/let.html#(form._((lib._racket/private/letstx-scheme..rkt)._let))" style="color: inherit">let</a> </span><span class="nv">loop</span> <span class="p">([</span><span class="nf">n</span> <span class="nv">n</span><span class="p">])</span>
+   <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/let.html#(form._((lib._racket/private/letstx-scheme..rkt)._let))" style="color: inherit">let</a> </span><span class="nv">loop</span> <span class="p">([</span><span class="nf">n</span> <span class="nv">n</span><span class="p">])</span>
         <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((quote._~23~25kernel)._define-values))" style="color: inherit">define-values</a> </span><span class="p">(</span><span class="nf">q</span> <span class="nv">r</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._quotient/remainder))" style="color: inherit">quotient/remainder</a> </span><span class="nv">n</span> <span class="mi">58</span><span class="p">))</span>
         <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((quote._~23~25kernel)._if))" style="color: inherit">if</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/number-types.html#(def._((quote._~23~25kernel)._zero~3f))" style="color: inherit">zero?</a> </span><span class="nv">q</span><span class="p">)</span>
-            <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((quote._~23~25kernel)._list))" style="color: inherit">list</a> </span><span class="p">(</span><span class="nf">num-&gt;base58-char</span> <span class="nv">r</span><span class="p">))</span>
-          <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((quote._~23~25kernel)._cons))" style="color: inherit">cons</a> </span><span class="p">(</span><span class="nf">num-&gt;base58-char</span> <span class="nv">r</span><span class="p">)</span> <span class="p">(</span><span class="nf">loop</span> <span class="nv">q</span><span class="p">)))))))</span>
+            <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((quote._~23~25kernel)._list))" style="color: inherit">list</a> </span><span class="p">(</span><span class="nf">num-&gt;base58-char</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">r</span><span class="p">))</span>
+           <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((quote._~23~25kernel)._cons))" style="color: inherit">cons</a> </span><span class="p">(</span><span class="nf">num-&gt;base58-char</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">r</span><span class="p">)</span> <span class="p">(</span><span class="nf">loop</span> <span class="nv">q</span><span class="p">)))))))</span>
 
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">hex-str-&gt;base58-str</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">hstr</span><span class="p">)</span> 
-  <span class="p">(</span><span class="nf">num-&gt;base58-str</span><span class="o">.</span><span class="nv">v0</span> <span class="p">(</span><span class="nf">hex-str-&gt;num</span> <span class="nv">hstr</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">num-&gt;base58-str</span><span class="o">.</span><span class="nv">v0</span> <span class="p">(</span><span class="nf">hex-str-&gt;num</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">hstr</span><span class="p">)))</span>
 </pre></div>
 </td></tr></tbody></table>
 </div>
 
 
- <p>The <code>hex-str-&gt;base58-str.v0</code> function starts by converting the hex string to a base&ndash;10 number using the previously defined <code>hex-str-&gt;num</code> function. It then calls <code>num-&gt;base58-str.v0</code> to convert the base&ndash;10 number to the base&ndash;58 digits. The <code>num-&gt;base58-str.v0</code> function repeatedly performs <code>modulo 58</code> and integer division operations in a loop. The <code>modulo</code> operation computes the next base&ndash;58 digit and the division computes the number to use in the next iteration. The <code>quotient/remainder</code> Racket function conveniently performs both the modulo and division in one step. The end result of the <code>loop</code> is a list of base&ndash;58 digits. The digits are computed in reverse order so they are reversed before converting back to a string.</p>
+ <p>The <code>hex-str-&gt;base58-str.v0</code> function starts by converting the hex string to a base&ndash;10 number using the previously defined <code>hex-str-&gt;num.v0</code>. It then calls <code>num-&gt;base58-str.v0</code> to convert the base&ndash;10 number to base&ndash;58. The <code>num-&gt;base58-str.v0</code> function repeatedly performs <code>modulo 58</code> and integer division operations on the given number. The <code>modulo</code> operation computes the next base&ndash;58 digit and the division computes the number to use in the next iteration. The <code>quotient/remainder</code> Racket function conveniently performs both the modulo and division in one step. The end result of the <code>loop</code> is a list of base&ndash;58 digits. The digits are computed in reverse order so they are reversed before converting back to a string.</p>
 
 
  <p>Let&rsquo;s test our code. Following <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses">the same example from the Bitcoin wiki</a>, the hex address <code>00010966776006953D5567439E5E39F86A0D273BEED61967F6</code> in Base58Check is <code>16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM</code>.</p>

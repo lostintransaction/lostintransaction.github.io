@@ -83,6 +83,7 @@ Base58Check. Here's an initial attempt at converting to base-58:
 
 ```racket
 (define BASE58-CHARS "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
+
 (define (num->base58-char n)
   (when (or (< n 0) (>= n 58))
     (error 'num->base58-char "cannot convert to base-58: ~a\n" n))
@@ -138,8 +139,8 @@ leading hex '0's. Here's an updated conversion function:
 
 ```racket
 (define (count-leading-zeros str)
-  (for/last ([(c n) (in-indexed str)] #:final (not (char=? #\0 c))) n))
-(define (num->base58-str n)
+  (for/sum ([c (in-string str)] #:break (not (char=? #\0 c))) 1))
+(define (num->base58-str n) 
   (if (zero? n) "" (num->base58-str.v0 n)))
 (define (hex-str->base58-str hstr)
   (define num-leading-ones (quotient (count-leading-zeros hstr) 2))
@@ -240,7 +241,8 @@ And trying it on our example returns the expected result:
 
 ### Software
 
-All the code from this post is available here. Examples were run with
-Racket 6.0.0.3 executing in Debian 7.0.
+All the code from this post
+[may be downloaded here](http://www.lostintransaction.com/code/base58.rkt).
+Examples were executed with Racket 6.0.0.3 running in Debian 7.0.
 
 <!--todo: explain decode code-->

@@ -47,6 +47,7 @@ Welcome to Racket v6.0.0.3.
 25420294593250030202636073700053352635053786165627414518&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;We can now use base&amp;ndash;10 modulo and divide to convert from base&amp;ndash;10 to Base58Check. Here&amp;rsquo;s an initial attempt at converting to base&amp;ndash;58:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define BASE58-CHARS "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
+
 (define (num-&amp;gt;base58-char n)
   (when (or (&amp;lt; n 0) (&amp;gt;= n 58))
     (error 'num-&amp;gt;base58-char "cannot convert to base-58: ~a\n" n))
@@ -55,7 +56,7 @@ Welcome to Racket v6.0.0.3.
 (define (num-&amp;gt;base58-str.v0 n)
   (list-&amp;gt;string
     (reverse
-      (let loop ([n n])
+     (let loop ([n n])
         (define-values (q r) (quotient/remainder n 58))
         (if (zero? q)
             (list (num-&amp;gt;base58-char r))
@@ -73,8 +74,8 @@ Welcome to Racket v6.0.0.3.
  &lt;p&gt;We got the wrong answer! What happened? It turns out that the leading zeros in a hex string matter when the string is viewed as a Bitcoin address. But when we converted to base&amp;ndash;10, the leading zeros got lost since they don&amp;rsquo;t matter for numbers.&lt;/p&gt;
  &lt;p&gt;To complete the base&amp;ndash;58 conversion according to the Bitcoin reference code, we count the number of leading zeros in the hex string and add one leading &amp;lsquo;1&amp;rsquo; character to the base&amp;ndash;58 address for each leading zero &lt;em&gt;byte&lt;/em&gt; in the hex string, ie, we add one leading base&amp;ndash;58 &amp;lsquo;1&amp;rsquo; per two leading hex &amp;rsquo;0&amp;rsquo;s. Here&amp;rsquo;s an updated conversion function:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (count-leading-zeros str)
-  (for/last ([(c n) (in-indexed str)] #:final (not (char=? #\0 c))) n))
-(define (num-&amp;gt;base58-str n)
+  (for/sum ([c (in-string str)] #:break (not (char=? #\0 c))) 1))
+(define (num-&amp;gt;base58-str n) 
   (if (zero? n) "" (num-&amp;gt;base58-str.v0 n)))
 (define (hex-str-&amp;gt;base58-str hstr)
   (define num-leading-ones (quotient (count-leading-zeros hstr) 2))
@@ -149,7 +150,7 @@ Welcome to Racket v6.0.0.3.
 -&amp;gt; (base58-str-&amp;gt;hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
 "00010966776006953D5567439E5E39F86A0D273BEED61967F6"&lt;/code&gt;&lt;/pre&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
- &lt;p&gt;All the code from this post is available here. Examples were run with Racket 6.0.0.3 executing in Debian 7.0.&lt;/p&gt;&lt;!--todo: explain decode code--&gt;&lt;/html&gt;</content></entry>
+ &lt;p&gt;All the code from this post &lt;a href="http://www.lostintransaction.com/code/base58.rkt"&gt;may be downloaded here&lt;/a&gt;. Examples were executed with Racket 6.0.0.3 running in Debian 7.0.&lt;/p&gt;&lt;!--todo: explain decode code--&gt;&lt;/html&gt;</content></entry>
  <entry>
   <title type="text">Adding OpenSSL bindings to Racket via its FFI</title>
   <link rel="alternate" href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/?utm_source=all&amp;utm_medium=Atom" />

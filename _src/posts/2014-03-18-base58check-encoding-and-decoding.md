@@ -7,8 +7,8 @@ In previous posts, we looked at
 and [computing a Bitcoin address from a public key][LiT:ffi]. However,
 these posts dealt with hexadecimal representations of keys and
 addresses, which is not the representation familiar to most Bitcoin
-users. In practice, Bitcoin addresses use the more human-readable
-[Base58Check][bwiki:b58] encoding, which we explore in this post.
+users. Bitcoin addresses more commonly are encoded as
+[Base58Check][bwiki:b58] strings, which we explore in this post.
 
 [LiT:pubfrompriv]: http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/ "Deriving a Bitcoin Public Key From a Private Key"
 [LiT:ffi]: http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/ "Adding OpenSSL bindings to Racket via its FFI"
@@ -16,8 +16,8 @@ users. In practice, Bitcoin addresses use the more human-readable
 
 <!-- more -->
 
-Here is the rationale for using Base58Check encoding (over base-64),
-taken from [comments in the Bitcoin reference code][bitcoinsrc]:
+The [Bitcoin reference code][bitcoinsrc] provides the following
+rationale for using Base58Check (over base-64):
 
     // Why base-58 instead of standard base-64 encoding?
     // - Don't want 0OIl characters that look the same in some fonts and
@@ -28,55 +28,48 @@ taken from [comments in the Bitcoin reference code][bitcoinsrc]:
 
 [bitcoinsrc]: https://github.com/bitcoin/bitcoin/blob/f76c122e2eac8ef66f69d142231bd33c88a24c50/src/base58.h#L7-L12 "src/base58.h"
 
-Basically, Bitcoin addresses should be easy for humans to read and
-handle and Base58Check improves on base-64 along these axes. Let's
-implement Base58Check encoding and decoding. We'll use
-[Racket](http://racket-lang.org) to avoid the hassle of `BIGNUM`s.
+Essentially, the goal with Base58Check is to make it easier for humans
+to read and handle Bitcoin addresses. Let's implement Base58Check
+encoding and decoding. We'll use [Racket](http://racket-lang.org),
+which let's us avoid the hassle of dealing with `BIGNUM`s.
 
 ### Encoding ###
 
-To convert a hex string to Base58Check, we need to repeatedly apply
+To convert a hex string to Base58Check, we need to repeatedly perform
 modulo and division operations on the string. However, Racket doesn't
 come with modulo and division operations on hex strings so it'll be
 easier to convert to a base-10 number first. Here's a Racket function
-`hex-str->num` that converts from hex to base-10.
+`hex-str->num.v0` that converts from hex to base-10.
 
 ```racket
-(define ASCII-ZERO (char->integer #\0))
+(define HEX-CHARS "0123456789ABCDEF")
 
-;; converts a hex digit [0-9A-Fa-f] to a number from 0 to 15
-(define (hex-char->num.v0 c)
-  (if (char-numeric? c)
-      (- (char->integer c) ASCII-ZERO)
-	  (match c
-	    [(or #\a #\A) 10]
-		[(or #\b #\B) 11]
-		[(or #\c #\C) 12]
-		[(or #\d #\D) 13]
-		[(or #\e #\E) 14]
-		[(or #\f #\F) 15]
-		[_ (error 'hex-char->num.v0 "invalid hex char: ~a\n" c)])))
-		
-(define (hex-str->num hstr)
-  (for/fold ([num 0]) ([h (in-string hstr)])
-    (+ (* 16 num) (hex-char->num.v0 h))))		
+(define (upcase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
+
+(define (hex-char->num.v0 ch)
+  (define index 
+    (for/first ([(c n) (in-indexed HEX-CHARS)] #:when (upcase=? c ch)) n))
+  (or index (error 'hex-char->num "invalid hex char: ~a\n" ch)))
+	  
+(define (hex-str->num.v0 hstr)
+  (for/fold ([num 0]) ([ch hstr]) (+ (* 16 num) (hex-char->num.v0 ch))))
 ```
 
-The `fold/for` form keeps an intermediate result `num` that is
-initially 0 and then for each hex digit, multiplies the intermediate
-result by 16 and adds to it the base-10 representation of that
-digit, as computed by the `hex-char->num.v0` function.
+The `fold/for` form defines an intermediate result `num` that is
+initially 0 and then for each hex character, multiplies the
+intermediate result by 16 and adds to it the base-10 representation of
+that hex character, as computed by `hex-char->num.v0`.
 
-Let's take a sample Bitcoin address (from [here][bwiki:addr]) and see
-what the base-10 equivalent is (the above code is saved to a file
-`base58.rkt` with `hex-str->num` exported):
+Let's see what the (hex) Bitcoin address from
+[this Bitcoin Wiki article][bwiki:addr]) is in base-10 (the above code
+is saved to a file `base58.rkt` with `hex-str->num.v0` exported):
 
 [bwiki:addr]: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses "Technical background of version 1 Bitcoin addresses"
 
     $ racket
     Welcome to Racket v6.0.0.3.
     -> (require "base58.rkt")
-    -> (hex-str->num "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
+    -> (hex-str->num.v0 "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
     25420294593250030202636073700053352635053786165627414518
 
 It's much easier to convert from base-10 to Base58Check because now we

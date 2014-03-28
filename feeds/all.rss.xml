@@ -14,41 +14,34 @@
    <pubDate>Tue, 18 Mar 2014 05:44:11 UTC</pubDate>
    <description>
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F18%2Fbase58check-encoding-and-decoding%2F" height="1" width="1" /&gt;
- &lt;p&gt;In previous posts, we looked at &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key"&gt;computing a Bitcoin public key from a private key&lt;/a&gt;, and &lt;a href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/" title="Adding OpenSSL bindings to Racket via its FFI"&gt;computing a Bitcoin address from a public key&lt;/a&gt;. However, these posts dealt with hexadecimal representations of keys and addresses, which is not the representation familiar to most Bitcoin users. In practice, Bitcoin addresses use the more human-readable &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Base58Check encoding"&gt;Base58Check&lt;/a&gt; encoding, which we explore in this post.&lt;/p&gt;
- &lt;p&gt;Here is the rationale for using Base58Check encoding (over base&amp;ndash;64), taken from &lt;a href="https://github.com/bitcoin/bitcoin/blob/f76c122e2eac8ef66f69d142231bd33c88a24c50/src/base58.h#L7-L12" title="src/base58.h"&gt;comments in the Bitcoin reference code&lt;/a&gt;:&lt;/p&gt;
+ &lt;p&gt;In previous posts, we looked at &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key"&gt;computing a Bitcoin public key from a private key&lt;/a&gt;, and &lt;a href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/" title="Adding OpenSSL bindings to Racket via its FFI"&gt;computing a Bitcoin address from a public key&lt;/a&gt;. However, these posts dealt with hexadecimal representations of keys and addresses, which is not the representation familiar to most Bitcoin users. Bitcoin addresses more commonly are encoded as &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Base58Check encoding"&gt;Base58Check&lt;/a&gt; strings, which we explore in this post.&lt;/p&gt;
+ &lt;p&gt;The &lt;a href="https://github.com/bitcoin/bitcoin/blob/f76c122e2eac8ef66f69d142231bd33c88a24c50/src/base58.h#L7-L12" title="src/base58.h"&gt;Bitcoin reference code&lt;/a&gt; provides the following rationale for using Base58Check (over base&amp;ndash;64):&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;// Why base-58 instead of standard base-64 encoding?
 // - Don't want 0OIl characters that look the same in some fonts and
 //      could be used to create visually identical looking account numbers.
 // - A string with non-alphanumeric characters is not as easily accepted as an account number.
 // - E-mail usually won't line-break if there's no punctuation to break at.
 // - Double-clicking selects the whole number as one word if it's all alphanumeric.&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Basically, Bitcoin addresses should be easy for humans to read and handle and Base58Check improves on base&amp;ndash;64 along these axes. Let&amp;rsquo;s implement Base58Check encoding and decoding. We&amp;rsquo;ll use &lt;a href="http://racket-lang.org"&gt;Racket&lt;/a&gt; to avoid the hassle of &lt;code&gt;BIGNUM&lt;/code&gt;s.&lt;/p&gt;
+ &lt;p&gt;Essentially, the goal with Base58Check is to make it easier for humans to read and handle Bitcoin addresses. Let&amp;rsquo;s implement Base58Check encoding and decoding. We&amp;rsquo;ll use &lt;a href="http://racket-lang.org"&gt;Racket&lt;/a&gt;, which let&amp;rsquo;s us avoid the hassle of dealing with &lt;code&gt;BIGNUM&lt;/code&gt;s.&lt;/p&gt;
  &lt;h3 id="encoding"&gt;Encoding&lt;/h3&gt;
- &lt;p&gt;To convert a hex string to Base58Check, we need to repeatedly apply modulo and division operations on the string. However, Racket doesn&amp;rsquo;t come with modulo and division operations on hex strings so it&amp;rsquo;ll be easier to convert to a base&amp;ndash;10 number first. Here&amp;rsquo;s a Racket function &lt;code&gt;hex-str-&amp;gt;num&lt;/code&gt; that converts from hex to base&amp;ndash;10.&lt;/p&gt;
- &lt;pre class="brush: racket"&gt;&lt;code&gt;(define ASCII-ZERO (char-&amp;gt;integer #\0))
+ &lt;p&gt;To convert a hex string to Base58Check, we need to repeatedly perform modulo and division operations on the string. However, Racket doesn&amp;rsquo;t come with modulo and division operations on hex strings so it&amp;rsquo;ll be easier to convert to a base&amp;ndash;10 number first. Here&amp;rsquo;s a Racket function &lt;code&gt;hex-str-&amp;gt;num.v0&lt;/code&gt; that converts from hex to base&amp;ndash;10.&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define HEX-CHARS "0123456789ABCDEF")
 
-;; converts a hex digit [0-9A-Fa-f] to a number from 0 to 15
-(define (hex-char-&amp;gt;num.v0 c)
-  (if (char-numeric? c)
-      (- (char-&amp;gt;integer c) ASCII-ZERO)
-    (match c
-     [(or #\a #\A) 10]
-      [(or #\b #\B) 11]
-      [(or #\c #\C) 12]
-      [(or #\d #\D) 13]
-      [(or #\e #\E) 14]
-      [(or #\f #\F) 15]
-      [_ (error 'hex-char-&amp;gt;num.v0 "invalid hex char: ~a\n" c)])))
-        
-(define (hex-str-&amp;gt;num hstr)
-  (for/fold ([num 0]) ([h (in-string hstr)])
-    (+ (* 16 num) (hex-char-&amp;gt;num.v0 h))))     &lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;The &lt;code&gt;fold/for&lt;/code&gt; form keeps an intermediate result &lt;code&gt;num&lt;/code&gt; that is initially 0 and then for each hex digit, multiplies the intermediate result by 16 and adds to it the base&amp;ndash;10 representation of that digit, as computed by the &lt;code&gt;hex-char-&amp;gt;num.v0&lt;/code&gt; function.&lt;/p&gt;
- &lt;p&gt;Let&amp;rsquo;s take a sample Bitcoin address (from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses"&gt;here&lt;/a&gt;) and see what the base&amp;ndash;10 equivalent is (the above code is saved to a file &lt;code&gt;base58.rkt&lt;/code&gt; with &lt;code&gt;hex-str-&amp;gt;num&lt;/code&gt; exported):&lt;/p&gt;
+(define (upcase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
+
+(define (hex-char-&amp;gt;num.v0 ch)
+  (define index 
+    (for/first ([(c n) (in-indexed HEX-CHARS)] #:when (upcase=? c ch)) n))
+  (or index (error 'hex-char-&amp;gt;num "invalid hex char: ~a\n" ch)))
+      
+(define (hex-str-&amp;gt;num.v0 hstr)
+  (for/fold ([num 0]) ([ch hstr]) (+ (* 16 num) (hex-char-&amp;gt;num.v0 ch))))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;The &lt;code&gt;fold/for&lt;/code&gt; form defines an intermediate result &lt;code&gt;num&lt;/code&gt; that is initially 0 and then for each hex character, multiplies the intermediate result by 16 and adds to it the base&amp;ndash;10 representation of that hex character, as computed by &lt;code&gt;hex-char-&amp;gt;num.v0&lt;/code&gt;.&lt;/p&gt;
+ &lt;p&gt;Let&amp;rsquo;s see what the (hex) Bitcoin address from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses"&gt;this Bitcoin Wiki article&lt;/a&gt;) is in base&amp;ndash;10 (the above code is saved to a file &lt;code&gt;base58.rkt&lt;/code&gt; with &lt;code&gt;hex-str-&amp;gt;num.v0&lt;/code&gt; exported):&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
 -&amp;gt; (require "base58.rkt")
--&amp;gt; (hex-str-&amp;gt;num "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
+-&amp;gt; (hex-str-&amp;gt;num.v0 "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
 25420294593250030202636073700053352635053786165627414518&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;It&amp;rsquo;s much easier to convert from base&amp;ndash;10 to Base58Check because now we can use base&amp;ndash;10 modulo and divide. Here&amp;rsquo;s an initial attempt at converting to base&amp;ndash;58:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define BASE58-CHARS "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")

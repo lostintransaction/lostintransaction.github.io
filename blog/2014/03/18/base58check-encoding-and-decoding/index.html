@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Base58Check Encoding and Decoding</title>
-    <meta name="description" content="In previous posts, we looked at computing a Bitcoin public key from a private key, and computing a Bitcoin address from a public key. However, these posts dealt with hexadecimal representations of keys and addresses, which is not the representation familiar to most Bitcoin users. In practice, Bitcoin addresses use the more human-readable Base58Check encoding, which we explore in this post. ...">
+    <meta name="description" content="In previous posts, we looked at computing a Bitcoin public key from a private key, and computing a Bitcoin address from a public key. However, these posts dealt with hexadecimal representations of keys and addresses, which is not the representation familiar to most Bitcoin users. Bitcoin addresses more commonly are encoded as Base58Check strings, which we explore in this post. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="Base58Check, Racket, Bitcoin addresses">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -126,10 +126,10 @@
   </header>
 
 
- <p>In previous posts, we looked at <a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key">computing a Bitcoin public key from a private key</a>, and <a href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/" title="Adding OpenSSL bindings to Racket via its FFI">computing a Bitcoin address from a public key</a>. However, these posts dealt with hexadecimal representations of keys and addresses, which is not the representation familiar to most Bitcoin users. In practice, Bitcoin addresses use the more human-readable <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Base58Check encoding">Base58Check</a> encoding, which we explore in this post.</p>
+ <p>In previous posts, we looked at <a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key">computing a Bitcoin public key from a private key</a>, and <a href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/" title="Adding OpenSSL bindings to Racket via its FFI">computing a Bitcoin address from a public key</a>. However, these posts dealt with hexadecimal representations of keys and addresses, which is not the representation familiar to most Bitcoin users. Bitcoin addresses more commonly are encoded as <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Base58Check encoding">Base58Check</a> strings, which we explore in this post.</p>
 
 
- <p>Here is the rationale for using Base58Check encoding (over base&ndash;64), taken from <a href="https://github.com/bitcoin/bitcoin/blob/f76c122e2eac8ef66f69d142231bd33c88a24c50/src/base58.h#L7-L12" title="src/base58.h">comments in the Bitcoin reference code</a>:</p>
+ <p>The <a href="https://github.com/bitcoin/bitcoin/blob/f76c122e2eac8ef66f69d142231bd33c88a24c50/src/base58.h#L7-L12" title="src/base58.h">Bitcoin reference code</a> provides the following rationale for using Base58Check (over base&ndash;64):</p>
 
 
  <pre><code>// Why base-58 instead of standard base-64 encoding?
@@ -140,13 +140,13 @@
 // - Double-clicking selects the whole number as one word if it's all alphanumeric.</code></pre>
 
 
- <p>Basically, Bitcoin addresses should be easy for humans to read and handle and Base58Check improves on base&ndash;64 along these axes. Let&rsquo;s implement Base58Check encoding and decoding. We&rsquo;ll use <a href="http://racket-lang.org">Racket</a> to avoid the hassle of <code>BIGNUM</code>s.</p>
+ <p>Essentially, the goal with Base58Check is to make it easier for humans to read and handle Bitcoin addresses. Let&rsquo;s implement Base58Check encoding and decoding. We&rsquo;ll use <a href="http://racket-lang.org">Racket</a>, which let&rsquo;s us avoid the hassle of dealing with <code>BIGNUM</code>s.</p>
 
 
  <h3 id="encoding">Encoding</h3>
 
 
- <p>To convert a hex string to Base58Check, we need to repeatedly apply modulo and division operations on the string. However, Racket doesn&rsquo;t come with modulo and division operations on hex strings so it&rsquo;ll be easier to convert to a base&ndash;10 number first. Here&rsquo;s a Racket function <code>hex-str-&gt;num</code> that converts from hex to base&ndash;10.</p>
+ <p>To convert a hex string to Base58Check, we need to repeatedly perform modulo and division operations on the string. However, Racket doesn&rsquo;t come with modulo and division operations on hex strings so it&rsquo;ll be easier to convert to a base&ndash;10 number first. Here&rsquo;s a Racket function <code>hex-str-&gt;num.v0</code> that converts from hex to base&ndash;10.</p>
 
 
  <div class="brush: racket">
@@ -171,52 +171,38 @@
  8
  9
 10
-11
-12
-13
-14
-15
-16
-17
-18</pre></div></td>
+11</pre></div></td>
 
      <td class="code">
 
       <div class="source">
 
-       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">ASCII-ZERO</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/characters.html#(def._((quote._~23~25kernel)._char-~3einteger))" style="color: inherit">char-&gt;integer</a> </span><span class="sc">#\0</span><span class="p">))</span>
+       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">HEX-CHARS</span> <span class="s">"0123456789ABCDEF"</span><span class="p">)</span>
 
-<span class="c1">;; converts a hex digit [0-9A-Fa-f] to a number from 0 to 15</span>
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">hex-char-&gt;num</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">c</span><span class="p">)</span>
-  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((quote._~23~25kernel)._if))" style="color: inherit">if</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/characters.html#(def._((quote._~23~25kernel)._char-numeric~3f))" style="color: inherit">char-numeric?</a> </span><span class="nv">c</span><span class="p">)</span>
-      <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._-))" style="color: inherit">-</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/characters.html#(def._((quote._~23~25kernel)._char-~3einteger))" style="color: inherit">char-&gt;integer</a> </span><span class="nv">c</span><span class="p">)</span> <span class="nv">ASCII-ZERO</span><span class="p">)</span>
-    <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/match.html#(form._((lib._racket/match..rkt)._match))" style="color: inherit">match</a></span> <span class="nv">c</span>
-     <span class="p">[(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="sc">#\a</span> <span class="sc">#\A</span><span class="p">)</span> <span class="mi">10</span><span class="p">]</span>
-      <span class="p">[(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="sc">#\b</span> <span class="sc">#\B</span><span class="p">)</span> <span class="mi">11</span><span class="p">]</span>
-      <span class="p">[(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="sc">#\c</span> <span class="sc">#\C</span><span class="p">)</span> <span class="mi">12</span><span class="p">]</span>
-      <span class="p">[(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="sc">#\d</span> <span class="sc">#\D</span><span class="p">)</span> <span class="mi">13</span><span class="p">]</span>
-      <span class="p">[(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="sc">#\e</span> <span class="sc">#\E</span><span class="p">)</span> <span class="mi">14</span><span class="p">]</span>
-      <span class="p">[(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="sc">#\f</span> <span class="sc">#\F</span><span class="p">)</span> <span class="mi">15</span><span class="p">]</span>
-      <span class="p">[</span><span class="nf"><a href="http://docs.racket-lang.org/reference/stx-patterns.html#(form._((lib._racket/private/stxcase-scheme..rkt).__))" style="color: inherit">_</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/exns.html#(def._((quote._~23~25kernel)._error))" style="color: inherit">error</a> </span><span class="ss">'hex-char-&gt;num</span><span class="o">.</span><span class="nv">v0</span> <span class="s">"invalid hex char: ~a\n"</span> <span class="nv">c</span><span class="p">)])))</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">upcase=?</span> <span class="nv">c1</span> <span class="nv">c2</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/characters.html#(def._((quote._~23~25kernel)._char~3d~3f))" style="color: inherit">char=?</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/characters.html#(def._((quote._~23~25kernel)._char-upcase))" style="color: inherit">char-upcase</a> </span><span class="nv">c1</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/characters.html#(def._((quote._~23~25kernel)._char-upcase))" style="color: inherit">char-upcase</a> </span><span class="nv">c2</span><span class="p">)))</span>
 
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">hex-str-&gt;num</span> <span class="nv">hstr</span><span class="p">)</span>
-  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/for.html#(form._((lib._racket/private/base..rkt)._for/fold))" style="color: inherit">for/fold</a></span> <span class="p">([</span><span class="nf">num</span> <span class="mi">0</span><span class="p">])</span> <span class="p">([</span><span class="nf">h</span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/sequences.html#(def._((lib._racket/private/base..rkt)._in-string))" style="color: inherit">in-string</a></span> <span class="nv">hstr</span><span class="p">)])</span>
-    <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._+))" style="color: inherit">+</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._*))" style="color: inherit">*</a> </span><span class="mi">16</span> <span class="nv">num</span><span class="p">)</span> <span class="p">(</span><span class="nf">hex-char-&gt;num</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">h</span><span class="p">))))</span>     
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">hex-char-&gt;num</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">ch</span><span class="p">)</span>
+  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv"><a href="http://docs.racket-lang.org/scribble/base.html#(def._((lib._scribble/base..rkt)._index))" style="color: inherit">index</a></span> 
+    <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/for.html#(form._((lib._racket/private/base..rkt)._for/first))" style="color: inherit">for/first</a></span> <span class="p">([(</span><span class="nf">c</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/sequences.html#(def._((lib._racket/private/base..rkt)._in-indexed))" style="color: inherit">in-indexed</a></span> <span class="nv">HEX-CHARS</span><span class="p">)]</span> <span class="kd">#:when</span> <span class="p">(</span><span class="nf">upcase=?</span> <span class="nv">c</span> <span class="nv">ch</span><span class="p">))</span> <span class="nv">n</span><span class="p">))</span>
+  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="nv"><a href="http://docs.racket-lang.org/scribble/base.html#(def._((lib._scribble/base..rkt)._index))" style="color: inherit">index</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/exns.html#(def._((quote._~23~25kernel)._error))" style="color: inherit">error</a> </span><span class="ss">'hex-char-&gt;num</span> <span class="s">"invalid hex char: ~a\n"</span> <span class="nv">ch</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">hex-str-&gt;num</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">hstr</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/for.html#(form._((lib._racket/private/base..rkt)._for/fold))" style="color: inherit">for/fold</a></span> <span class="p">([</span><span class="nf">num</span> <span class="mi">0</span><span class="p">])</span> <span class="p">([</span><span class="nf">ch</span> <span class="nv">hstr</span><span class="p">])</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._+))" style="color: inherit">+</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._*))" style="color: inherit">*</a> </span><span class="mi">16</span> <span class="nv">num</span><span class="p">)</span> <span class="p">(</span><span class="nf">hex-char-&gt;num</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">ch</span><span class="p">))))</span>
 </pre></div>
 </td></tr></tbody></table>
 </div>
 
 
- <p>The <code>fold/for</code> form keeps an intermediate result <code>num</code> that is initially 0 and then for each hex digit, multiplies the intermediate result by 16 and adds to it the base&ndash;10 representation of that digit, as computed by the <code>hex-char-&gt;num.v0</code> function.</p>
+ <p>The <code>fold/for</code> form defines an intermediate result <code>num</code> that is initially 0 and then for each hex character, multiplies the intermediate result by 16 and adds to it the base&ndash;10 representation of that hex character, as computed by <code>hex-char-&gt;num.v0</code>.</p>
 
 
- <p>Let&rsquo;s take a sample Bitcoin address (from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses">here</a>) and see what the base&ndash;10 equivalent is (the above code is saved to a file <code>base58.rkt</code> with <code>hex-str-&gt;num</code> exported):</p>
+ <p>Let&rsquo;s see what the (hex) Bitcoin address from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses">this Bitcoin Wiki article</a>) is in base&ndash;10 (the above code is saved to a file <code>base58.rkt</code> with <code>hex-str-&gt;num.v0</code> exported):</p>
 
 
  <pre><code>$ racket
 Welcome to Racket v6.0.0.3.
 -&gt; (require "base58.rkt")
--&gt; (hex-str-&gt;num "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
+-&gt; (hex-str-&gt;num.v0 "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
 25420294593250030202636073700053352635053786165627414518</code></pre>
 
 

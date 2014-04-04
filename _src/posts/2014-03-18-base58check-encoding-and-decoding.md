@@ -149,7 +149,7 @@ leading hex '0's. Here's an updated conversion function:
 (define (hex-str->base58-str hstr)
   (define num-leading-ones (quotient (count-leading-zeros hstr) 2))
   (define leading-ones (make-string num-leading-ones #\1))
-  (string-append leading-ones (hex-str->base58-str.v0 hstr)))
+  (string-append leading-ones (num->base58-str (hex-str->num hstr))))
 ```
 
 Trying our example again yields the expected result:
@@ -188,16 +188,15 @@ Similarly, the conversion from base-10 to hex looks mostly like the
     (error 'num->hex-char "cannot convert to hex: ~a\n" n))
   (string-ref HEX-CHARS n))
 
-(define (num->hex-str.v0 n)
-  (list->string
-    (reverse
-      (let loop ([n n])
-        (define-values (q r) (quotient/remainder n 16))
-        (if (zero? q)
-            (list (num->hex-char r))
-            (cons (num->hex-char r) (loop q)))))))
-			
-(define (num->hex-str n) (if (zero? n) "" (num->hex-str.v0 n)))
+(define (num->hex-str n)
+  (if (zero? n) ""
+      (list->string
+        (reverse
+          (let loop ([n n])
+            (define-values (q r) (quotient/remainder n 16))
+            (if (zero? q)
+                (list (num->hex-char r))
+                (cons (num->hex-char r) (loop q))))))))
 ```
 
 Putting it all together gives us a `base58-str->hex-str` decoding
@@ -209,11 +208,8 @@ byte-aligned.
 (define (count-leading-ones str)
   (for/sum ([c (in-string str)] #:break (not (char=? #\1 c))) 1))
   
-(define (base58-str->hex-str.v0 b58str)
-  (num->hex-str.v0 (base58-str->num b58str)))
-
 (define (base58-str->hex-str b58str)
-  (define hex-str/no-leading-zeros (base58-str->hex-str.v0 b58str))
+  (define hex-str/no-leading-zeros (num->hex-str (base58-str->num b58str)))
   (define num-leading-ones (count-leading-ones b58str))
   (define num-leading-zeros
   (if (even? (string-length hex-str/no-leading-zeros))

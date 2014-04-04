@@ -45,16 +45,19 @@
 (define (num->base58-str n) 
   (if (zero? n) "" (num->base58-str.v0 n)))
 
+;; ----------------------------------------------------------------------------
 ;; convert hex string to base58 string
 (define (count-leading-zeros str)
   (for/sum ([c (in-string str)] #:break (not (char=? #\0 c))) 1))
 
+;; bad first attempt
 (define (hex-str->base58-str.v0 hstr) 
   (num->base58-str.v0 (hex-str->num hstr)))
+;; only accepts byte-aligned (ie even-length) hex strings
 (define (hex-str->base58-str hstr)
   (define num-leading-ones (quotient (count-leading-zeros hstr) 2))
   (define leading-ones (make-string num-leading-ones #\1))
-  (string-append leading-ones (hex-str->base58-str.v0 hstr)))
+  (string-append leading-ones (num->base58-str (hex-str->num hstr))))
 
 ;; convert base10 to hex string
 (define (num->hex-char n)
@@ -62,25 +65,25 @@
     (error 'num->hex-char "cannot convert to hex: ~a\n" n))
   (string-ref HEX-CHARS n))
 
-(define (num->hex-str.v0 n)
-  (list->string
-    (reverse
-     (let loop ([n n])
-       (define-values (q r) (quotient/remainder n 16))
-       (if (zero? q)
-           (list (num->hex-char r))
-           (cons (num->hex-char r) (loop q)))))))
-(define (num->hex-str n) 
-  (if (zero? n) "" (num->hex-str.v0 n)))
+(define (num->hex-str n)
+  (if (zero? n) ""
+      (list->string
+        (reverse
+          (let loop ([n n])
+            (define-values (q r) (quotient/remainder n 16))
+            (if (zero? q)
+                (list (num->hex-char r))
+                (cons (num->hex-char r) (loop q))))))))
 
+;; ----------------------------------------------------------------------------
 ;; convert base58 string to hex string
 (define (count-leading-ones str)
   (for/sum ([c (in-string str)] #:break (not (char=? #\1 c))) 1))
 
-(define (base58-str->hex-str.v0 b58str) 
-  (num->hex-str.v0 (base58-str->num b58str)))
+;; (define (base58-str->hex-str.v0 b58str) 
+;;   (num->hex-str.v0 (base58-str->num b58str)))
 (define (base58-str->hex-str b58str)
-  (define hex-str/no-leading-zeros (base58-str->hex-str.v0 b58str))
+  (define hex-str/no-leading-zeros (num->hex-str (base58-str->num b58str)))
   (define num-leading-ones (count-leading-ones b58str))
   (define num-leading-zeros 
     (if (even? (string-length hex-str/no-leading-zeros))
@@ -107,6 +110,14 @@
                 (hex-str->base58-str (base58-str->hex-str bwiki-b58-addr)))
   (check-equal? bwiki-hex-addr 
                 (base58-str->hex-str (hex-str->base58-str bwiki-hex-addr)))
+
+  ;; corner cases
+  ;; result should not be 11
+  (check-equal? (hex-str->base58-str "00") "1")
+  ;; hex-str->base58-str only accepts byte-aligned (ie even-length) hex strings
+  (check-equal? (hex-str->base58-str "0") "")
+  (check-equal? (base58-str->hex-str "1") "00")
+  (check-equal? (base58-str->hex-str "11") "0000")
   
   ;; check char->num fns
   (check-equal? (hex-char->num #\F) 15)

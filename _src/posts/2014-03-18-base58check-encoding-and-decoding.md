@@ -200,12 +200,12 @@ Similarly, the conversion from base-10 to hex looks mostly like the
 (define (num->hex-str n) (if (zero? n) "" (num->hex-str.v0 n)))
 ```
 
-Putting it all together gives us a `base58-str->hex-str`
+Putting it all together gives us a `base58-str->hex-str` decoding
 function. Here we need to count leading '1's. Note that we add an
 extra '0' to odd-length hex strings so the result is always
 byte-aligned.
 
-```
+```racket
 (define (count-leading-ones str)
   (for/sum ([c (in-string str)] #:break (not (char=? #\1 c))) 1))
   

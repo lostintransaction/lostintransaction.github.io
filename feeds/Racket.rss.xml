@@ -113,8 +113,8 @@ Welcome to Racket v6.0.0.3.
             (cons (num-&amp;gt;hex-char r) (loop q)))))))
            
 (define (num-&amp;gt;hex-str n) (if (zero? n) "" (num-&amp;gt;hex-str.v0 n)))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Putting it all together gives us a &lt;code&gt;base58-str-&amp;gt;hex-str&lt;/code&gt; function. Here we need to count leading &amp;lsquo;1&amp;rsquo;s. Note that we add an extra &amp;rsquo;0&amp;rsquo; to odd-length hex strings so the result is always byte-aligned.&lt;/p&gt;
- &lt;pre&gt;&lt;code&gt;(define (count-leading-ones str)
+ &lt;p&gt;Putting it all together gives us a &lt;code&gt;base58-str-&amp;gt;hex-str&lt;/code&gt; decoding function. Here we need to count leading &amp;lsquo;1&amp;rsquo;s. Note that we add an extra &amp;rsquo;0&amp;rsquo; to odd-length hex strings so the result is always byte-aligned.&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (count-leading-ones str)
   (for/sum ([c (in-string str)] #:break (not (char=? #\1 c))) 1))
   
 (define (base58-str-&amp;gt;hex-str.v0 b58str)

@@ -88,7 +88,7 @@
   (define num-leading-zeros 
     (if (even? (string-length hex-str/no-leading-zeros))
         (* num-leading-ones 2)
-        (add1 (* num-leading-ones 2))))
+        (add1 (* num-leading-ones 2)))) ; add extra 0 to byte align
   (define leading-zeros (make-string num-leading-zeros #\0))
   (string-append leading-zeros hex-str/no-leading-zeros))
 

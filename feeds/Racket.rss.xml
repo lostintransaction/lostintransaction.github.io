@@ -79,7 +79,7 @@ Welcome to Racket v6.0.0.3.
 (define (hex-str-&amp;gt;base58-str hstr)
   (define num-leading-ones (quotient (count-leading-zeros hstr) 2))
   (define leading-ones (make-string num-leading-ones #\1))
-  (string-append leading-ones (hex-str-&amp;gt;base58-str.v0 hstr)))&lt;/code&gt;&lt;/pre&gt;
+  (string-append leading-ones (num-&amp;gt;base58-str (hex-str-&amp;gt;num hstr))))&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;Trying our example again yields the expected result:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
@@ -103,25 +103,21 @@ Welcome to Racket v6.0.0.3.
     (error 'num-&amp;gt;hex-char "cannot convert to hex: ~a\n" n))
   (string-ref HEX-CHARS n))
 
-(define (num-&amp;gt;hex-str.v0 n)
-  (list-&amp;gt;string
-    (reverse
-      (let loop ([n n])
-        (define-values (q r) (quotient/remainder n 16))
-        (if (zero? q)
-            (list (num-&amp;gt;hex-char r))
-            (cons (num-&amp;gt;hex-char r) (loop q)))))))
-           
-(define (num-&amp;gt;hex-str n) (if (zero? n) "" (num-&amp;gt;hex-str.v0 n)))&lt;/code&gt;&lt;/pre&gt;
+(define (num-&amp;gt;hex-str n)
+  (if (zero? n) ""
+      (list-&amp;gt;string
+        (reverse
+          (let loop ([n n])
+            (define-values (q r) (quotient/remainder n 16))
+            (if (zero? q)
+                (list (num-&amp;gt;hex-char r))
+                (cons (num-&amp;gt;hex-char r) (loop q))))))))&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;Putting it all together gives us a &lt;code&gt;base58-str-&amp;gt;hex-str&lt;/code&gt; decoding function. Here we need to count leading &amp;lsquo;1&amp;rsquo;s. Note that we add an extra &amp;rsquo;0&amp;rsquo; to odd-length hex strings so the result is always byte-aligned.&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (count-leading-ones str)
   (for/sum ([c (in-string str)] #:break (not (char=? #\1 c))) 1))
   
-(define (base58-str-&amp;gt;hex-str.v0 b58str)
-  (num-&amp;gt;hex-str.v0 (base58-str-&amp;gt;num b58str)))
-
 (define (base58-str-&amp;gt;hex-str b58str)
-  (define hex-str/no-leading-zeros (base58-str-&amp;gt;hex-str.v0 b58str))
+  (define hex-str/no-leading-zeros (num-&amp;gt;hex-str (base58-str-&amp;gt;num b58str)))
   (define num-leading-ones (count-leading-ones b58str))
   (define num-leading-zeros
   (if (even? (string-length hex-str/no-leading-zeros))

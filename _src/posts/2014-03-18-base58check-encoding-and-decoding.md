@@ -180,7 +180,7 @@ like the `hex-str->num` function we defined above:
 ```
 
 Similarly, the conversion from base-10 to hex looks mostly like the
-`num->base58-str` function above, except now we need to count leading '1's:
+`num->base58-str` function above:
 
 ```racket
 (define (num->hex-char n)
@@ -198,7 +198,14 @@ Similarly, the conversion from base-10 to hex looks mostly like the
             (cons (num->hex-char r) (loop q)))))))
 			
 (define (num->hex-str n) (if (zero? n) "" (num->hex-str.v0 n)))
-  
+```
+
+Putting it all together gives us a `base58-str->hex-str`
+function. Here we need to count leading '1's. Note that we add an
+extra '0' to odd-length hex strings so the result is always
+byte-aligned.
+
+```
 (define (count-leading-ones str)
   (for/sum ([c (in-string str)] #:break (not (char=? #\1 c))) 1))
   
@@ -215,10 +222,7 @@ Similarly, the conversion from base-10 to hex looks mostly like the
   (define leading-zeros (make-string num-leading-zeros #\0))
   (string-append leading-zeros hex-str/no-leading-zeros))
 ```
-
-Note that we may have to add an extra '0' in `base58-str->hex-str` to keep the resulting hex string byte-aligned.
-
-And trying it on our example returns the expected result:
+And trying it on our example returns the expected results:
 
     $ racket
     Welcome to Racket v6.0.0.3.

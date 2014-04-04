@@ -97,7 +97,7 @@ Welcome to Racket v6.0.0.3.
 (define (base58-str-&amp;gt;num b58str)
   (for/fold ([num 0]) ([ch (in-string b58str)])
     (+ (* 58 num) (base58-char-&amp;gt;num ch))))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Similarly, the conversion from base&amp;ndash;10 to hex looks mostly like the &lt;code&gt;num-&amp;gt;base58-str&lt;/code&gt; function above, except now we need to count leading &amp;rsquo;1&amp;rsquo;s:&lt;/p&gt;
+ &lt;p&gt;Similarly, the conversion from base&amp;ndash;10 to hex looks mostly like the &lt;code&gt;num-&amp;gt;base58-str&lt;/code&gt; function above:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (num-&amp;gt;hex-char n)
   (when (or (&amp;lt; n 0) (&amp;gt;= n 16))
     (error 'num-&amp;gt;hex-char "cannot convert to hex: ~a\n" n))
@@ -112,9 +112,9 @@ Welcome to Racket v6.0.0.3.
             (list (num-&amp;gt;hex-char r))
             (cons (num-&amp;gt;hex-char r) (loop q)))))))
            
-(define (num-&amp;gt;hex-str n) (if (zero? n) "" (num-&amp;gt;hex-str.v0 n)))
-  
-(define (count-leading-ones str)
+(define (num-&amp;gt;hex-str n) (if (zero? n) "" (num-&amp;gt;hex-str.v0 n)))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Putting it all together gives us a &lt;code&gt;base58-str-&amp;gt;hex-str&lt;/code&gt; function. Here we need to count leading &amp;lsquo;1&amp;rsquo;s. Note that we add an extra &amp;rsquo;0&amp;rsquo; to odd-length hex strings so the result is always byte-aligned.&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;(define (count-leading-ones str)
   (for/sum ([c (in-string str)] #:break (not (char=? #\1 c))) 1))
   
 (define (base58-str-&amp;gt;hex-str.v0 b58str)
@@ -129,8 +129,7 @@ Welcome to Racket v6.0.0.3.
       (add1 (* num-leading-ones 2))))
   (define leading-zeros (make-string num-leading-zeros #\0))
   (string-append leading-zeros hex-str/no-leading-zeros))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Note that we may have to add an extra &amp;lsquo;0&amp;rsquo; in &lt;code&gt;base58-str-&amp;gt;hex-str&lt;/code&gt; to keep the resulting hex string byte-aligned.&lt;/p&gt;
- &lt;p&gt;And trying it on our example returns the expected result:&lt;/p&gt;
+ &lt;p&gt;And trying it on our example returns the expected results:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
 -&amp;gt; (require "base58.rkt")

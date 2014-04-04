@@ -383,7 +383,7 @@ Welcome to Racket v6.0.0.3.
 </div>
 
 
- <p>Similarly, the conversion from base&ndash;10 to hex looks mostly like the <code>num-&gt;base58-str</code> function above, except now we need to count leading &rsquo;1&rsquo;s:</p>
+ <p>Similarly, the conversion from base&ndash;10 to hex looks mostly like the <code>num-&gt;base58-str</code> function above:</p>
 
 
  <div class="brush: racket">
@@ -412,23 +412,7 @@ Welcome to Racket v6.0.0.3.
 12
 13
 14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31</pre></div></td>
+15</pre></div></td>
 
      <td class="code">
 
@@ -449,31 +433,32 @@ Welcome to Racket v6.0.0.3.
             <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/pairs.html#(def._((quote._~23~25kernel)._cons))" style="color: inherit">cons</a> </span><span class="p">(</span><span class="nf">num-&gt;hex-char</span> <span class="nv">r</span><span class="p">)</span> <span class="p">(</span><span class="nf">loop</span> <span class="nv">q</span><span class="p">)))))))</span>
 
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">num-&gt;hex-str</span> <span class="nv">n</span><span class="p">)</span> <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((quote._~23~25kernel)._if))" style="color: inherit">if</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/number-types.html#(def._((quote._~23~25kernel)._zero~3f))" style="color: inherit">zero?</a> </span><span class="nv">n</span><span class="p">)</span> <span class="s">""</span> <span class="p">(</span><span class="nf">num-&gt;hex-str</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">n</span><span class="p">)))</span>
-
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">count-leading-ones</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">)</span>
-  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/for.html#(form._((lib._racket/private/base..rkt)._for/sum))" style="color: inherit">for/sum</a></span> <span class="p">([</span><span class="nf">c</span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/sequences.html#(def._((lib._racket/private/base..rkt)._in-string))" style="color: inherit">in-string</a></span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">)]</span> <span class="kd">#:break</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/booleans.html#(def._((quote._~23~25kernel)._not))" style="color: inherit">not</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/characters.html#(def._((quote._~23~25kernel)._char~3d~3f))" style="color: inherit">char=?</a> </span><span class="sc">#\1</span> <span class="nv">c</span><span class="p">)))</span> <span class="mi">1</span><span class="p">))</span>
-
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">base58-str-&gt;hex-str</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">b58str</span><span class="p">)</span>
-  <span class="p">(</span><span class="nf">num-&gt;hex-str</span><span class="o">.</span><span class="nv">v0</span> <span class="p">(</span><span class="nf">base58-str-&gt;num</span> <span class="nv">b58str</span><span class="p">)))</span>
-
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">base58-str-&gt;hex-str</span> <span class="nv">b58str</span><span class="p">)</span>
-  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">hex-str/no-leading-zeros</span> <span class="p">(</span><span class="nf">base58-str-&gt;hex-str</span><span class="o">.</span><span class="nv">v0</span> <span class="nv">b58str</span><span class="p">))</span>
-  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">num-leading-ones</span> <span class="p">(</span><span class="nf">count-leading-ones</span> <span class="nv">b58str</span><span class="p">))</span>
-  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">num-leading-zeros</span>
-  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((quote._~23~25kernel)._if))" style="color: inherit">if</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/number-types.html#(def._((quote._~23~25kernel)._even~3f))" style="color: inherit">even?</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-length))" style="color: inherit">string-length</a> </span><span class="nv">hex-str/no-leading-zeros</span><span class="p">))</span>
-      <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._*))" style="color: inherit">*</a> </span><span class="nv">num-leading-ones</span> <span class="mi">2</span><span class="p">)</span>
-      <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._add1))" style="color: inherit">add1</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._*))" style="color: inherit">*</a> </span><span class="nv">num-leading-ones</span> <span class="mi">2</span><span class="p">))))</span>
-  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">leading-zeros</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._make-string))" style="color: inherit">make-string</a> </span><span class="nv">num-leading-zeros</span> <span class="sc">#\0</span><span class="p">))</span>
-  <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-append))" style="color: inherit">string-append</a> </span><span class="nv">leading-zeros</span> <span class="nv">hex-str/no-leading-zeros</span><span class="p">))</span>
 </pre></div>
 </td></tr></tbody></table>
 </div>
 
 
- <p>Note that we may have to add an extra &lsquo;0&rsquo; in <code>base58-str-&gt;hex-str</code> to keep the resulting hex string byte-aligned.</p>
+ <p>Putting it all together gives us a <code>base58-str-&gt;hex-str</code> function. Here we need to count leading &lsquo;1&rsquo;s. Note that we add an extra &rsquo;0&rsquo; to odd-length hex strings so the result is always byte-aligned.</p>
 
 
- <p>And trying it on our example returns the expected result:</p>
+ <pre><code>(define (count-leading-ones str)
+  (for/sum ([c (in-string str)] #:break (not (char=? #\1 c))) 1))
+
+(define (base58-str-&gt;hex-str.v0 b58str)
+  (num-&gt;hex-str.v0 (base58-str-&gt;num b58str)))
+
+(define (base58-str-&gt;hex-str b58str)
+  (define hex-str/no-leading-zeros (base58-str-&gt;hex-str.v0 b58str))
+  (define num-leading-ones (count-leading-ones b58str))
+  (define num-leading-zeros
+  (if (even? (string-length hex-str/no-leading-zeros))
+      (* num-leading-ones 2)
+      (add1 (* num-leading-ones 2))))
+  (define leading-zeros (make-string num-leading-zeros #\0))
+  (string-append leading-zeros hex-str/no-leading-zeros))</code></pre>
+
+
+ <p>And trying it on our example returns the expected results:</p>
 
 
  <pre><code>$ racket

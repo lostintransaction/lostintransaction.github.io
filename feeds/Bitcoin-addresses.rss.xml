@@ -88,58 +88,48 @@ Welcome to Racket v6.0.0.3.
 "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"&lt;/code&gt;&lt;/pre&gt;
  &lt;h3 id="decoding"&gt;Decoding&lt;/h3&gt;
  &lt;p&gt;To convert from base&amp;ndash;58 back to hex, we reverse the above steps. We first convert from base&amp;ndash;58 to base&amp;ndash;10 and then from base&amp;ndash;10 to hex.&lt;/p&gt;
- &lt;p&gt;The conversion from hex or base&amp;ndash;58 strings into numbers is similar, so we can abstract the common parts into a separate function:&lt;/p&gt;
- &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (baseN-char-&amp;gt;num ch #:CHARS [CHARS ""] #:c=? [c=? char=?])
-  (define base (string-length CHARS))
-  (define index (for/first ([(c n) (in-indexed CHARS)] #:when (c=? c ch)) n))
-  (or index (error 'char-&amp;gt;num "invalid base-~a char: ~a\n" base ch)))
+ &lt;p&gt;The conversion from base&amp;ndash;58 strings into base&amp;ndash;10 numbers looks a lot like the &lt;code&gt;hex-str-&amp;gt;num&lt;/code&gt; function we defined above:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (base58-char-&amp;gt;num ch)
+  (define index
+    (for/first ([(c n) (in-indexed BASE58-CHARS)] #:when (char=? c ch)) n))
+  (or index (error 'base58-char-&amp;gt;num "invalid base58 char: ~a\n" ch)))
 
-(define HEX-CHARS "0123456789ABCDEF")
-(define (upcase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
-
-(define (hex-char-&amp;gt;num c) 
-  (baseN-char-&amp;gt;num c #:CHARS HEX-CHARS #:c=? upcase=?))
-(define (base58-char-&amp;gt;num c) 
-  (baseN-char-&amp;gt;num c #:CHARS BASE58-CHARS))
-         
-(define (baseN-str-&amp;gt;num str #:base [N 10] #:digit-&amp;gt;num [digit-&amp;gt;num identity])
-  (for/fold ([num 0]) ([d str]) (+ (* N num) (digit-&amp;gt;num d))))
-
-(define (hex-str-&amp;gt;num hstr)
-  (baseN-str-&amp;gt;num hstr #:base 16 #:digit-&amp;gt;num hex-char-&amp;gt;num))
 (define (base58-str-&amp;gt;num b58str)
-  (baseN-str-&amp;gt;num b58str #:base 58 #:digit-&amp;gt;num base58-char-&amp;gt;num))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Similarly, the conversion from base&amp;ndash;10 to hex resembles the conversion from base&amp;ndash;10 to base&amp;ndash;58:&lt;/p&gt;
- &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (num-&amp;gt;baseN-str n #:base [N 10] #:num-&amp;gt;char [num-&amp;gt;char identity])
-  (if (zero? n) "" (nonzero-num-&amp;gt;baseN-str n #:base N #:num-&amp;gt;char num-&amp;gt;char)))
-(define (nonzero-num-&amp;gt;baseN-str n #:base [N 10] #:num-&amp;gt;char [num-&amp;gt;char identity])
+  (for/fold ([num 0]) ([ch (in-string b58str)])
+    (+ (* 58 num) (base58-char-&amp;gt;num ch))))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Similarly, the conversion from base&amp;ndash;10 to hex looks mostly like the &lt;code&gt;num-&amp;gt;base58-str&lt;/code&gt; function above, except now we need to count leading &amp;rsquo;1&amp;rsquo;s:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (num-&amp;gt;hex-char n)
+  (when (or (&amp;lt; n 0) (&amp;gt;= n 16))
+    (error 'num-&amp;gt;hex-char "cannot convert to hex: ~a\n" n))
+  (string-ref HEX-CHARS n))
+
+(define (num-&amp;gt;hex-str.v0 n)
   (list-&amp;gt;string
     (reverse
       (let loop ([n n])
-        (define-values (q r) (quotient/remainder n N))
+        (define-values (q r) (quotient/remainder n 16))
         (if (zero? q)
-            (list (num-&amp;gt;char r))
-            (cons (num-&amp;gt;char r) (loop q)))))))
-
-(define (num-&amp;gt;base58-str n)
-  (num-&amp;gt;baseN-str n #:base 58 #:num-&amp;gt;char num-&amp;gt;base58-char))
-(define (num-&amp;gt;hex-str n)
-  (num-&amp;gt;baseN-str n #:base 16 #:num-&amp;gt;char num-&amp;gt;hex-char))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Finally we put the functions together to complete the conversion. Of course, we can&amp;rsquo;t forget to add back the leading zeros, like before.&lt;/p&gt;
- &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (count-leading ch str)
-  (for/sum ([c str] #:break (not (eq? c ch))) 1))
+            (list (num-&amp;gt;hex-char r))
+            (cons (num-&amp;gt;hex-char r) (loop q)))))))
+           
+(define (num-&amp;gt;hex-str n) (if (zero? n) "" (num-&amp;gt;hex-str.v0 n)))
   
+(define (count-leading-ones str)
+  (for/sum ([c (in-string str)] #:break (not (char=? #\1 c))) 1))
+  
+(define (base58-str-&amp;gt;hex-str.v0 b58str)
+  (num-&amp;gt;hex-str.v0 (base58-str-&amp;gt;num b58str)))
+
 (define (base58-str-&amp;gt;hex-str b58str)
-  (define hex-str (base58-str-&amp;gt;hex-str/num b58str))
-  (define zeros-from-b58str (* 2 (count-leading #\1 b58str)))
+  (define hex-str/no-leading-zeros (base58-str-&amp;gt;hex-str.v0 b58str))
+  (define num-leading-ones (count-leading-ones b58str))
   (define num-leading-zeros
-  (if (even? (string-length hex-str))
-      zeros-from-b58str
-      (add1 zeros-from-b58str))) ; to make hex str byte aligned
-  (define leading-zeros-str (make-string num-leading-zeros #\0))
-  (string-append leading-zeros-str hex-str))
-(define (base58-str-&amp;gt;hex-str/num b58str)
-  (num-&amp;gt;hex-str (base58-str-&amp;gt;num b58str)))&lt;/code&gt;&lt;/pre&gt;
+  (if (even? (string-length hex-str/no-leading-zeros))
+      (* num-leading-ones 2)
+      (add1 (* num-leading-ones 2))))
+  (define leading-zeros (make-string num-leading-zeros #\0))
+  (string-append leading-zeros hex-str/no-leading-zeros))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Note that we may have to add an extra &amp;lsquo;0&amp;rsquo; in &lt;code&gt;base58-str-&amp;gt;hex-str&lt;/code&gt; to keep the resulting hex string byte-aligned.&lt;/p&gt;
  &lt;p&gt;And trying it on our example returns the expected result:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
@@ -147,6 +137,10 @@ Welcome to Racket v6.0.0.3.
 -&amp;gt; (hex-str-&amp;gt;base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
 "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
 -&amp;gt; (base58-str-&amp;gt;hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
-"00010966776006953D5567439E5E39F86A0D273BEED61967F6"&lt;/code&gt;&lt;/pre&gt;
+"00010966776006953D5567439E5E39F86A0D273BEED61967F6"
+-&amp;gt; (base58-str-&amp;gt;hex-str (hex-str-&amp;gt;base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6"))
+"00010966776006953D5567439E5E39F86A0D273BEED61967F6"
+-&amp;gt; (hex-str-&amp;gt;base58-str (base58-str-&amp;gt;hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"))
+"16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"&lt;/code&gt;&lt;/pre&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
- &lt;p&gt;All the code from this post &lt;a href="http://www.lostintransaction.com/code/base58.rkt"&gt;may be downloaded here&lt;/a&gt;. Examples were executed with Racket 6.0.0.3 running in Debian 7.0.&lt;/p&gt;&lt;!--todo: explain decode code--&gt;&lt;/html&gt;</description></item></channel></rss>
+ &lt;p&gt;All the code from this post &lt;a href="http://www.lostintransaction.com/code/base58.rkt"&gt;is available here&lt;/a&gt;. Examples were executed with Racket 6.0.0.3, running in Debian 7.0.&lt;/p&gt;&lt;!--todo: explain decode code--&gt;&lt;/html&gt;</description></item></channel></rss>

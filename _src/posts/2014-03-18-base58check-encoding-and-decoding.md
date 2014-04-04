@@ -163,75 +163,60 @@ Trying our example again yields the expected result:
 ### Decoding ###
 
 To convert from base-58 back to hex, we reverse the above steps. We
-first convert from base-58 to base-10 and then from base-10 to
-hex. 
+first convert from base-58 to base-10 and then from base-10 to hex.
 
-The conversion from hex or base-58 strings into numbers is
-similar, so we can abstract the common parts into a separate function:
+The conversion from base-58 strings into base-10 numbers looks a lot
+like the `hex-str->num` function we defined above:
 
 ```racket
-(define (baseN-char->num ch #:CHARS [CHARS ""] #:c=? [c=? char=?])
-  (define base (string-length CHARS))
-  (define index (for/first ([(c n) (in-indexed CHARS)] #:when (c=? c ch)) n))
-  (or index (error 'char->num "invalid base-~a char: ~a\n" base ch)))
+(define (base58-char->num ch)
+  (define index
+    (for/first ([(c n) (in-indexed BASE58-CHARS)] #:when (char=? c ch)) n))
+  (or index (error 'base58-char->num "invalid base58 char: ~a\n" ch)))
 
-(define HEX-CHARS "0123456789ABCDEF")
-(define (upcase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
-
-(define (hex-char->num c) 
-  (baseN-char->num c #:CHARS HEX-CHARS #:c=? upcase=?))
-(define (base58-char->num c) 
-  (baseN-char->num c #:CHARS BASE58-CHARS))
-			
-(define (baseN-str->num str #:base [N 10] #:digit->num [digit->num identity])
-  (for/fold ([num 0]) ([d str]) (+ (* N num) (digit->num d))))
-
-(define (hex-str->num hstr)
-  (baseN-str->num hstr #:base 16 #:digit->num hex-char->num))
 (define (base58-str->num b58str)
-  (baseN-str->num b58str #:base 58 #:digit->num base58-char->num))
+  (for/fold ([num 0]) ([ch (in-string b58str)])
+    (+ (* 58 num) (base58-char->num ch))))
 ```
 
-Similarly, the conversion from base-10 to hex resembles the conversion
-from base-10 to base-58:
+Similarly, the conversion from base-10 to hex looks mostly like the
+`num->base58-str` function above, except now we need to count leading '1's:
 
 ```racket
-(define (num->baseN-str n #:base [N 10] #:num->char [num->char identity])
-  (if (zero? n) "" (nonzero-num->baseN-str n #:base N #:num->char num->char)))
-(define (nonzero-num->baseN-str n #:base [N 10] #:num->char [num->char identity])
+(define (num->hex-char n)
+  (when (or (< n 0) (>= n 16))
+    (error 'num->hex-char "cannot convert to hex: ~a\n" n))
+  (string-ref HEX-CHARS n))
+
+(define (num->hex-str.v0 n)
   (list->string
     (reverse
       (let loop ([n n])
-        (define-values (q r) (quotient/remainder n N))
+        (define-values (q r) (quotient/remainder n 16))
         (if (zero? q)
-            (list (num->char r))
-            (cons (num->char r) (loop q)))))))
-
-(define (num->base58-str n)
-  (num->baseN-str n #:base 58 #:num->char num->base58-char))
-(define (num->hex-str n)
-  (num->baseN-str n #:base 16 #:num->char num->hex-char))
-```
-
-Finally we put the functions together to complete the conversion. Of
-course, we can't forget to add back the leading zeros, like before.
-
-```racket
-(define (count-leading ch str)
-  (for/sum ([c str] #:break (not (eq? c ch))) 1))
+            (list (num->hex-char r))
+            (cons (num->hex-char r) (loop q)))))))
+			
+(define (num->hex-str n) (if (zero? n) "" (num->hex-str.v0 n)))
   
+(define (count-leading-ones str)
+  (for/sum ([c (in-string str)] #:break (not (char=? #\1 c))) 1))
+  
+(define (base58-str->hex-str.v0 b58str)
+  (num->hex-str.v0 (base58-str->num b58str)))
+
 (define (base58-str->hex-str b58str)
-  (define hex-str (base58-str->hex-str/num b58str))
-  (define zeros-from-b58str (* 2 (count-leading #\1 b58str)))
+  (define hex-str/no-leading-zeros (base58-str->hex-str.v0 b58str))
+  (define num-leading-ones (count-leading-ones b58str))
   (define num-leading-zeros
-  (if (even? (string-length hex-str))
-      zeros-from-b58str
-      (add1 zeros-from-b58str))) ; to make hex str byte aligned
-  (define leading-zeros-str (make-string num-leading-zeros #\0))
-  (string-append leading-zeros-str hex-str))
-(define (base58-str->hex-str/num b58str)
-  (num->hex-str (base58-str->num b58str)))
+  (if (even? (string-length hex-str/no-leading-zeros))
+      (* num-leading-ones 2)
+      (add1 (* num-leading-ones 2))))
+  (define leading-zeros (make-string num-leading-zeros #\0))
+  (string-append leading-zeros hex-str/no-leading-zeros))
 ```
+
+Note that we may have to add an extra '0' in `base58-str->hex-str` to keep the resulting hex string byte-aligned.
 
 And trying it on our example returns the expected result:
 
@@ -240,13 +225,17 @@ And trying it on our example returns the expected result:
     -> (require "base58.rkt")
     -> (hex-str->base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
     "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
-	-> (base58-str->hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
+    -> (base58-str->hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
     "00010966776006953D5567439E5E39F86A0D273BEED61967F6"
-
+    -> (base58-str->hex-str (hex-str->base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6"))
+    "00010966776006953D5567439E5E39F86A0D273BEED61967F6"
+    -> (hex-str->base58-str (base58-str->hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"))
+    "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
+   
 ### Software
 
 All the code from this post
-[may be downloaded here](http://www.lostintransaction.com/code/base58.rkt).
-Examples were executed with Racket 6.0.0.3 running in Debian 7.0.
+[is available here](http://www.lostintransaction.com/code/base58.rkt).
+Examples were executed with Racket 6.0.0.3, running in Debian 7.0.
 
 <!--todo: explain decode code-->

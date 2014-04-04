@@ -6,11 +6,11 @@
 (define BASE58-CHARS 
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
 
-(define (upcase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
+(define (anycase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
 
 (define (hex-char->num ch)
   (define index 
-    (for/first ([(c n) (in-indexed HEX-CHARS)] #:when (upcase=? c ch)) n))
+    (for/first ([(c n) (in-indexed HEX-CHARS)] #:when (anycase=? c ch)) n))
   (or index (error 'hex-char->num "invalid hex char: ~a\n" ch)))
 
 (define (hex-str->num hstr)

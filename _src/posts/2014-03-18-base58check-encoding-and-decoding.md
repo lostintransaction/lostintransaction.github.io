@@ -5,8 +5,8 @@
 In previous posts, we looked at
 [computing a Bitcoin public key from a private key][LiT:pubfrompriv],
 and [computing a Bitcoin address from a public key][LiT:ffi]. However,
-these posts dealt with hexadecimal representations of keys and
-addresses, which is not the representation familiar to most Bitcoin
+these posts dealt with the keys and addresses in hexadecimal (hex)
+form, which is not the representation familiar to most Bitcoin
 users. Bitcoin addresses more commonly are encoded as
 [Base58Check][bwiki:b58] strings, which we explore in this post.
 
@@ -17,7 +17,8 @@ users. Bitcoin addresses more commonly are encoded as
 <!-- more -->
 
 The [Bitcoin reference code][bitcoinsrc] provides the following
-rationale for using Base58Check (over base-64):
+rationale for using Base58Check (instead of a more common base-64
+encoding):
 
     // Why base-58 instead of standard base-64 encoding?
     // - Don't want 0OIl characters that look the same in some fonts and
@@ -29,9 +30,10 @@ rationale for using Base58Check (over base-64):
 [bitcoinsrc]: https://github.com/bitcoin/bitcoin/blob/f76c122e2eac8ef66f69d142231bd33c88a24c50/src/base58.h#L7-L12 "src/base58.h"
 
 Essentially, the goal with Base58Check is to make it easier for humans
-to read and handle Bitcoin addresses. Let's implement Base58Check
-encoding and decoding. We'll use [Racket](http://racket-lang.org),
-which let's us avoid the hassle of dealing with `BIGNUM`s.
+to read and handle Bitcoin addresses. In this post, instead of the C++
+used in the Bitcoin reference, we implement Base58Check encoding and
+decoding using [Racket](http://racket-lang.org), which lets us avoid
+the hassle of dealing with `BIGNUM`s.
 
 ### Encoding ###
 
@@ -44,11 +46,11 @@ easier to convert to a base-10 number first. Here's a Racket function
 ```racket
 (define HEX-CHARS "0123456789ABCDEF")
 
-(define (upcase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
+(define (anycase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
 
 (define (hex-char->num ch)
   (define index 
-    (for/first ([(c n) (in-indexed HEX-CHARS)] #:when (upcase=? c ch)) n))
+    (for/first ([(c n) (in-indexed HEX-CHARS)] #:when (anycase=? c ch)) n))
   (or index (error 'hex-char->num "invalid hex char: ~a\n" ch)))
 	  
 (define (hex-str->num hstr)
@@ -57,18 +59,20 @@ easier to convert to a base-10 number first. Here's a Racket function
 ```
 
 The `fold/for` form defines an intermediate result `num` that is
-initially 0 and then for each hex character, multiplies the
-intermediate result by 16 and adds to it the base-10 representation of
-that hex character, as computed by `hex-char->num`. The
-`hex-char->num` function converts a hex character to a number by
-computing the position of the character in the `HEX-CHARS` constant
-string, or throws an error if the input character is not valid
-hex. Note that `hex-char->num` accepts both upper and lowercase hex
-characters.
+initially 0 and then for each hex character in the input `hstr`,
+multiplies the intermediate result by 16 and adds to it the base-10
+representation of that hex character, as computed by
+`hex-char->num`. The `hex-char->num` function converts a hex character
+to a number by computing the position of the character in the
+`HEX-CHARS` constant string (or throws an error if the input character
+is not valid hex). Note that `hex-char->num` accepts both upper and
+lowercase hex characters, and uses `anycase=?` to compare characters
+for equality.
 
 Let's see what the (hex) Bitcoin address from
-[this Bitcoin Wiki article][bwiki:addr]) is in base-10 (the above code
-is saved to a file `base58.rkt` with `hex-str->num` exported):
+[this Bitcoin Wiki article][bwiki:addr] (step 8) is in base-10 (the
+above code is saved to a file `base58.rkt` with `hex-str->num`
+exported):
 
 [bwiki:addr]: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses "Technical background of version 1 Bitcoin addresses"
 
@@ -92,33 +96,33 @@ Base58Check. Here's an initial attempt at converting to base-58:
 (define (num->base58-str.v0 n)
   (list->string
     (reverse
-	  (let loop ([n n])
-	    (define-values (q r) (quotient/remainder n 58))
-		(if (zero? q)
+      (let loop ([n n])
+        (define-values (q r) (quotient/remainder n 58))
+        (if (zero? q)
             (list (num->base58-char r))
-			(cons (num->base58-char r) (loop q)))))))
+            (cons (num->base58-char r) (loop q)))))))
 
 (define (hex-str->base58-str.v0 hstr) 
-  (num->base58-str (hex-str->num hstr)))
+  (num->base58-str.v0 (hex-str->num hstr)))
 ```
 
-The `hex-str->base58-str.v0` function starts by converting the hex
-string to a base-10 number using the previously defined
+The `hex-str->base58-str.v0` function first converts its hex string
+input to a base-10 number using the previously defined
 `hex-str->num`. It then calls `num->base58-str.v0` to convert the
 base-10 number to base-58. The `num->base58-str.v0` function
 repeatedly performs `modulo 58` and integer division operations on the
-given number in a loop. Giving the result of the `modulo` operation to
-`num->base58-char` produces the next base-58 digit and the division
-computes the number to use in the next iteration of the loop. The
-`quotient/remainder` Racket function conveniently performs both the
-modulo and division in one step. The end result of the `loop` is a
-list of base-58 digits. The digits are computed in reverse order so
-they are reversed before converting back to a string.
+given number --- the `quotient/remainder` Racket function conveniently
+performs both the operations in one step. Passing the `modulo` result
+(ie the remainder `r`) to `num->base58-char` gives in the next base-58
+digit and the division result (ie the quotient `q`) is used in the
+next `loop` iteration. The end result of the `loop` is a list of
+base-58 digits. The digits are computed in reverse order so they are
+reversed before converting back to a string.
 
 Let's test our code. Following
 [the same example from the Bitcoin wiki][bwiki:addr], the hex address
-`00010966776006953D5567439E5E39F86A0D273BEED61967F6` in Base58Check is
-`16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM`.
+`00010966776006953D5567439E5E39F86A0D273BEED61967F6` is
+`16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM` in Base58Check.
 
     $ racket
 	Welcome to Racket v6.0.0.3.
@@ -126,12 +130,12 @@ Let's test our code. Following
 	-> (hex-str->base58-str.v0 "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
 	"6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
 
-We got the wrong answer! What happened? It turns out that the leading
-zeros in a hex string matter when the string is viewed as a Bitcoin
-address. But when we converted to base-10, the leading zeros got lost
-since they don't matter for numbers.
+Our initial attempt produces the wrong answer! What happened? It turns
+out that the leading zeros in a hex string matter when the string is
+viewed as a Bitcoin address. But when we converted to base-10, the
+leading zeros got lost since they don't matter for numbers.
 
-To complete the base-58 conversion according to the Bitcoin reference
+To complete the base-58 conversion, following the Bitcoin reference
 code, we count the number of leading zeros in the hex string and add
 one leading '1' character to the base-58 address for each leading zero
 *byte* in the hex string, ie, we add one leading base-58 '1' per two

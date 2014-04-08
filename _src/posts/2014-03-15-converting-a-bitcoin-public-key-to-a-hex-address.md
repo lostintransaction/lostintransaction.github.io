@@ -61,7 +61,7 @@ unsigned char *SHA256( const unsigned char *d, size_t n, unsigned char *md );
 ```
 
 To create a Racket wrapper function, we use
-[`get-ffi-obj`][racket:getffiobj]. Here's one possible definition of a
+[`get-ffi-obj`][racket:getffiobj]. Here's a definition of a
 `sha256` Racket function that calls the `SHA256` C function:
 
 ```racket
@@ -106,7 +106,7 @@ library.
 [racket:fun]: http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29 "Racket docs: _fun"
 [openssl:sha256const]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133 "OpenSSL source: crypto/sha/sha.h"
 
-Here's the wrapper for `ripemd160`:
+And here's a wrapper for `ripemd160`:
 
 ```racket
 (define RIPEMD160-DIGEST-LEN 20) ; bytes
@@ -142,7 +142,7 @@ from the Bitcoin wiki example:
 4. prepend `0x00`: `00010966776006953D5567439E5E39F86A0D273BEE`
 5. SHA-256: `445C7A8007A93D8733188288BB320A8FE2DEBD2AE1B47F0F50BC10BAE845C094`
 6. SHA-256 (checksum is first 4 bytes): `D61967F63C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30`
-7. checksum + #4 = (hex) address: `00010966776006953D5567439E5E39F86A0D273BEED61967F6`
+7. #4 + checksum = (hex) address: `00010966776006953D5567439E5E39F86A0D273BEED61967F6`
 
 The hashes are all in hexdecimal form so we need to extend our hash
 functions to convert to and from hex strings (`bytes->hex-string` and

@@ -286,7 +286,7 @@
 <span class="p">{</span>
   <span class="n">EC_GROUP</span> <span class="o">*</span><span class="n">ecgrp</span> <span class="o">=</span> <span class="n">EC_GROUP_new_by_curve_name</span><span class="p">(</span> <span class="n">NID_secp256k1</span> <span class="p">);</span>
 
-  <span class="c1">// convert priv key from BIGNUM to hexadecimal</span>
+  <span class="c1">// convert priv key from hexadecimal to BIGNUM</span>
   <span class="n">BIGNUM</span> <span class="o">*</span><span class="n">priv_bn</span> <span class="o">=</span> <span class="n">BN_new</span><span class="p">();</span>
   <span class="n">BN_hex2bn</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">priv_bn</span><span class="p">,</span> <span class="n">priv_hex</span> <span class="p">);</span>
 
@@ -325,11 +325,11 @@
  <p>Bitcoin private keys are 32 bytes and public keys are 65 bytes. The <code>priv2pub</code> function computes the public key associated with the given private key. Both the input private key and the output public key are in hexadecimal. I had to first convert the private key to <code>BIGNUM</code>, which is OpenSSL&rsquo;s number representation for arbitrary precision arithmetic. The computed public key is a curve coordinate in OpenSSL&rsquo;s <code>EC_POINT</code> representation. I then convert back to hex using <code>EC_POINT_point2hex</code>.</p>
 
 
- <p>To test, I found a sample public/private key pair from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses">this Bitcoin wiki article</a>. The private key from the article is <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code> and the public key is <code>0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code>. Let&rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file <code>blog.c</code>.)</p>
+ <p>To test, I found a sample public/private key pair from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses">this Bitcoin wiki article</a>. The private key from the article is <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code> and the public key is <code>0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code>. Let&rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file <code>priv2pub.c</code>.)</p>
 
 
- <pre><code>$ gcc -lcrypto -std=c99 blog.c
-$ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
+ <pre><code>$ gcc -lcrypto -std=c99 priv2pub.c -o priv2pub
+$ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code></pre>
 
 
@@ -339,7 +339,7 @@ $ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
  <p>Let&rsquo;s do another one. I generated a private key with <a href="https://www.bitaddress.org">bitaddress.org</a>, <code>5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe</code>, but it&rsquo;s in <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a> and not hex. So I went to the &ldquo;Wallet Details&rdquo; tab, entered the base58 key, and <a href="https://www.bitaddress.org">bitaddress.org</a> reports that the private key in hex is <code>4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61</code> and public key is <code>0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117</code>. Let&rsquo;s check with our code:</p>
 
 
- <pre><code>$ ./a.out 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
+ <pre><code>$ ./priv2pub 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
 0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117</code></pre>
 
 
@@ -349,7 +349,7 @@ $ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
  <h3 id="software">Software</h3>
 
 
- <p>In this post, I&rsquo;m using OpenSSL 1.0.1e, gcc 4.7.2, and running Debian 7.0. I had to also install the <code>libssl-dev</code> package to get the proper header files.</p>
+ <p>All the code from this post <a href="http://www.lostintransaction.com/code/priv2pub.c">is available here</a>. In this post, I&rsquo;m using OpenSSL 1.0.1e and gcc 4.7.2, running in Debian 7.0. I had to install the <code>libssl-dev</code> package to get the proper header files.</p>
 
  <footer>
 

@@ -79,7 +79,7 @@ unsigned char *priv2pub( const unsigned char *priv_hex )
 {
   EC_GROUP *ecgrp = EC_GROUP_new_by_curve_name( NID_secp256k1 );
   
-  // convert priv key from BIGNUM to hexadecimal
+  // convert priv key from hexadecimal to BIGNUM
   BIGNUM *priv_bn = BN_new();
   BN_hex2bn( &priv_bn, priv_hex );
   
@@ -128,10 +128,10 @@ article is
 the public key is
 `0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6`. Let's
 see if our program can recover this public key from the private
-key. (I save the code above to a file `blog.c`.)
+key. (I save the code above to a file `priv2pub.c`.)
 
-    $ gcc -lcrypto -std=c99 blog.c
-    $ ./a.out 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
+    $ gcc -lcrypto -std=c99 priv2pub.c -o priv2pub
+    $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 	0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6
 
 Success!
@@ -140,7 +140,7 @@ Success!
 
 Let's do another one. I generated a private key with [bitaddress.org](https://www.bitaddress.org), `5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe`, but it's in [Base58Check encoding][bwiki:base58] and not hex. So I went to the "Wallet Details" tab, entered the base58 key, and [bitaddress.org](https://www.bitaddress.org) reports that the private key in hex is `4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61` and public key is `0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117`. Let's check with our code:
 
-    $ ./a.out 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
+    $ ./priv2pub 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
 	0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117
 
 [bwiki:base58]: https://en.bitcoin.it/wiki/Base58Check_encoding "Bitcoin wiki: Base58Check encoding"
@@ -149,6 +149,8 @@ Hurrah!
 
 ### Software ###
 
-In this post, I'm using OpenSSL 1.0.1e, gcc 4.7.2, and running Debian
-7.0. I had to also install the `libssl-dev` package to get the proper
-header files.
+All the code from this post
+[is available here](http://www.lostintransaction.com/code/priv2pub.c).
+In this post, I'm using OpenSSL 1.0.1e and gcc 4.7.2, running in
+Debian 7.0. I had to install the `libssl-dev` package to get the
+proper header files.

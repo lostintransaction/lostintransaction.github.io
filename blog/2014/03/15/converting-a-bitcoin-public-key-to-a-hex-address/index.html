@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Converting a Bitcoin Public Key to a (Hex) Address</title>
-    <meta name="description" content="In a previous post, we derived a Bitcoin public key from a private key. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I'll be using the Racket language in this post. ...">
+    <meta name="description" content="In a previous post, we derived a Bitcoin public key from a private key. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I'll be using the Racket language to help me. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD, Bitcoin addresses, public key">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -126,13 +126,13 @@
   </header>
 
 
- <p>In a previous post, we <a href="lit:pubfrompriv">derived a Bitcoin public key from a private key</a>. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&rsquo;ll be using <a href="http://racket-lang.org">the Racket language</a> in this post.</p>
+ <p>In a previous post, we <a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key">derived a Bitcoin public key from a private key</a>. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&rsquo;ll be using <a href="http://racket-lang.org">the Racket language</a> to help me.</p>
 
 
  <p>C is great for many programming tasks but sometimes it&rsquo;s nice to use a higher-level language that automatically handles things like arbitrary-precision arithmetic and memory management. <a href="http://racket-lang.org">Racket</a>, a LISP dialect, has linguistic support for these features (and more) and I enjoy using it to experiment with Bitcoin.</p>
 
 
- <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto library. It does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. Let&rsquo;s first create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
+ <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto library. It does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. So first we&rsquo;ll create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
 
 
  <h3 id="ffi-lib"><code>ffi-lib</code></h3>
@@ -174,7 +174,7 @@
  <h3 id="get-ffi-obj"><code>get-ffi-obj</code></h3>
 
 
- <p>Let&rsquo;s create a Racket wrapper function for the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"><code>SHA256</code> C function</a>. Here&rsquo;s the header:</p>
+ <p>Next we create a Racket wrapper function for the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"><code>SHA256</code> C function</a>. Here&rsquo;s the header:</p>
 
 
  <div class="brush: C">
@@ -230,7 +230,7 @@
 
       <div class="source">
 
-       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">SHA256-DIGEST-LEN</span> <span class="mi">32</span><span class="p">)</span>
+       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">SHA256-DIGEST-LEN</span> <span class="mi">32</span><span class="p">)</span> <span class="c1">; <a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes))" style="color: inherit">bytes</a></span>
 
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">sha256</span>
   <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._get-ffi-obj))" style="color: inherit">get-ffi-obj</a></span>
@@ -265,10 +265,7 @@
    <p>The third argument is the output byte array. The <code>o</code> indicates a return pointer and is followed by the expected length of the output array, which should be 32 bytes here. We define a constant <code>SHA256-DIGEST-LEN</code> which is analogous to <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133" title="OpenSSL source: crypto/sha/sha.h">the <code>SHA256_DIGEST_LENGTH</code> constant</a> in the C library.</p></li></ol>
 
 
- <h3 id="all-together">All Together</h3>
-
-
- <p>Here&rsquo;s some code defining a Racket module that exports functions named <code>sha256</code> and <code>ripemd160</code>. Note that the functions that call directly to the C functions are now named <code>sha256/bytes</code> and <code>ripemd160/bytes</code>, and these functions consume and produce bytes. We additionally define <code>sha256</code> and <code>ripemd160</code> functions which have optional keyword arguments for conversion of the input and output. These functions consume and produce hexadecimal strings by default.</p>
+ <p>Here&rsquo;s the wrapper for <code>ripemd160</code>:</p>
 
 
  <div class="brush: racket">
@@ -293,73 +290,23 @@
  8
  9
 10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36</pre></div></td>
+11</pre></div></td>
 
      <td class="code">
 
       <div class="source">
 
-       <pre><span class="kn">#lang racket/base</span>
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._require))" style="color: inherit">require</a> </span><span class="nv">ffi/unsafe</span> <span class="nv">openssl/libcrypto</span><span class="p">)</span>
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._require))" style="color: inherit">require</a> </span><span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._only-in))" style="color: inherit">only-in</a></span> <span class="nv">openssl/sha1</span> <span class="nv">hex-string-&gt;bytes</span>
-                               <span class="nv">bytes-&gt;hex-string</span><span class="p">))</span>
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._provide))" style="color: inherit">provide</a> </span><span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/require.html#(form._((lib._racket/private/base..rkt)._all-defined-out))" style="color: inherit">all-defined-out</a></span><span class="p">))</span>
-
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">SHA256-DIGEST-LEN</span> <span class="mi">32</span><span class="p">)</span>
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">RIPEMD160-DIGEST-LEN</span> <span class="mi">20</span><span class="p">)</span>
-
-<span class="c1">; from crypto/sha/sha.h:</span>
-<span class="c1">;   unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *SHA256(const unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *d, size_t n, unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *md);</span>
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">sha256/bytes</span>
-  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._get-ffi-obj))" style="color: inherit">get-ffi-obj</a></span>
-  <span class="ss">'SHA256</span> <span class="nv">libcrypto</span>
-  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__fun))" style="color: inherit">_fun</a></span> <span class="p">[</span><span class="nf">input</span>     <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span><span class="p">]</span>
-        <span class="p">[</span><span class="nf">input-len</span> <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/Numeric_Types.html#(def._((lib._ffi/unsafe..rkt).__ulong))" style="color: inherit">_ulong</a></span> <span class="nv"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3d))" style="color: inherit">=</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes-length))" style="color: inherit">bytes-length</a> </span><span class="nv">input</span><span class="p">)]</span>
-        <span class="p">[</span><span class="nf"><a href="http://docs.racket-lang.org/scribble-pp/text.html#(def._((lib._scribble/text..rkt)._output))" style="color: inherit">output</a></span>    <span class="nv">:</span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span> <span class="nv">o</span> <span class="nv">SHA256-DIGEST-LEN</span><span class="p">)]</span>
-        <span class="nv"><a href="http://docs.racket-lang.org/reference/function-contracts.html#(form._((lib._racket/contract/base..rkt)._-~3e))" style="color: inherit">-&gt;</a></span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span> <span class="nv">o</span> <span class="nv">SHA256-DIGEST-LEN</span><span class="p">))))</span>
-
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">sha256</span> <span class="nv">input</span> <span class="kd">#:convert-input</span>  <span class="p">[</span><span class="nf">input-&gt;bytes</span> <span class="nv">hex-string-&gt;bytes</span><span class="p">]</span>
-                      <span class="kd">#:convert-output</span> <span class="p">[</span><span class="nf">bytes-&gt;output</span> <span class="nv">bytes-&gt;hex-string</span><span class="p">])</span>
-  <span class="p">(</span><span class="nf">bytes-&gt;output</span> <span class="p">(</span><span class="nf">sha256/bytes</span> <span class="p">(</span><span class="nf">input-&gt;bytes</span> <span class="nv">input</span><span class="p">))))</span>
+       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">RIPEMD160-DIGEST-LEN</span> <span class="mi">20</span><span class="p">)</span> <span class="c1">; <a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes))" style="color: inherit">bytes</a></span>
 
 <span class="c1">; from crypto/ripemd/ripemd.h</span>
-<span class="c1">;   unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *RIPEMD160(const unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *d, size_t n, unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *md);</span>
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">ripemd160/bytes</span>
+<span class="c1">;  unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *RIPEMD160(const unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *d, size_t n, unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *md);</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">ripemd160</span>
   <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._get-ffi-obj))" style="color: inherit">get-ffi-obj</a></span>
-  <span class="ss">'RIPEMD160</span> <span class="nv">libcrypto</span>
-  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__fun))" style="color: inherit">_fun</a></span> <span class="p">[</span><span class="nf">input</span>     <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span><span class="p">]</span>
-        <span class="p">[</span><span class="nf">input-len</span> <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/Numeric_Types.html#(def._((lib._ffi/unsafe..rkt).__ulong))" style="color: inherit">_ulong</a></span> <span class="nv"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3d))" style="color: inherit">=</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes-length))" style="color: inherit">bytes-length</a> </span><span class="nv">input</span><span class="p">)]</span>
-        <span class="p">[</span><span class="nf"><a href="http://docs.racket-lang.org/scribble-pp/text.html#(def._((lib._scribble/text..rkt)._output))" style="color: inherit">output</a></span>    <span class="nv">:</span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span> <span class="nv">o</span> <span class="nv">RIPEMD160-DIGEST-LEN</span><span class="p">)]</span>
-        <span class="nv"><a href="http://docs.racket-lang.org/reference/function-contracts.html#(form._((lib._racket/contract/base..rkt)._-~3e))" style="color: inherit">-&gt;</a></span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span> <span class="nv">o</span> <span class="nv">RIPEMD160-DIGEST-LEN</span><span class="p">))))</span>
-
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">ripemd160</span> <span class="nv">input</span> <span class="kd">#:convert-input</span>  <span class="p">[</span><span class="nf">input-&gt;bytes</span> <span class="nv">hex-string-&gt;bytes</span><span class="p">]</span>
-                         <span class="kd">#:convert-output</span> <span class="p">[</span><span class="nf">bytes-&gt;output</span> <span class="nv">bytes-&gt;hex-string</span><span class="p">])</span>
-  <span class="p">(</span><span class="nf">bytes-&gt;output</span> <span class="p">(</span><span class="nf">ripemd160/bytes</span> <span class="p">(</span><span class="nf">input-&gt;bytes</span> <span class="nv">input</span><span class="p">))))</span>
+    <span class="ss">'RIPEMD160</span> <span class="nv">libcrypto</span>
+    <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__fun))" style="color: inherit">_fun</a></span> <span class="p">[</span><span class="nf">input</span>     <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span><span class="p">]</span>
+          <span class="p">[</span><span class="nf">input-len</span> <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/Numeric_Types.html#(def._((lib._ffi/unsafe..rkt).__ulong))" style="color: inherit">_ulong</a></span> <span class="nv"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3d))" style="color: inherit">=</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes-length))" style="color: inherit">bytes-length</a> </span><span class="nv">input</span><span class="p">)]</span>
+          <span class="p">[</span><span class="nf"><a href="http://docs.racket-lang.org/scribble-pp/text.html#(def._((lib._scribble/text..rkt)._output))" style="color: inherit">output</a></span>    <span class="nv">:</span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span> <span class="nv">o</span> <span class="nv">RIPEMD160-DIGEST-LEN</span><span class="p">)]</span>
+          <span class="nv"><a href="http://docs.racket-lang.org/reference/function-contracts.html#(form._((lib._racket/contract/base..rkt)._-~3e))" style="color: inherit">-&gt;</a></span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span> <span class="nv">o</span> <span class="nv">RIPEMD160-DIGEST-LEN</span><span class="p">))))</span>
 </pre></div>
 </td></tr></tbody></table>
 </div>
@@ -391,24 +338,59 @@
   <li>checksum + #4 = (hex) address: <code>00010966776006953D5567439E5E39F86A0D273BEED61967F6</code></li></ol>
 
 
- <p>We can use <a href="http://docs.racket-lang.org/guide/intro.html?q=repl#%28tech._repl%29" title="Interacting with Racket">the Racket REPL</a>, and the code above (which I saved to a file <code>crypto.rkt</code>) to get the same results:</p>
+ <p>The hashes are all in hexdecimal form so we need to extend our hash functions to convert to and from hex strings (<code>bytes-&gt;hex-string</code> and <code>hex-string-&gt;bytes</code> are Racket built-in functions):</p>
+
+
+ <div class="brush: racket">
+
+  <table class="sourcetable">
+
+   <tbody>
+
+    <tr>
+
+     <td class="linenos">
+
+      <div class="linenodiv">
+
+       <pre>1
+2
+3
+4
+5</pre></div></td>
+
+     <td class="code">
+
+      <div class="source">
+
+       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">sha256/hex</span> <span class="nv">input</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">bytes-&gt;hex-string</span> <span class="p">(</span><span class="nf">sha256</span> <span class="p">(</span><span class="nf">hex-string-&gt;bytes</span> <span class="nv">input</span><span class="p">))))</span>
+
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">ripemd160/hex</span> <span class="nv">input</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">bytes-&gt;hex-string</span> <span class="p">(</span><span class="nf">ripemd160</span> <span class="p">(</span><span class="nf">hex-string-&gt;bytes</span> <span class="nv">input</span><span class="p">))))</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+
+ <p>We can use <a href="http://docs.racket-lang.org/guide/intro.html?q=repl#%28tech._repl%29" title="Interacting with Racket">the Racket REPL</a>, and the <a href="http://www.lostintransaction.com/code/crypto.rkt">code from this post</a> (which I saved to a file <code>crypto.rkt</code>) to get the same results:</p>
 
 
  <pre><code>$ racket
 Welcome to Racket v6.0.0.3.
 -&gt; (require "crypto.rkt")
 -&gt; (define pub-key "0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6")
--&gt; (sha256 pub-key)
+-&gt; (sha256/hex pub-key)
 "600ffe422b4e00731a59557a5cca46cc183944191006324a447bdb2d98d4b408"
--&gt; (ripemd160 (sha256 pub-key))
+-&gt; (ripemd160/hex (sha256/hex pub-key))
 "010966776006953d5567439e5e39f86a0d273bee"
--&gt; (define hash160 (ripemd160 (sha256 pub-key)))
+-&gt; (define hash160 (ripemd160/hex (sha256/hex pub-key)))
 -&gt; (define hash160/extended (string-append "00" hash160))
--&gt; (sha256 hash160/extended)
+-&gt; (sha256/hex hash160/extended)
 "445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
--&gt; (sha256 (sha256 hash160/extended))
+-&gt; (sha256/hex (sha256/hex hash160/extended))
 "d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
--&gt; (define checksum (substring (sha256 (sha256 hash160/extended)) 0 8))
+-&gt; (define checksum (substring (sha256/hex (sha256/hex hash160/extended)) 0 8))
 -&gt; checksum
 "d61967f6"
 -&gt; (define address/hex (string-append hash160/extended checksum))
@@ -423,7 +405,7 @@ Welcome to Racket v6.0.0.3.
  <h3 id="software">Software</h3>
 
 
- <p>The code from this post can be downloaded here. In this post, I&rsquo;m using OpenSSL 1.0.1e with Racket 6.0.0.3 running in Debian 7.0.</p>
+ <p>All the code from this post <a href="http://www.lostintransaction.com/code/crypto.rkt">is available here</a>. In this post, I&rsquo;m using OpenSSL 1.0.1e with Racket 6.0.0.3, running in Debian 7.0.</p>
 
  <footer>
 

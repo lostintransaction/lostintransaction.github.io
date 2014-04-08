@@ -3,9 +3,10 @@
     Tags: OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD, Bitcoin addresses, public key
 
 In a previous post, we
-[derived a Bitcoin public key from a private key](lit:pubfrompriv). This
+[derived a Bitcoin public key from a private key][lit:pubfrompriv]. This
 post explores how to convert that public key into a Bitcoin address
-(in hexadecimal notation). I'll be using [the Racket language](http://racket-lang.org) in this post.
+(in hexadecimal notation). I'll be using
+[the Racket language](http://racket-lang.org) to help me.
 
 <!-- more -->
 
@@ -18,9 +19,9 @@ to experiment with Bitcoin.
 
 Unfortunately, Racket doesn't have a complete crypto library. It does
 have, however, an [FFI][racketffi] that enables Racket code to
-directly call C functions. Let's first create Racket bindings for two
-important hashing functions used by Bitcoin, [SHA-256][wiki:sha] and
-[RIPEMD-160][wiki:ripemd].
+directly call C functions. So first we'll create Racket bindings for
+two important hashing functions used by Bitcoin, [SHA-256][wiki:sha]
+and [RIPEMD-160][wiki:ripemd].
 
 [racketffi]: http://docs.racket-lang.org/foreign/index.html "Racket FFI"
 [wiki:sha]: http://en.wikipedia.org/wiki/SHA-2 "Wikipedia: SHA-2"
@@ -52,7 +53,7 @@ with wrapper functions for some `libcrypto` C functions, but not for
 
 ### `get-ffi-obj` ###
 
-Let's create a Racket wrapper function for the
+Next we create a Racket wrapper function for the
 [`SHA256` C function][openssl:sha256]. Here's the header:
 
 ```C
@@ -64,7 +65,7 @@ To create a Racket wrapper function, we use
 `sha256` Racket function that calls the `SHA256` C function:
 
 ```racket
-(define SHA256-DIGEST-LEN 32)
+(define SHA256-DIGEST-LEN 32) ; bytes
 
 (define sha256
   (get-ffi-obj
@@ -105,53 +106,20 @@ library.
 [racket:fun]: http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29 "Racket docs: _fun"
 [openssl:sha256const]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133 "OpenSSL source: crypto/sha/sha.h"
 
-### All Together
-
-Here's some code defining a Racket module that exports functions named
-`sha256` and `ripemd160`. Note that the functions that call directly
-to the C functions are now named `sha256/bytes` and `ripemd160/bytes`,
-and these functions consume and produce bytes. We additionally define
-`sha256` and `ripemd160` functions which have optional keyword
-arguments for conversion of the input and output. These functions
-consume and produce hexadecimal strings by default.
+Here's the wrapper for `ripemd160`:
 
 ```racket
-#lang racket/base
-(require ffi/unsafe openssl/libcrypto)
-(require (only-in openssl/sha1 hex-string->bytes
-                               bytes->hex-string))
-(provide (all-defined-out))
-
-(define SHA256-DIGEST-LEN 32)
-(define RIPEMD160-DIGEST-LEN 20)
-
-; from crypto/sha/sha.h:
-;   unsigned char *SHA256(const unsigned char *d, size_t n, unsigned char *md);
-(define sha256/bytes
-  (get-ffi-obj
-  'SHA256 libcrypto
-  (_fun [input     : _bytes]
-        [input-len : _ulong = (bytes-length input)]
-		[output    : (_bytes o SHA256-DIGEST-LEN)]
-        -> (_bytes o SHA256-DIGEST-LEN))))
-
-(define (sha256 input #:convert-input  [input->bytes hex-string->bytes]
-                      #:convert-output [bytes->output bytes->hex-string])
-  (bytes->output (sha256/bytes (input->bytes input))))
+(define RIPEMD160-DIGEST-LEN 20) ; bytes
 
 ; from crypto/ripemd/ripemd.h
-;   unsigned char *RIPEMD160(const unsigned char *d, size_t n, unsigned char *md);
-(define ripemd160/bytes
+;  unsigned char *RIPEMD160(const unsigned char *d, size_t n, unsigned char *md);
+(define ripemd160
   (get-ffi-obj
-  'RIPEMD160 libcrypto
-  (_fun [input     : _bytes]
-        [input-len : _ulong = (bytes-length input)]
-        [output    : (_bytes o RIPEMD160-DIGEST-LEN)]
-        -> (_bytes o RIPEMD160-DIGEST-LEN))))
-		
-(define (ripemd160 input #:convert-input  [input->bytes hex-string->bytes]
-                         #:convert-output [bytes->output bytes->hex-string])
-  (bytes->output (ripemd160/bytes (input->bytes input))))
+    'RIPEMD160 libcrypto
+    (_fun [input     : _bytes]
+          [input-len : _ulong = (bytes-length input)]
+          [output    : (_bytes o RIPEMD160-DIGEST-LEN)]
+          -> (_bytes o RIPEMD160-DIGEST-LEN))))
 ```
 
 ### Testing ###
@@ -176,8 +144,21 @@ from the Bitcoin wiki example:
 6. SHA-256 (checksum is first 4 bytes): `D61967F63C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30`
 7. checksum + #4 = (hex) address: `00010966776006953D5567439E5E39F86A0D273BEED61967F6`
 
-We can use [the Racket REPL][racket:repl], and the code above (which I
-saved to a file `crypto.rkt`) to get the same results:
+The hashes are all in hexdecimal form so we need to extend our hash
+functions to convert to and from hex strings (`bytes->hex-string` and
+`hex-string->bytes` are Racket built-in functions):
+
+```racket
+(define (sha256/hex input)
+  (bytes->hex-string (sha256 (hex-string->bytes input))))
+  
+(define (ripemd160/hex input)
+  (bytes->hex-string (ripemd160 (hex-string->bytes input))))
+```
+
+We can use [the Racket REPL][racket:repl], and the
+[code from this post](http://www.lostintransaction.com/code/crypto.rkt)
+(which I saved to a file `crypto.rkt`) to get the same results:
 
 [racket:repl]: http://docs.racket-lang.org/guide/intro.html?q=repl#%28tech._repl%29 "Interacting with Racket"
 
@@ -185,17 +166,17 @@ saved to a file `crypto.rkt`) to get the same results:
 	Welcome to Racket v6.0.0.3.
 	-> (require "crypto.rkt")
 	-> (define pub-key "0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6")
-	-> (sha256 pub-key)
+	-> (sha256/hex pub-key)
 	"600ffe422b4e00731a59557a5cca46cc183944191006324a447bdb2d98d4b408"
-	-> (ripemd160 (sha256 pub-key))
+	-> (ripemd160/hex (sha256/hex pub-key))
 	"010966776006953d5567439e5e39f86a0d273bee"
-	-> (define hash160 (ripemd160 (sha256 pub-key)))
+	-> (define hash160 (ripemd160/hex (sha256/hex pub-key)))
 	-> (define hash160/extended (string-append "00" hash160))
-	-> (sha256 hash160/extended)
+	-> (sha256/hex hash160/extended)
 	"445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
-	-> (sha256 (sha256 hash160/extended))
+	-> (sha256/hex (sha256/hex hash160/extended))
 	"d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
-	-> (define checksum (substring (sha256 (sha256 hash160/extended)) 0 8))
+	-> (define checksum (substring (sha256/hex (sha256/hex hash160/extended)) 0 8))
 	-> checksum
 	"d61967f6"
 	-> (define address/hex (string-append hash160/extended checksum))
@@ -212,5 +193,7 @@ encoding in the next post!
 
 ### Software ###
 
-The code from this post can be downloaded here. In this post, I'm using OpenSSL 1.0.1e with Racket 6.0.0.3 running in Debian
-7.0.
+All the code from this post
+[is available here](http://www.lostintransaction.com/code/crypto.rkt).
+In this post, I'm using OpenSSL 1.0.1e with Racket 6.0.0.3, running in
+Debian 7.0.

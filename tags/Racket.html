@@ -136,20 +136,17 @@
 
  <header>
 
-  <h2><a href="/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/">Adding OpenSSL bindings to Racket via its FFI</a></h2>
+  <h2><a href="/blog/2014/03/15/converting-a-bitcoin-public-key-to-a-hex-address/">Converting a Bitcoin Public Key to a (Hex) Address</a></h2>
 
   <p class="date-and-tags">
-   <time datetime="2014-03-15" pubdate="true">2014-03-15</time> :: <span class="tags"><a href="/tags/OpenSSL.html">OpenSSL</a>, <a href="/tags/C.html">C</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/FFI.html">FFI</a>, <a href="/tags/hashes.html">hashes</a>, <a href="/tags/SHA.html">SHA</a>, <a href="/tags/RIPEMD.html">RIPEMD</a></span></p>
+   <time datetime="2014-03-15" pubdate="true">2014-03-15</time> :: <span class="tags"><a href="/tags/OpenSSL.html">OpenSSL</a>, <a href="/tags/C.html">C</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/FFI.html">FFI</a>, <a href="/tags/hashes.html">hashes</a>, <a href="/tags/SHA.html">SHA</a>, <a href="/tags/RIPEMD.html">RIPEMD</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a>, <a href="/tags/public-key.html">public key</a></span></p>
   </header>
 
 
- <p>C is great for many programming tasks but sometimes it&rsquo;s nice to use a higher-level language that automatically handles things like arbitrary-precision arithmetic and memory management. <a href="http://racket-lang.org">Racket</a>, a LISP dialect, has linguistic support for these features (and more) and I enjoy using it to experiment with Bitcoin.</p>
+ <p>In a previous post, we <a href="lit:pubfrompriv">derived a Bitcoin public key from a private key</a>. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&rsquo;ll be using <a href="http://racket-lang.org">the Racket language</a> in this post.</p>
 
 
- <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto library. It does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
-
-
- <footer class="read-more"><a href="/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/">&hellip;more&hellip;</a></footer>
+ <footer class="read-more"><a href="/blog/2014/03/15/converting-a-bitcoin-public-key-to-a-hex-address/">&hellip;more&hellip;</a></footer>
 </article>
 
 <footer>

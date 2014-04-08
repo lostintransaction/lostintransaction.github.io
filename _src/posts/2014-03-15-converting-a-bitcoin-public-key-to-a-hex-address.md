@@ -1,6 +1,13 @@
-    Title: Adding OpenSSL bindings to Racket via its FFI
+    Title: Converting a Bitcoin Public Key to a (Hex) Address
     Date: 2014-03-15T04:09:45
-    Tags: OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD
+    Tags: OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD, Bitcoin addresses, public key
+
+In a previous post, we
+[derived a Bitcoin public key from a private key](lit:pubfrompriv). This
+post explores how to convert that public key into a Bitcoin address
+(in hexadecimal notation). I'll be using [the Racket language](http://racket-lang.org) in this post.
+
+<!-- more -->
 
 C is great for many programming tasks but sometimes it's nice to use a
 higher-level language that automatically handles things like
@@ -11,15 +18,13 @@ to experiment with Bitcoin.
 
 Unfortunately, Racket doesn't have a complete crypto library. It does
 have, however, an [FFI][racketffi] that enables Racket code to
-directly call C functions. In this post, I create Racket bindings for
-two important hashing functions used by Bitcoin, [SHA-256][wiki:sha]
-and [RIPEMD-160][wiki:ripemd].
+directly call C functions. Let's first create Racket bindings for two
+important hashing functions used by Bitcoin, [SHA-256][wiki:sha] and
+[RIPEMD-160][wiki:ripemd].
 
 [racketffi]: http://docs.racket-lang.org/foreign/index.html "Racket FFI"
 [wiki:sha]: http://en.wikipedia.org/wiki/SHA-2 "Wikipedia: SHA-2"
 [wiki:ripemd]: http://en.wikipedia.org/wiki/RIPEMD "Wikipedia: RIPEMD"
-
-<!-- more -->
 
 ### `ffi-lib` ###
 
@@ -207,5 +212,5 @@ encoding in the next post!
 
 ### Software ###
 
-In this post, I'm using OpenSSL 1.0.1e, Racket 6.0.0.3, and Debian
+The code from this post can be downloaded here. In this post, I'm using OpenSSL 1.0.1e with Racket 6.0.0.3 running in Debian
 7.0.

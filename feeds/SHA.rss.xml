@@ -8,14 +8,15 @@
   <pubDate>Sat, 15 Mar 2014 04:09:45 UTC</pubDate>
   <ttl>1800</ttl>
   <item>
-   <title>Adding OpenSSL bindings to Racket via its FFI</title>
-   <link>http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/?utm_source=SHA&amp;utm_medium=RSS</link>
-   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-15-adding-openssl-bindings-to-racket-via-its-ffi</guid>
+   <title>Converting a Bitcoin Public Key to a (Hex) Address</title>
+   <link>http://www.lostintransaction.com/blog/2014/03/15/converting-a-bitcoin-public-key-to-a-hex-address/?utm_source=SHA&amp;utm_medium=RSS</link>
+   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-15-converting-a-bitcoin-public-key-to-a-hex-address</guid>
    <pubDate>Sat, 15 Mar 2014 04:09:45 UTC</pubDate>
    <description>
-&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=SHA&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F15%2Fadding-openssl-bindings-to-racket-via-its-ffi%2F" height="1" width="1" /&gt;
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=SHA&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F15%2Fconverting-a-bitcoin-public-key-to-a-hex-address%2F" height="1" width="1" /&gt;
+ &lt;p&gt;In a previous post, we &lt;a href="lit:pubfrompriv"&gt;derived a Bitcoin public key from a private key&lt;/a&gt;. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&amp;rsquo;ll be using &lt;a href="http://racket-lang.org"&gt;the Racket language&lt;/a&gt; in this post.&lt;/p&gt;
  &lt;p&gt;C is great for many programming tasks but sometimes it&amp;rsquo;s nice to use a higher-level language that automatically handles things like arbitrary-precision arithmetic and memory management. &lt;a href="http://racket-lang.org"&gt;Racket&lt;/a&gt;, a LISP dialect, has linguistic support for these features (and more) and I enjoy using it to experiment with Bitcoin.&lt;/p&gt;
- &lt;p&gt;Unfortunately, Racket doesn&amp;rsquo;t have a complete crypto library. It does have, however, an &lt;a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI"&gt;FFI&lt;/a&gt; that enables Racket code to directly call C functions. In this post, I create Racket bindings for two important hashing functions used by Bitcoin, &lt;a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2"&gt;SHA&amp;ndash;256&lt;/a&gt; and &lt;a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD"&gt;RIPEMD&amp;ndash;160&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;Unfortunately, Racket doesn&amp;rsquo;t have a complete crypto library. It does have, however, an &lt;a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI"&gt;FFI&lt;/a&gt; that enables Racket code to directly call C functions. Let&amp;rsquo;s first create Racket bindings for two important hashing functions used by Bitcoin, &lt;a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2"&gt;SHA&amp;ndash;256&lt;/a&gt; and &lt;a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD"&gt;RIPEMD&amp;ndash;160&lt;/a&gt;.&lt;/p&gt;
  &lt;h3 id="ffi-lib"&gt;&lt;code&gt;ffi-lib&lt;/code&gt;&lt;/h3&gt;
  &lt;p&gt;The &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"&gt;&lt;code&gt;ffi-lib&lt;/code&gt;&lt;/a&gt; function creates a Racket value through which programmers can access functions in the specified C library. For example, the following code evaluates to a Racket value for the OpenSSL &lt;code&gt;libcrypto&lt;/code&gt; library:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(ffi-lib '(so "libcrypto") '("" "1.0.1e" "1.0.0" "1.0" "0.9.8b" "0.9.8" "0.9.7"))&lt;/code&gt;&lt;/pre&gt;
@@ -116,4 +117,4 @@ Welcome to Racket v6.0.0.3.
    &lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;The last command computes the Bitcoin address in hexadecimal format. The Bitcoin wiki article performs one more step to convert to &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding"&gt;Base58Check encoding&lt;/a&gt;, which is the standard representation for Bitcoin addresses. We&amp;rsquo;ll look at Base58Check encoding in the next post!&lt;/p&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
- &lt;p&gt;In this post, I&amp;rsquo;m using OpenSSL 1.0.1e, Racket 6.0.0.3, and Debian 7.0.&lt;/p&gt;&lt;/html&gt;</description></item></channel></rss>
+ &lt;p&gt;The code from this post can be downloaded here. In this post, I&amp;rsquo;m using OpenSSL 1.0.1e with Racket 6.0.0.3 running in Debian 7.0.&lt;/p&gt;&lt;/html&gt;</description></item></channel></rss>

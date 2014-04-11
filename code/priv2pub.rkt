@@ -4,39 +4,31 @@
 (provide (all-defined-out))
 
 ;; cmd to compile priv2pub.c to .so shared lib:
-;;   gcc -fPIC -lcrypto -std=c99 -shared -Wl,-soname,libpriv2pub.so.1 -o libpriv2pub.so.1.0 priv2pub.c
+;;   gcc -fPIC -lcrypto -std=c99 -shared -Wl,-soname,libpriv2pub.so.1 priv2pub.c -o libpriv2pub.so.1.0
 
 (define COMPRESSED 2) ; POINT_CONVERSION_COMPRESSED
 (define COMPRESSED-LEN 33)
 (define UNCOMPRESSED 4) ; POINT_CONVERSION_UNCOMPRESSED
 (define UNCOMPRESSED-LEN 65)
 
-;(define-runtime-path libpriv2pub-so "libpriv2pub.so")
 (define-runtime-path libpriv2pub-so '(so "libpriv2pub"))
 
 (define libpriv2pub (ffi-lib libpriv2pub-so '("1.0")))
 
-;; (define-ffi-definer define-priv2pub libpriv2pub
-;;   #:default-make-fail make-not-available)
-
-;; (define-priv2pub OPENSSL_free (_fun _pointer -> _void) #:wrap (deallocator))
-;; (define-priv2pub priv2pub (_fun _pointer -> _pointer) 
-;;   #:wrap (alloc OPENSSL_free))
-
 (define priv2pub_bytes
   (get-ffi-obj 'priv2pub_bytes libpriv2pub
-    (_fun _string _int [len : _int] (_bytes o len)
-          -> (_bytes o len))))
+    (_fun _string _int (_bytes o UNCOMPRESSED-LEN) 
+          -> (_bytes o UNCOMPRESSED-LEN))))
 
-;; this version leaks memory
+;; this version leaks memory (ie must be manually freed)
 ;; (define priv2pub
 ;;   (get-ffi-obj 'priv2pub libpriv2pub
 ;;     (_fun _string _int -> _string)))
 
 (define (priv-key->pub-key/compressed priv/hex)
-  (bytes->hex-string (priv2pub_bytes priv/hex COMPRESSED COMPRESSED-LEN)))
+  (bytes->hex-string (subbytes (priv2pub_bytes priv/hex COMPRESSED) 0 33)))
 (define (priv-key->pub-key priv/hex)
-  (bytes->hex-string (priv2pub_bytes priv/hex UNCOMPRESSED UNCOMPRESSED-LEN)))
+  (bytes->hex-string (priv2pub_bytes priv/hex UNCOMPRESSED)))
 
 (module+ main
   (define args (current-command-line-arguments))

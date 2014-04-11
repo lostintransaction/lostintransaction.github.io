@@ -4,9 +4,9 @@
 
 I've been wondering about the relationship between Bitcoin private
 keys, public keys, and addresses. This post and the ones following
-will explore the steps needed to go from a Bitcoin private key to a
-public address. This first post explores how to derive a Bitcoin
-public key from a private key.
+will explore, step by step, how to go from a Bitcoin private key to a
+public address. This first post explores how to derive a public key
+from a private key.
 
 <!-- more -->
 
@@ -14,7 +14,7 @@ I know that Bitcoin public and private keys are
 [Elliptic Curve DSA (ECDSA)][wiki:ecdsa] key pairs, and I've seen the
 [`Q = dG` explanation][so] on a few sites, but they leave out some
 details. I want to experiment for myself, so this post describes how
-to derive a public key from a private key with runnable C code.
+to derive a public key from a private key with runnable code.
 
 [wiki:ecdsa]: http://en.wikipedia.org/wiki/Elliptic_Curve_DSA "Wikipedia: Elliptic Curve DSA"
 [so]: http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl "Stack Overflow: Public Key from Private Key"
@@ -29,8 +29,8 @@ Googling quickly finds that Bitcoin uses the
 [so2]: http://stackoverflow.com/a/12482384/951881 "Stack Overflow: Public Key from Private Key Answer"
 [bwiki:secp]: https://en.bitcoin.it/wiki/Secp256k1 "secp256k1 Bitcoin wiki entry"
 
-Next, I looked at the [OpenSSL][openssl] `libcrypto` library, in the
-[function mentioned in the Stack Overflow post, `EC_KEY_generate_key`][ec_key]. Here's
+Next, I looked at the [OpenSSL][openssl] `libcrypto` C library, in
+[`EC_KEY_generate_key` (the function mentioned in the Stack Overflow post)][ec_key]. Here's
 the line that performs the multiplication:
 
 ```c
@@ -57,7 +57,7 @@ matter of getting the right data representation. Here is the
 int EC_POINT_mul(const EC_GROUP *group, EC_POINT *r, const BIGNUM *n, const EC_POINT *q, const BIGNUM *m, BN_CTX *ctx);
 ```
 
-Looks like we need an `EC_GROUP` and to create one we can use
+Looks like we need an `EC_GROUP`. To create one we call
 [`EC_GROUP_new_by_curve_name`][ec_curve].
 
 [openssl]: https://www.openssl.org/ "OpenSSL"
@@ -66,19 +66,18 @@ Looks like we need an `EC_GROUP` and to create one we can use
 [obj_mac]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385 "crypto/objects/obj_mac.h"
 [ec_curve]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057 "crypco/ec/ec_curve.c"
 
-Putting everything together, I came up with a function `priv2pub` to compute a
-public key from a private key (disclaimer: the code has no
-error-checking so don't use this in production):
+Putting everything together, here's a function `priv2pub` that
+computes a public key from a private key (disclaimer: the
+code has no error-checking so don't use this in production):
 
 ```c
 // calculates and returns the public key associated with the given private key
 // - input private key and output public key are in hexadecimal
-// form = POINT_CONVERSION_UNCOMPRESSED
-//     or POINT_CONVERSION_COMPRESSED
-//     or POINT_CONVERSION_HYBRID
+// form = POINT_CONVERSION_[UNCOMPRESSED|COMPRESSED|HYBRID]
 unsigned char *priv2pub( const unsigned char *priv_hex,
                          point_conversion_form_t form )
 {
+  // create group
   EC_GROUP *ecgrp = EC_GROUP_new_by_curve_name( NID_secp256k1 );
   
   // convert priv key from hexadecimal to BIGNUM
@@ -89,7 +88,7 @@ unsigned char *priv2pub( const unsigned char *priv_hex,
   EC_POINT *pub = EC_POINT_new( ecgrp );
   EC_POINT_mul( ecgrp, pub, priv_bn, NULL, NULL, NULL );
 							  
-  // convert pub_key from EC_POINT curve coordinate to hexadecimal
+  // convert pub_key from elliptic curve coordinate to hexadecimal
   unsigned char *ret = EC_POINT_point2hex( ecgrp, pub, form, NULL );
 	
   EC_GROUP_free( ecgrp ); BN_free( priv_bn ); EC_POINT_free( pub );
@@ -105,7 +104,7 @@ arbitrary precision arithmetic. The computed public key is a curve
 coordinate in OpenSSL's `EC_POINT` representation. I then convert back
 to hex using
 `EC_POINT_point2hex`. [Public keys can either be compressed or uncompressed][bwiki:ecdsa],
-and the format of the output of `priv2pub` depends on the `form`
+and the format of the output of `priv2pub` depends on the `form` input
 parameter, [which can be one of three values][point_conversion].
 
 [bwiki:ecdsa]: https://en.bitcoin.it/wiki/Elliptic_Curve_Digital_Signature_Algorithm "Bitcoin Wiki: Elliptic Curve Digital Signature Algorithm"
@@ -116,26 +115,25 @@ To test, I found a sample public/private key pair from
 article is
 `18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725` and
 the public key is
-`0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6`. The public key is uncompressed here because it begins with a `0x04` and is 65 bytes long
-(see the ANSI X9.62 standard).
+`0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6`. The
+public key is [uncompressed here because it begins with a `0x04`][sec] and is
+65 bytes long (see ANSI X9.62 for more details).
 
 Let's see if our program can recover this public key from the private
 key. I used the following `main` function.
 
-```
+[sec]: http://www.secg.org/collateral/sec1.pdf "SEC: Elliptic Curve Cryptography"
+
+```c
 #define PUB_KEY_UNCOMPRESSED_LEN 65
 
 int main( int argc, const unsigned char *argv[] )
 {
-  // compute pub key
+  // compute pub key from cmd line arg
   unsigned char *pub_hex = priv2pub( argv[1], POINT_CONVERSION_UNCOMPRESSED );
   
-  // print computed pub key
-  for( size_t i = 0; i < PUB_KEY_UNCOMPRESSED_LEN * 2; i++ ) {
-    printf( "%c", pub_hex[i] );
-  }
-  printf( "\n" );
-  
+  printf( "%s\n", pub_hex );
+	
   free( pub_hex );
   
   return 0;
@@ -163,7 +161,7 @@ Hurrah!
 
 ### A Racket Version
 
-I'm using [Racket](http://racket-lang.org), a modern LIST dialect, to
+I'm using [Racket](http://racket-lang.org), a modern LISP dialect, to
 experiment with Bitcoin so I want a Racket version of my conversion
 function as well. Fortunately, Racket has an [FFI][racketffi] that
 enables Racket code to call C functions directly.
@@ -172,16 +170,16 @@ enables Racket code to call C functions directly.
 
 First I create a slightly different version of my C function:
 
-```racket
+```c
 // calculates and returns the public key associated with the given private key
 // - input private key is in hexadecimal
 // - output public key is in raw bytes
 // form = POINT_CONVERSION_[UNCOMPRESSED|COMPRESSED|HYBRID]
-// - len is number of bytes in output buffer, 33 for compressed, 65 otherwise
 unsigned char *priv2pub_bytes( const unsigned char *priv_hex,
                                point_conversion_form_t form,
-							   size_t len, unsigned char *ret )
+							   unsigned char *ret )
 {
+  // create group
   EC_GROUP *ecgrp = EC_GROUP_new_by_curve_name( NID_secp256k1 );
   
   // convert priv key from hexadecimal to BIGNUM
@@ -192,26 +190,30 @@ unsigned char *priv2pub_bytes( const unsigned char *priv_hex,
   EC_POINT *pub = EC_POINT_new( ecgrp );
   EC_POINT_mul( ecgrp, pub, priv_bn, NULL, NULL, NULL );
   
-  // convert pub_key from EC_POINT curve coordinate to hexadecimal
+  // convert pub key from elliptic curve coordinate to bytes
+  //   (first call gets appropriate length from group, point, and form)
+  size_t len = EC_POINT_point2oct( ecgrp, pub, form, NULL, 0, NULL );
   EC_POINT_point2oct( ecgrp, pub, form, ret, len, NULL );
-  
+		
   EC_GROUP_free( ecgrp ); BN_free( priv_bn ); EC_POINT_free( pub );
   
   return ret;
 }
 ```
 
-Uses `EC_POINT_point2oct` to return a byte string instead of a hex
-string. I need a different function because the function I used earlier,
-`EC_POINT_point2hex`, allocates, but I won't have the opportunity to
-free in Racket. With the new `priv2pub_bytes` function, Racket
-allocates a buffer, controlled by the GC, prior to calling the
-function, and then passes in the allocated buffer.
+The difference is in the line that converts the curve coordinate to
+the result of the function (and an extra parameter). This function
+uses `EC_POINT_point2oct` to return a byte string instead of a hex
+string. I need a different function because the function I used
+earlier, `EC_POINT_point2hex`, allocates, but I won't have the
+opportunity to free in Racket. With this `priv2pub_bytes` function,
+Racket can allocate a buffer controlled by the GC prior to calling the
+function and then pass in the allocated buffer.
 
 To create a Racket wrapper for the `priv2pub_bytes` C function, I
 first need to compile the C code to a `.so` file.
 
-    $ gcc -lcrypto -std=c99 -fPIC -shared -Wl,-soname,libpriv2pub.so.1 -o libpriv2pub.so.1.0 priv2pub.c
+    $ gcc -lcrypto -std=c99 -fPIC -shared -Wl,-soname,libpriv2pub.so.1 priv2pub.c -o libpriv2pub.so.1.0
 	
 This creates a dynamic library file named `libpriv2pub.so.1.0`.
 
@@ -232,30 +234,28 @@ for the library's functions. We use the Racket `get-ffi-obj` function
 to do this:
 
 ```racket
+(define UNCOMPRESSED-LEN 65)
 (define priv2pub_bytes
   (get-ffi-obj 'priv2pub_bytes libpriv2pub
-    (_fun _string _int [len : _int] (_bytes o len)
-          -> (_bytes o len))))
+    (_fun _string _int (_bytes o UNCOMPRESSED-LEN)
+          -> (_bytes o UNCOMPRESSED-LEN))))
 ```
 
 This creates a wrapper function `priv2pub_bytes` in Racket where the
-first argument is a (Racket) string, the second is an int (indicating
-either compressed or uncompressed), the third is the length of the
-output buffer and the fourth is the output buffer. A pointer to the
-output buffer is also returned by the function.
+first argument is a (Racket) string, the second is an int representing
+the `form` parameter indicating either compressed or uncompressed, the
+third is the output buffer. A pointer to the output buffer is also
+returned by the function. We make the size the output buffer equal to the uncompressed form since that is the maximum size.
 
-Let's make this function easier to use with a couple more wrappers:
+Let's make this function easier to use with a couple more functions:
 
 ```racket
 (define COMPRESSED 2) ; POINT_CONVERSION_COMPRESSED
-(define COMPRESSED-LEN 33)
 (define UNCOMPRESSED 4) ; POINT_CONVERSION_UNCOMPRESSED
-(define UNCOMPRESSED-LEN 65)
-
 (define (priv-key->pub-key/compressed priv/hex)
-  (bytes->hex-string (priv2pub_bytes priv/hex COMPRESSED COMPRESSED-LEN)))
+  (bytes->hex-string (subbytes (priv2pub_bytes priv/hex COMPRESSED) 0 33)))
 (define (priv-key->pub-key priv/hex)
-  (bytes->hex-string (priv2pub_bytes priv/hex UNCOMPRESSED UNCOMPRESSED-LEN)))
+  (bytes->hex-string (priv2pub_bytes priv/hex UNCOMPRESSED)))
 ```
 
 We can now test our examples again:

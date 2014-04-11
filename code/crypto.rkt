@@ -10,8 +10,7 @@
 ; from crypto/sha/sha.h: 
 ;  unsigned char *SHA256(const unsigned char *d, size_t n, unsigned char *md);
 (define sha256
-  (get-ffi-obj 
-    'SHA256 libcrypto
+  (get-ffi-obj 'SHA256 libcrypto
     (_fun [input     : _bytes]
           [input-len : _ulong = (bytes-length input)]
           [output    : (_bytes o SHA256-DIGEST-LEN)]
@@ -35,7 +34,7 @@
 
 (module+ test
   (require (prefix-in r: rackunit))
-  (define-syntax-rule (check-equal? x y) 
+  (define-syntax-rule (check-hex-equal? x y) 
     (r:check-equal? (string-downcase x) (string-downcase y)))
   ; example from: 
   ; https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses
@@ -52,27 +51,27 @@
   (define checksum "D61967F6")
   (define address/hex "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
   
-  (check-equal? (sha256/hex pub-key) 
-                pub-key-sha256)
-  (check-equal? (ripemd160/hex (sha256/hex pub-key))
-                hash160)
-  (check-equal? (string-append "00" (ripemd160/hex (sha256/hex pub-key)))
-                hash160/extended)
-  (check-equal? (sha256/hex 
-                  (string-append "00" (ripemd160/hex (sha256/hex pub-key))))
-                hash160/ext-sha256)
-  (check-equal? 
+  (check-hex-equal? (sha256/hex pub-key) 
+                    pub-key-sha256)
+  (check-hex-equal? (ripemd160/hex (sha256/hex pub-key))
+                    hash160)
+  (check-hex-equal? (string-append "00" (ripemd160/hex (sha256/hex pub-key)))
+                    hash160/extended)
+  (check-hex-equal? 
+    (sha256/hex (string-append "00" (ripemd160/hex (sha256/hex pub-key))))
+    hash160/ext-sha256)
+  (check-hex-equal? 
     (sha256/hex 
       (sha256/hex 
         (string-append "00" (ripemd160/hex (sha256/hex pub-key)))))
     hash160/ext-sha256x2)
-  (check-equal?
+  (check-hex-equal?
     (substring 
       (sha256/hex 
         (sha256/hex 
           (string-append "00" (ripemd160/hex (sha256/hex pub-key))))) 0 8)
     checksum)
-  (check-equal?
+  (check-hex-equal?
     (string-append
       (string-append "00" (ripemd160/hex (sha256/hex pub-key))) 
       (substring 

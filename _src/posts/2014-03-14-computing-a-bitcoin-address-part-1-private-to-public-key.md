@@ -1,12 +1,11 @@
-    Title: Deriving a Bitcoin Public Key From a Private Key
+    Title: Computing a Bitcoin Address, Part 1: Private to Public Key
     Date: 2014-03-14T05:28:01
     Tags: public key, private key, elliptic curve, OpenSSL, C, Racket, FFI
 
-I've been wondering about the relationship between Bitcoin private
-keys, public keys, and addresses. This post and the ones following
-will explore, step by step, how to go from a Bitcoin private key to a
-public address. This first post explores how to derive a public key
-from a private key.
+I've been wondering how Bitcoin addresses are generated. This post and
+the ones following will explore, step by step, how to go from a
+Bitcoin private key to a public address. This first post explores how
+to derive a public key from a private key.
 
 <!-- more -->
 

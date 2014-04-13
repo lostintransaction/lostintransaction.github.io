@@ -6,7 +6,7 @@
     <title>Lost in Transaction: A neophyte explores Bitcoin (page 1)</title>
     <meta name="description" content="Lost in Transaction: A neophyte explores Bitcoin (page 1)">
     <meta name="author"      content="The Unknown Blogger">
-    <meta name="keywords"    content="FFI, Andreas Antonopoulos, public key, Base58Check, signatures, RIPEMD, private key, elliptic curve, Racket, Bitcoin addresses, OpenSSL, hashes, C, SHA, MultiBit">
+    <meta name="keywords"    content="FFI, Andreas Antonopoulos, public key, Base58Check, signatures, RIPEMD, private key, elliptic curve, Racket, Bitcoin addresses, Bitcoin wallets, OpenSSL, hashes, C, SHA, MultiBit">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
     <link rel="icon"      href="/favicon.ico">
     <link rel="canonical" href="http://www.lostintransaction.com/index.html">
@@ -70,6 +70,8 @@
 
 <li><a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a></li>
 
+<li><a href="/tags/Bitcoin-wallets.html">Bitcoin wallets</a></li>
+
 <li><a href="/tags/C.html">C</a></li>
 
 <li><a href="/tags/elliptic-curve.html">elliptic curve</a></li>
@@ -124,6 +126,23 @@
 
  <header>
 
+  <h2><a href="/blog/2014/04/09/wallet-import-format-wif/">Wallet Import Format (WIF)</a></h2>
+
+  <p class="date-and-tags">
+   <time datetime="2014-04-09" pubdate="true">2014-04-09</time> :: <span class="tags"><a href="/tags/private-key.html">private key</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a>, <a href="/tags/MultiBit.html">MultiBit</a>, <a href="/tags/Bitcoin-wallets.html">Bitcoin wallets</a>, <a href="/tags/Racket.html">Racket</a></span></p>
+  </header>
+
+
+ <p>In previous posts, we figured out how to compute a Bitcoin address from a private key, using an example from the Bitcoin wiki. In this post we try to convert a private key generated from an actual (MultiBit) wallet to an address.</p>
+
+
+ <footer class="read-more"><a href="/blog/2014/04/09/wallet-import-format-wif/">&hellip;more&hellip;</a></footer>
+</article>
+
+<article>
+
+ <header>
+
   <h2><a href="/blog/2014/03/18/base58check-encoding-and-decoding/">Base58Check Encoding and Decoding</a></h2>
 
   <p class="date-and-tags">
@@ -158,17 +177,17 @@
 
  <header>
 
-  <h2><a href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">Deriving a Bitcoin Public Key From a Private Key</a></h2>
+  <h2><a href="/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">Computing a Bitcoin Address, Part 1: Private to Public Key</a></h2>
 
   <p class="date-and-tags">
-   <time datetime="2014-03-14" pubdate="true">2014-03-14</time> :: <span class="tags"><a href="/tags/public-key.html">public key</a>, <a href="/tags/private-key.html">private key</a>, <a href="/tags/elliptic-curve.html">elliptic curve</a>, <a href="/tags/OpenSSL.html">OpenSSL</a>, <a href="/tags/C.html">C</a></span></p>
+   <time datetime="2014-03-14" pubdate="true">2014-03-14</time> :: <span class="tags"><a href="/tags/public-key.html">public key</a>, <a href="/tags/private-key.html">private key</a>, <a href="/tags/elliptic-curve.html">elliptic curve</a>, <a href="/tags/OpenSSL.html">OpenSSL</a>, <a href="/tags/C.html">C</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/FFI.html">FFI</a></span></p>
   </header>
 
 
- <p>I&rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I know they are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but they leave out some details. I wanted to experiment for myself, so this post describes how to derive a public key from a private key with runnable C code.</p>
+ <p>I&rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to go from a Bitcoin private key to a public address. This first post explores how to derive a public key from a private key.</p>
 
 
- <footer class="read-more"><a href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">&hellip;more&hellip;</a></footer>
+ <footer class="read-more"><a href="/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">&hellip;more&hellip;</a></footer>
 </article>
 
 <article>
@@ -242,7 +261,7 @@
         the <strong>fr</strong>ozen bl<strong>og</strong> tool.
         Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
 <!--        <p><em>Your legal notice here</em>.</p>-->
-        <p><em>Don't believe anything you read here</em>.</p>
+<!--        <p><em></em></p>-->
         <p><a href="bitcoin:18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS">18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS</a></p>
       </footer>
     </div>

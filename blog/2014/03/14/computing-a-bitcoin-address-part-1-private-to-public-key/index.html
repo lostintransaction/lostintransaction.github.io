@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Computing a Bitcoin Address, Part 1: Private to Public Key</title>
-    <meta name="description" content="I've been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to go from a Bitcoin private key to a public address. This first post explores how to derive a public key from a private key. ...">
+    <meta name="description" content="I've been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to go from a Bitcoin private key to a public address. I know that Bitcoin public and private keys are Elliptic Curve DSA (ECDSA) key pairs, and I've seen the `Q = dG` explanation on a few sites, but they leave out some details. I want to experiment for myself, so this post describes how to derive a public key from a private key with runnable code. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="public key, private key, elliptic curve, OpenSSL, C, Racket, FFI">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -128,7 +128,7 @@
   </header>
 
 
- <p>I&rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to go from a Bitcoin private key to a public address. This first post explores how to derive a public key from a private key.</p>
+ <p>I&rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to go from a Bitcoin private key to a public address.</p>
 
 
  <p>I know that Bitcoin public and private keys are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but they leave out some details. I want to experiment for myself, so this post describes how to derive a public key from a private key with runnable code.</p>
@@ -285,13 +285,13 @@
 </div>
 
 
- <p>The function assumes that the input private key is in hex, and returned public key is in hex as well. I had to first convert the private key to <code>BIGNUM</code>, which is OpenSSL&rsquo;s number representation for arbitrary precision arithmetic. The computed public key is a curve coordinate in OpenSSL&rsquo;s <code>EC_POINT</code> representation. I then convert back to hex using <code>EC_POINT_point2hex</code>. <a href="https://en.bitcoin.it/wiki/Elliptic_Curve_Digital_Signature_Algorithm" title="Bitcoin Wiki: Elliptic Curve Digital Signature Algorithm">Public keys can either be compressed or uncompressed</a>, and the format of the output of <code>priv2pub</code> depends on the <code>form</code> input parameter, <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l104" title="crypto/ec/ec.h">which can be one of three values</a>.</p>
+ <p>The function assumes that the input private key is in hex, and returned public key is in hex as well. I had to first convert the private key to <code>BIGNUM</code>, which is OpenSSL&rsquo;s number representation for arbitrary precision arithmetic. The computed public key is an OpenSSL <code>EC_POINT</code> data structure, which represents a curve coordinate. The curve coordinate is converted back to hex using <code>EC_POINT_point2hex</code>. <a href="https://en.bitcoin.it/wiki/Elliptic_Curve_Digital_Signature_Algorithm" title="Bitcoin Wiki: Elliptic Curve Digital Signature Algorithm">Public keys can either be compressed or uncompressed</a>, and the format of the output of <code>priv2pub</code> depends on the <code>form</code> input parameter, <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l104" title="crypto/ec/ec.h">which can be one of three values</a>.</p>
 
 
- <p>To test, I found a sample public/private key pair from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses">this Bitcoin wiki article</a>. The private key from the article is <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code> and the public key is <code>0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code>. The public key is <a href="http://www.secg.org/collateral/sec1.pdf" title="SEC: Elliptic Curve Cryptography">uncompressed here because it begins with a <code>0x04</code></a> and is 65 bytes long (see ANSI X9.62 for more details).</p>
+ <p>To test this function, I found a sample public/private key pair from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses">this Bitcoin wiki article</a>. The private key from the article is <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code> and the public key is <code>0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code>. The public key begins with <code>0x04</code> <a href="http://www.secg.org/collateral/sec1.pdf" title="SEC: Elliptic Curve Cryptography">so we know it&rsquo;s in uncompressed form</a> and is 65 bytes long (see ANSI X9.62 for more details).</p>
 
 
- <p>Let&rsquo;s see if our program can recover this public key from the private key. I used the following <code>main</code> function.</p>
+ <p>I used the following main function to test if <code>priv2pub</code> can compute the public key with the private key from the example:</p>
 
 
  <div class="brush: c">
@@ -316,19 +316,15 @@
  8
  9
 10
-11
-12
-13</pre></div></td>
+11</pre></div></td>
 
      <td class="code">
 
       <div class="source">
 
-       <pre><span class="cp">#define PUB_KEY_UNCOMPRESSED_LEN 65</span>
-
-<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span> <span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[]</span> <span class="p">)</span>
+       <pre><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span> <span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[]</span> <span class="p">)</span>
 <span class="p">{</span>
-  <span class="c1">// compute pub key from cmd line arg</span>
+  <span class="c1">// get priv key from cmd line and compute pub key</span>
   <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">pub_hex</span> <span class="o">=</span> <span class="n">priv2pub</span><span class="p">(</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">POINT_CONVERSION_UNCOMPRESSED</span> <span class="p">);</span>
 
   <span class="n">printf</span><span class="p">(</span> <span class="s">"%s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">pub_hex</span> <span class="p">);</span>
@@ -353,7 +349,7 @@ $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
  <p>Success!</p>
 
 
- <p>Let&rsquo;s do another one. I generated a private key with <a href="https://www.bitaddress.org">bitaddress.org</a>, <code>5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe</code>, but it&rsquo;s in <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a> and not hex. So I went to the &ldquo;Wallet Details&rdquo; tab, entered the base58 key, and <a href="https://www.bitaddress.org">bitaddress.org</a> reports that the private key in hex is <code>4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61</code> and public key is <code>0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117</code>. Let&rsquo;s check with our code:</p>
+ <p>Let&rsquo;s try another example. I generated a private key with <a href="https://www.bitaddress.org">bitaddress.org</a>, <code>5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe</code>, but it&rsquo;s in <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a> and not hex. We&rsquo;ll deal with Base58 encoding later so for now I went to the &ldquo;Wallet Details&rdquo; tab at <a href="https://www.bitaddress.org">bitaddress.org</a>, entered the base58 key, and got back that the private key in hex is <code>4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61</code> and public key is <code>0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117</code>. Let&rsquo;s check what our code says:</p>
 
 
  <pre><code>$ ./priv2pub 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
@@ -423,7 +419,7 @@ $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 <span class="c1">// form = POINT_CONVERSION_[UNCOMPRESSED|COMPRESSED|HYBRID]</span>
 <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">priv2pub_bytes</span><span class="p">(</span> <span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">priv_hex</span><span class="p">,</span>
                                <span class="kt">point_conversion_form_t</span> <span class="n">form</span><span class="p">,</span>
-                             <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">ret</span> <span class="p">)</span>
+                               <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">ret</span> <span class="p">)</span>
 <span class="p">{</span>
   <span class="c1">// create group</span>
   <span class="n">EC_GROUP</span> <span class="o">*</span><span class="n">ecgrp</span> <span class="o">=</span> <span class="n">EC_GROUP_new_by_curve_name</span><span class="p">(</span> <span class="n">NID_secp256k1</span> <span class="p">);</span>
@@ -437,7 +433,7 @@ $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
   <span class="n">EC_POINT_mul</span><span class="p">(</span> <span class="n">ecgrp</span><span class="p">,</span> <span class="n">pub</span><span class="p">,</span> <span class="n">priv_bn</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
 
   <span class="c1">// convert pub key from elliptic curve coordinate to bytes</span>
-  <span class="c1">//   (first call gets appropriate length from group, point, and form)</span>
+  <span class="c1">//  (first call gets the appropriate length to use)</span>
   <span class="kt">size_t</span> <span class="n">len</span> <span class="o">=</span> <span class="n">EC_POINT_point2oct</span><span class="p">(</span> <span class="n">ecgrp</span><span class="p">,</span> <span class="n">pub</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
   <span class="n">EC_POINT_point2oct</span><span class="p">(</span> <span class="n">ecgrp</span><span class="p">,</span> <span class="n">pub</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="n">len</span><span class="p">,</span> <span class="nb">NULL</span> <span class="p">);</span>
 
@@ -450,10 +446,10 @@ $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 </div>
 
 
- <p>The difference is in the line that converts the curve coordinate to the result of the function (and an extra parameter). This function uses <code>EC_POINT_point2oct</code> to return a byte string instead of a hex string. I need a different function because the function I used earlier, <code>EC_POINT_point2hex</code>, allocates, but I won&rsquo;t have the opportunity to free in Racket. With this <code>priv2pub_bytes</code> function, Racket can allocate a buffer controlled by the GC prior to calling the function and then pass in the allocated buffer.</p>
+ <p>The difference is an extra parameter and the representation of the public key output. This new function uses <code>EC_POINT_point2oct</code> to return a byte string instead of a hex string. The problem is that the hex conversion function, <code>EC_POINT_point2hex</code>, allocates, but I don&rsquo;t want to manually manage memory in Racket. Because <code>priv2pub_bytes</code> consumes an additional buffer parameter, Racket can allocate a buffer controlled by the GC prior to calling the function, and then pass in this allocated buffer.</p>
 
 
- <p>To create a Racket wrapper for the <code>priv2pub_bytes</code> C function, I first need to compile the C code to a <code>.so</code> file.</p>
+ <p>Next I use Racket&rsquo;s FFI to create a Racket wrapper function for the <code>priv2pub_bytes</code> C function. The FFI requires a library file, so I compile the <code>.c</code> file to a <code>.so</code> library.</p>
 
 
  <pre><code>$ gcc -lcrypto -std=c99 -fPIC -shared -Wl,-soname,libpriv2pub.so.1 priv2pub.c -o libpriv2pub.so.1.0
@@ -497,7 +493,7 @@ $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
  <p>The first argument to <code>ffi-lib</code> is the path of the library and the second argument specifies a list of acceptable version numbers.</p>
 
 
- <p>Once we have a hook into the C library, we can create Racket wrappers for the library&rsquo;s functions. We use the Racket <code>get-ffi-obj</code> function to do this:</p>
+ <p>Once we have a hook into the C library, we can create Racket wrappers for individual functions in the library. We use the Racket <code>get-ffi-obj</code> function to do this:</p>
 
 
  <div class="brush: racket">
@@ -532,10 +528,10 @@ $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 </div>
 
 
- <p>This creates a wrapper function <code>priv2pub_bytes</code> in Racket where the first argument is a (Racket) string, the second is an int representing the <code>form</code> parameter indicating either compressed or uncompressed, the third is the output buffer. A pointer to the output buffer is also returned by the function. We make the size the output buffer equal to the uncompressed form since that is the maximum size.</p>
+ <p>This creates a Racket function <code>priv2pub_bytes</code> where the first argument is a (Racket) string, the second is an int indicating whether the output should be in compressed or uncompressed form, and the third is the output buffer. A pointer to the output buffer is also returned by the function. We make the size the output buffer equal to the uncompressed form since that is the maximum size.</p>
 
 
- <p>Let&rsquo;s make this function easier to use with a couple more functions:</p>
+ <p>Let&rsquo;s make things easier to use with a couple more functions:</p>
 
 
  <div class="brush: racket">
@@ -555,7 +551,10 @@ $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 3
 4
 5
-6</pre></div></td>
+6
+7
+8
+9</pre></div></td>
 
      <td class="code">
 
@@ -563,16 +562,22 @@ $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 
        <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">COMPRESSED</span> <span class="mi">2</span><span class="p">)</span> <span class="c1">; POINT_CONVERSION_COMPRESSED</span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">UNCOMPRESSED</span> <span class="mi">4</span><span class="p">)</span> <span class="c1">; POINT_CONVERSION_UNCOMPRESSED</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">COMPRESSED-LEN</span> <span class="mi">33</span><span class="p">)</span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">priv-key-&gt;pub-key/compressed</span> <span class="nv">priv/hex</span><span class="p">)</span>
-  <span class="p">(</span><span class="nf">bytes-&gt;hex-string</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._subbytes))" style="color: inherit">subbytes</a> </span><span class="p">(</span><span class="nf">priv2pub_bytes</span> <span class="nv">priv/hex</span> <span class="nv">COMPRESSED</span><span class="p">)</span> <span class="mi">0</span> <span class="mi">33</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">bytes-&gt;hex-string</span> 
+    <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._subbytes))" style="color: inherit">subbytes</a> </span><span class="p">(</span><span class="nf">priv2pub_bytes</span> <span class="nv">priv/hex</span> <span class="nv">COMPRESSED</span><span class="p">)</span> <span class="mi">0</span> <span class="nv">COMPRESSED-LEN</span><span class="p">)))</span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">priv-key-&gt;pub-key</span> <span class="nv">priv/hex</span><span class="p">)</span>
-  <span class="p">(</span><span class="nf">bytes-&gt;hex-string</span> <span class="p">(</span><span class="nf">priv2pub_bytes</span> <span class="nv">priv/hex</span> <span class="nv">UNCOMPRESSED</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">bytes-&gt;hex-string</span> 
+    <span class="p">(</span><span class="nf">priv2pub_bytes</span> <span class="nv">priv/hex</span> <span class="nv">UNCOMPRESSED</span><span class="p">)))</span>
 </pre></div>
 </td></tr></tbody></table>
 </div>
 
 
- <p>We can now test our examples again:</p>
+ <p><code>priv-key-&gt;pub-key</code> consumes a private key in hex and returns an uncompressed public key, also in hex. <code>priv-key-&gt;pub-key/compressed</code> is similar except it returns a compressed public key (note that this function extracts only the first 33 bytes of the output buffer).</p>
+
+
+ <p>Testing our examples again, we see that our Racket functions produce the same results:</p>
 
 
  <pre><code>$ racket

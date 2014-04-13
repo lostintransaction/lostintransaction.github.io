@@ -26,9 +26,11 @@
 ;;     (_fun _string _int -> _string)))
 
 (define (priv-key->pub-key/compressed priv/hex)
-  (bytes->hex-string (subbytes (priv2pub_bytes priv/hex COMPRESSED) 0 33)))
+  (bytes->hex-string 
+    (subbytes (priv2pub_bytes priv/hex COMPRESSED) 0 COMPRESSED-LEN)))
 (define (priv-key->pub-key priv/hex)
-  (bytes->hex-string (priv2pub_bytes priv/hex UNCOMPRESSED)))
+  (bytes->hex-string 
+    (priv2pub_bytes priv/hex UNCOMPRESSED)))
 
 (module+ main
   (define args (current-command-line-arguments))

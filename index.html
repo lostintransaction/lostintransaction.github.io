@@ -184,7 +184,10 @@
   </header>
 
 
- <p>I&rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to go from a Bitcoin private key to a public address. This first post explores how to derive a public key from a private key.</p>
+ <p>I&rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to go from a Bitcoin private key to a public address.</p>
+
+
+ <p>I know that Bitcoin public and private keys are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but they leave out some details. I want to experiment for myself, so this post describes how to derive a public key from a private key with runnable code.</p>
 
 
  <footer class="read-more"><a href="/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">&hellip;more&hellip;</a></footer>

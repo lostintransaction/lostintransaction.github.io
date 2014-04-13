@@ -52,7 +52,7 @@ unsigned char *priv2pub_bytes( const unsigned char *priv_hex,
   EC_POINT_mul( ecgrp, pub, priv_bn, NULL, NULL, NULL );
 
   // convert pub_key from elliptic curve coordinate to bytes
-  //   (first call gets appropriate length from group, point, and form)
+  //  (first call gets the appropriate length to use)
   size_t len = EC_POINT_point2oct( ecgrp, pub, form, NULL, 0, NULL );
   EC_POINT_point2oct( ecgrp, pub, form, ret, len, NULL );
 
@@ -63,7 +63,7 @@ unsigned char *priv2pub_bytes( const unsigned char *priv_hex,
 
 int main( int argc, const unsigned char *argv[] )
 {
-  // compute pub key from cmd line arg
+  // get priv key from cmd line and compute put key
   unsigned char *pub_hex = priv2pub( argv[1], POINT_CONVERSION_UNCOMPRESSED );
 
   printf( "%s\n", pub_hex );

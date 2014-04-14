@@ -1,8 +1,9 @@
-    Title: Converting a Bitcoin Public Key to a (Hex) Address
+    Title: Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address
     Date: 2014-03-15T04:09:45
-    Tags: OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD, Bitcoin addresses, public key
+    Tags: OpenSSL, C, Racket, FFI, hashes, SHA256, RIPEMD160, Bitcoin addresses, public key
 
-In a previous post, we
+This series of posts figures out how to compute a Bitcoin address from
+a private key. In a previous post, we
 [derived a Bitcoin public key from a private key][lit:pubfrompriv]. This
 post explores how to convert that public key into a Bitcoin address
 (in hexadecimal notation). I'll be using
@@ -10,68 +11,37 @@ post explores how to convert that public key into a Bitcoin address
 
 <!-- more -->
 
-C is great for many programming tasks but sometimes it's nice to use a
-higher-level language that automatically handles things like
-arbitrary-precision arithmetic and memory
-management. [Racket](http://racket-lang.org), a LISP dialect, has
-linguistic support for these features (and more) and I enjoy using it
-to experiment with Bitcoin. 
-
-Unfortunately, Racket doesn't have a complete crypto library. It does
-have, however, an [FFI][racketffi] that enables Racket code to
-directly call C functions. So first we'll create Racket bindings for
-two important hashing functions used by Bitcoin, [SHA-256][wiki:sha]
-and [RIPEMD-160][wiki:ripemd].
+To convert from a public key to a Bitcoin address, we need an
+implementation of the [SHA-256][wiki:sha] and
+[RIPEMD-160][wiki:ripemd] hash functions. Racket doesn't come with these functions but we can easily call to OpenSSL's implementation of these hash functions via Racket's C [FFI][racketffi].
 
 [racketffi]: http://docs.racket-lang.org/foreign/index.html "Racket FFI"
 [wiki:sha]: http://en.wikipedia.org/wiki/SHA-2 "Wikipedia: SHA-2"
 [wiki:ripemd]: http://en.wikipedia.org/wiki/RIPEMD "Wikipedia: RIPEMD"
 
-### `ffi-lib` ###
-
-The [`ffi-lib`][racket:ffilib] function creates a Racket value through
-which programmers can access functions in the specified C library. For
-example, the [following code](pltgit:libcrypto) evaluates to a Racket
-value for the OpenSSL `libcrypto` library:
-
-```racket
-(define-runtime-path libcrypto-so '(so "libcrypto"))
-(ffi-lib libcrpyto-so '("" "1.0.1e"))
-```
-
-Here the first argument to `ffi-lib` specifies a dynamic C library and
-the second argument is a list of acceptable version numbers. (Check
-the [`ffi-lib` documentation][racket:ffilib] for other possible use
-cases.)
-
-The standard Racket distribution pre-defines an identifier (also named
-`librypto`) that is bound to the `libcrypto` library (Racket comes
+Conveniently, the standard Racket distribution already defines [a hook into the `libcrypto` library](pltgit:libcrypto), also named `libcrypto`. Racket comes
 with wrapper functions for some `libcrypto` C functions, but not for
-`SHA256` or `RIPEMD160`).
+`SHA256` or `RIPEMD160` so now we'll create those.
 
 [pltgit:libcrypto]: https://github.com/plt/racket/blob/master/racket/collects/openssl/libcrypto.rkt "Racket source: libcrypto.rkt"
 [racket:ffilib]: http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29 "Racket docs: ffi-lib"
 [plt:libcrypto]: https://github.com/plt/racket/blob/8b4c5d3debbe41c90e37e5ffdc55fb8ab3635f92/racket/collects/openssl/libcrypto.rkt "Racket source: openssl/libcrypto.rkt"
 
-### `get-ffi-obj` ###
-
-Next we create a Racket wrapper function for the
-[`SHA256` C function][openssl:sha256]. Here's the header:
+Here's the header for the [`SHA256` C function][openssl:sha256]:
 
 ```C
 unsigned char *SHA256( const unsigned char *d, size_t n, unsigned char *md );
 ```
 
-To create a Racket wrapper function, we use
-[`get-ffi-obj`][racket:getffiobj]. Here's a definition of a
-`sha256` Racket function that calls the `SHA256` C function:
+We use the Racket [`get-ffi-obj`][racket:getffiobj] function to create
+a Racket wrapper for `SHA256`. Here's a definition of a `sha256`
+Racket function that calls the `SHA256` C function:
 
 ```racket
 (define SHA256-DIGEST-LEN 32) ; bytes
 
 (define sha256
-  (get-ffi-obj
-    'SHA256 libcrypto
+  (get-ffi-obj 'SHA256 libcrypto
     (_fun [input     : _bytes]
           [input-len : _ulong = (bytes-length input)]
           [output    : (_bytes o SHA256-DIGEST-LEN)]
@@ -79,11 +49,11 @@ To create a Racket wrapper function, we use
 ```
 
 The first argument to `get-ffi-obj` is the name of the C function and
-the second argument is the library value that we created earlier with
-`ffi-lib`. The third argument is the type, which specifies how to
-mediate between Racket and C values. [`_fun`][racket:fun] is the
-function type and in this case the function has three arguments
-(each delimited with brackets by convention).
+the second argument is the book into the appropriate library. The
+third argument is the type, which specifies how to mediate between
+Racket and C values. [`_fun`][racket:fun] is the function type and in
+this case the function has three arguments (each delimited with
+brackets by convention).
 
 Examining the types of the arguments:
 
@@ -92,9 +62,9 @@ bytes. Accordingly, we give `get-ffi-obj` a `_bytes` type for this
 argument.
 
 2. The second argument is the length of the input byte array. The `=`
-and the following expression describe how to calculate this argument
-automatically. Thus a caller of the `sha256` Racket function need not
-provide this argument.
+and the expression following it describe how to calculate this
+argument automatically. Thus a caller of `sha256` need not provide
+this argument.
 
 3. The third argument is the output byte array. The `o` indicates a
 return pointer and is followed by the expected length of the output
@@ -108,16 +78,15 @@ library.
 [racket:fun]: http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29 "Racket docs: _fun"
 [openssl:sha256const]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133 "OpenSSL source: crypto/sha/sha.h"
 
-And here's a wrapper for `ripemd160`:
+And here's an analogous wrapper for `ripemd160`:
 
 ```racket
 (define RIPEMD160-DIGEST-LEN 20) ; bytes
 
-; from crypto/ripemd/ripemd.h
+; from crypto/ripemd/ripemd.h:
 ;  unsigned char *RIPEMD160(const unsigned char *d, size_t n, unsigned char *md);
 (define ripemd160
-  (get-ffi-obj
-    'RIPEMD160 libcrypto
+  (get-ffi-obj 'RIPEMD160 libcrypto
     (_fun [input     : _bytes]
           [input-len : _ulong = (bytes-length input)]
           [output    : (_bytes o RIPEMD160-DIGEST-LEN)]
@@ -133,7 +102,7 @@ convert a Bitcoin private key into a public address. We covered
 a previous post, so we start with the public key here.
 
 [bwiki]: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses "Bitcoin Wiki: Technical background of version 1 Bitcoin addresses"
-[lit:pubfrompriv]: http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/ "Deriving a Bitcoin Public Key From a Private Key"
+[lit:pubfrompriv]: http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/ "Computing a Bitcoin Address, Part 1: Private to Public Key"
 
 For ease of comparison, here's the sequence of expected hashes, copied
 from the Bitcoin wiki example:
@@ -144,9 +113,9 @@ from the Bitcoin wiki example:
 4. prepend `0x00`: `00010966776006953D5567439E5E39F86A0D273BEE`
 5. SHA-256: `445C7A8007A93D8733188288BB320A8FE2DEBD2AE1B47F0F50BC10BAE845C094`
 6. SHA-256 (checksum is first 4 bytes): `D61967F63C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30`
-7. checksum + $4 = (hex) address: `00010966776006953D5567439E5E39F86A0D273BEED61967F6`
+7. step 4 result + checksum = (hex) address: `00010966776006953D5567439E5E39F86A0D273BEED61967F6`
 
-The hashes are all in hexdecimal form so we need to extend our hash
+The hashes are all in hexdecimal form so we extend our hash
 functions to convert to and from hex strings (`bytes->hex-string` and
 `hex-string->bytes` are Racket built-in functions):
 
@@ -158,9 +127,18 @@ functions to convert to and from hex strings (`bytes->hex-string` and
   (bytes->hex-string (ripemd160 (hex-string->bytes input))))
 ```
 
-We can use [the Racket (extended) REPL][racket:xrepl], and the
+For convenience, we also define a few more helper functions:
+
+```racket
+(define (add-version0 str) (string-append "00" str))
+(define (get-checksum hstr) (substring hstr 0 8))
+```
+
+We duplicate this example using
+[the Racket (extended) REPL][racket:xrepl], and the
 [code from this post](http://www.lostintransaction.com/code/crypto.rkt)
-(which I saved to a file `crypto.rkt`) to get the same results:
+(saved to a file `crypto.rkt`). (The `^` token in the REPL represents
+the last printed result.)
 
 [racket:repl]: http://docs.racket-lang.org/guide/intro.html?q=repl#%28tech._repl%29 "Interacting with Racket"
 [racket:xrepl]: http://docs.racket-lang.org/xrepl/index.html "XREPL"
@@ -171,24 +149,23 @@ We can use [the Racket (extended) REPL][racket:xrepl], and the
 	-> (define pub-key "0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6")
 	-> (sha256/hex pub-key)
 	"600ffe422b4e00731a59557a5cca46cc183944191006324a447bdb2d98d4b408"
-	-> (ripemd160/hex (sha256/hex pub-key))
+	-> (ripemd160/hex ^)
 	"010966776006953d5567439e5e39f86a0d273bee"
-	-> (define hash160 (ripemd160/hex (sha256/hex pub-key)))
-	-> (define hash160/extended (string-append "00" hash160))
-	-> (sha256/hex hash160/extended)
+	-> (add-version0 ^)
+	"00010966776006953d5567439e5e39f86a0d273bee"
+	-> (define hash160+version ^)
+	-> (sha256/hex ^)
 	"445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
-	-> (sha256/hex (sha256/hex hash160/extended))
+	-> (sha256/hex ^)
 	"d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
-	-> (define checksum (substring (sha256/hex (sha256/hex hash160/extended)) 0 8))
-	-> checksum
+	-> (get-checksum ^)
 	"d61967f6"
-	-> (define address/hex (string-append hash160/extended checksum))
-	-> address/hex
+	-> (string-append hash160+version ^)
 	"00010966776006953d5567439e5e39f86a0d273beed61967f6"
 	   
-The last command computes the Bitcoin address in hexadecimal
-format. The Bitcoin wiki article performs one more step to convert to
-[Base58Check encoding][bwiki:b58], which is the standard
+The final result is the same Bitcoin address, in hexadecimal format,
+as tje example. The Bitcoin wiki article performs one more step to
+convert to [Base58Check encoding][bwiki:b58], which is the standard
 representation for Bitcoin addresses. We'll look at Base58Check
 encoding in the next post!
 

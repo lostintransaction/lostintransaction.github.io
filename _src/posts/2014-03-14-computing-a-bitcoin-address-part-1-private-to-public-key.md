@@ -263,8 +263,11 @@ uncompressed public key, also in hex. `priv-key->pub-key/compressed`
 is similar except it returns a compressed public key (note that this
 function extracts only the first 33 bytes of the output buffer).
 
-Testing our examples again, we see that our Racket functions produce
-the same results:
+Testing our examples again, with
+[the Racket (extended) REPL][racket:xrepl], we see that our Racket
+functions produce the same results:
+
+[racket:xrepl]: http://docs.racket-lang.org/xrepl/index.html "XREPL"
 
     $ racket
     Welcome to Racket v6.0.0.3.
@@ -273,7 +276,6 @@ the same results:
     "0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6"
     -> (priv-key->pub-key "4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61")
     "0492edc09a7311c2ab83ef3d133331d7b73117902bb391d9dac3be261547f571e171f16775dda6d09a6aaf1f3f6e6aa3cfcd854dcaa6aed0fa7af9a5ed9965e117"
-
 
 ### Software ###
 

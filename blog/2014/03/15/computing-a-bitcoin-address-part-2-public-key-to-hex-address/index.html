@@ -3,14 +3,14 @@
   <head>
 
     <meta charset="utf-8">
-    <title>Converting a Bitcoin Public Key to a (Hex) Address</title>
-    <meta name="description" content="In a previous post, we derived a Bitcoin public key from a private key. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I'll be using the Racket language to help me. ...">
+    <title>Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address</title>
+    <meta name="description" content="This series of posts figures out how to compute a Bitcoin address from a private key. In a previous post, we derived a Bitcoin public key from a private key. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I'll be using the Racket language to help me. ...">
     <meta name="author"      content="The Unknown Blogger">
-    <meta name="keywords"    content="OpenSSL, C, Racket, FFI, hashes, SHA, RIPEMD, Bitcoin addresses, public key">
+    <meta name="keywords"    content="OpenSSL, C, Racket, FFI, hashes, SHA256, RIPEMD160, Bitcoin addresses, public key">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
     <link rel="icon"      href="/favicon.ico">
-    <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/03/15/converting-a-bitcoin-public-key-to-a-hex-address/">
-    <link rel="next" href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">
+    <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/">
+    <link rel="next" href="/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">
     <link rel="prev" href="/blog/2014/03/18/base58check-encoding-and-decoding/">
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
@@ -70,7 +70,11 @@
 
 <li><a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a></li>
 
+<li><a href="/tags/Bitcoin-wallets.html">Bitcoin wallets</a></li>
+
 <li><a href="/tags/C.html">C</a></li>
+
+<li><a href="/tags/Dorian-Nakamoto.html">Dorian Nakamoto</a></li>
 
 <li><a href="/tags/elliptic-curve.html">elliptic curve</a></li>
 
@@ -82,15 +86,17 @@
 
 <li><a href="/tags/OpenSSL.html">OpenSSL</a></li>
 
+<li><a href="/tags/PGP.html">PGP</a></li>
+
 <li><a href="/tags/private-key.html">private key</a></li>
 
 <li><a href="/tags/public-key.html">public key</a></li>
 
 <li><a href="/tags/Racket.html">Racket</a></li>
 
-<li><a href="/tags/RIPEMD.html">RIPEMD</a></li>
+<li><a href="/tags/RIPEMD160.html">RIPEMD160</a></li>
 
-<li><a href="/tags/SHA.html">SHA</a></li>
+<li><a href="/tags/SHA256.html">SHA256</a></li>
 
 <li><a href="/tags/signatures.html">signatures</a></li>
               </ul>
@@ -119,62 +125,23 @@
 
  <header>
 
-  <h1>Converting a Bitcoin Public Key to a (Hex) Address</h1>
+  <h1>Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address</h1>
 
   <p class="date-and-tags">
-   <time datetime="2014-03-15" pubdate="true">2014-03-15</time> :: <span class="tags"><a href="/tags/OpenSSL.html">OpenSSL</a>, <a href="/tags/C.html">C</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/FFI.html">FFI</a>, <a href="/tags/hashes.html">hashes</a>, <a href="/tags/SHA.html">SHA</a>, <a href="/tags/RIPEMD.html">RIPEMD</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a>, <a href="/tags/public-key.html">public key</a></span></p>
+   <time datetime="2014-03-15" pubdate="true">2014-03-15</time> :: <span class="tags"><a href="/tags/OpenSSL.html">OpenSSL</a>, <a href="/tags/C.html">C</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/FFI.html">FFI</a>, <a href="/tags/hashes.html">hashes</a>, <a href="/tags/SHA256.html">SHA256</a>, <a href="/tags/RIPEMD160.html">RIPEMD160</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a>, <a href="/tags/public-key.html">public key</a></span></p>
   </header>
 
 
- <p>In a previous post, we <a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key">derived a Bitcoin public key from a private key</a>. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&rsquo;ll be using <a href="http://racket-lang.org">the Racket language</a> to help me.</p>
+ <p>This series of posts figures out how to compute a Bitcoin address from a private key. In a previous post, we <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">derived a Bitcoin public key from a private key</a>. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&rsquo;ll be using <a href="http://racket-lang.org">the Racket language</a> to help me.</p>
 
 
- <p>C is great for many programming tasks but sometimes it&rsquo;s nice to use a higher-level language that automatically handles things like arbitrary-precision arithmetic and memory management. <a href="http://racket-lang.org">Racket</a>, a LISP dialect, has linguistic support for these features (and more) and I enjoy using it to experiment with Bitcoin.</p>
+ <p>To convert from a public key to a Bitcoin address, we need an implementation of the <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a> hash functions. Racket doesn&rsquo;t come with these functions but we can easily call to OpenSSL&rsquo;s implementation of these hash functions via Racket&rsquo;s C <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a>.</p>
 
 
- <p>Unfortunately, Racket doesn&rsquo;t have a complete crypto library. It does have, however, an <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a> that enables Racket code to directly call C functions. So first we&rsquo;ll create Racket bindings for two important hashing functions used by Bitcoin, <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a>.</p>
+ <p>Conveniently, the standard Racket distribution already defines <a href="pltgit:libcrypto">a hook into the <code>libcrypto</code> library</a>, also named <code>libcrypto</code>. Racket comes with wrapper functions for some <code>libcrypto</code> C functions, but not for <code>SHA256</code> or <code>RIPEMD160</code> so now we&rsquo;ll create those.</p>
 
 
- <h3 id="ffi-lib"><code>ffi-lib</code></h3>
-
-
- <p>The <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code></a> function creates a Racket value through which programmers can access functions in the specified C library. For example, the following code evaluates to a Racket value for the OpenSSL <code>libcrypto</code> library:</p>
-
-
- <div class="brush: racket">
-
-  <table class="sourcetable">
-
-   <tbody>
-
-    <tr>
-
-     <td class="linenos">
-
-      <div class="linenodiv">
-
-       <pre>1</pre></div></td>
-
-     <td class="code">
-
-      <div class="source">
-
-       <pre><span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._ffi-lib))" style="color: inherit">ffi-lib</a></span> <span class="o">'</span><span class="p">(</span><span class="nv">so</span> <span class="s">"libcrypto"</span><span class="p">)</span> <span class="o">'</span><span class="p">(</span><span class="s">""</span> <span class="s">"1.0.1e"</span> <span class="s">"1.0.0"</span> <span class="s">"1.0"</span> <span class="s">"0.9.8b"</span> <span class="s">"0.9.8"</span> <span class="s">"0.9.7"</span><span class="p">))</span>
-</pre></div>
-</td></tr></tbody></table>
-</div>
-
-
- <p>Here the first argument to <code>ffi-lib</code> specifies a dynamic C library and the second argument is a list of acceptable version numbers. (Check the <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"><code>ffi-lib</code> documentation</a> for other possible use cases.)</p>
-
-
- <p>The standard Racket distribution pre-defines an identifier (also named <code>librypto</code>) that is bound to the <code>libcrypto</code> library (Racket comes with wrapper functions for some <code>libcrypto</code> C functions, but not for <code>SHA256</code> or <code>RIPEMD160</code>).</p>
-
-
- <h3 id="get-ffi-obj"><code>get-ffi-obj</code></h3>
-
-
- <p>Next we create a Racket wrapper function for the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"><code>SHA256</code> C function</a>. Here&rsquo;s the header:</p>
+ <p>Here&rsquo;s the header for the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"><code>SHA256</code> C function</a>:</p>
 
 
  <div class="brush: C">
@@ -201,7 +168,7 @@
 </div>
 
 
- <p>To create a Racket wrapper function, we use <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"><code>get-ffi-obj</code></a>. Here&rsquo;s a definition of a <code>sha256</code> Racket function that calls the <code>SHA256</code> C function:</p>
+ <p>We use the Racket <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"><code>get-ffi-obj</code></a> function to create a Racket wrapper for <code>SHA256</code>. Here&rsquo;s a definition of a <code>sha256</code> Racket function that calls the <code>SHA256</code> C function:</p>
 
 
  <div class="brush: racket">
@@ -223,8 +190,7 @@
 5
 6
 7
-8
-9</pre></div></td>
+8</pre></div></td>
 
      <td class="code">
 
@@ -233,8 +199,7 @@
        <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">SHA256-DIGEST-LEN</span> <span class="mi">32</span><span class="p">)</span> <span class="c1">; <a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes))" style="color: inherit">bytes</a></span>
 
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">sha256</span>
-  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._get-ffi-obj))" style="color: inherit">get-ffi-obj</a></span>
-    <span class="ss">'SHA256</span> <span class="nv">libcrypto</span>
+  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._get-ffi-obj))" style="color: inherit">get-ffi-obj</a></span> <span class="ss">'SHA256</span> <span class="nv">libcrypto</span>
     <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__fun))" style="color: inherit">_fun</a></span> <span class="p">[</span><span class="nf">input</span>     <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span><span class="p">]</span>
           <span class="p">[</span><span class="nf">input-len</span> <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/Numeric_Types.html#(def._((lib._ffi/unsafe..rkt).__ulong))" style="color: inherit">_ulong</a></span> <span class="nv"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3d))" style="color: inherit">=</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes-length))" style="color: inherit">bytes-length</a> </span><span class="nv">input</span><span class="p">)]</span>
           <span class="p">[</span><span class="nf"><a href="http://docs.racket-lang.org/scribble-pp/text.html#(def._((lib._scribble/text..rkt)._output))" style="color: inherit">output</a></span>    <span class="nv">:</span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span> <span class="nv">o</span> <span class="nv">SHA256-DIGEST-LEN</span><span class="p">)]</span>
@@ -244,7 +209,7 @@
 </div>
 
 
- <p>The first argument to <code>get-ffi-obj</code> is the name of the C function and the second argument is the library value that we created earlier with <code>ffi-lib</code>. The third argument is the type, which specifies how to mediate between Racket and C values. <a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"><code>_fun</code></a> is the function type and in this case the function has three arguments (each delimited with brackets by convention).</p>
+ <p>The first argument to <code>get-ffi-obj</code> is the name of the C function and the second argument is the book into the appropriate library. The third argument is the type, which specifies how to mediate between Racket and C values. <a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"><code>_fun</code></a> is the function type and in this case the function has three arguments (each delimited with brackets by convention).</p>
 
 
  <p>Examining the types of the arguments:</p>
@@ -258,14 +223,14 @@
 
   <li>
 
-   <p>The second argument is the length of the input byte array. The <code>=</code> and the following expression describe how to calculate this argument automatically. Thus a caller of the <code>sha256</code> Racket function need not provide this argument.</p></li>
+   <p>The second argument is the length of the input byte array. The <code>=</code> and the expression following it describe how to calculate this argument automatically. Thus a caller of <code>sha256</code> need not provide this argument.</p></li>
 
   <li>
 
    <p>The third argument is the output byte array. The <code>o</code> indicates a return pointer and is followed by the expected length of the output array, which should be 32 bytes here. We define a constant <code>SHA256-DIGEST-LEN</code> which is analogous to <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133" title="OpenSSL source: crypto/sha/sha.h">the <code>SHA256_DIGEST_LENGTH</code> constant</a> in the C library.</p></li></ol>
 
 
- <p>And here&rsquo;s a wrapper for <code>ripemd160</code>:</p>
+ <p>And here&rsquo;s an analogous wrapper for <code>ripemd160</code>:</p>
 
 
  <div class="brush: racket">
@@ -289,8 +254,7 @@
  7
  8
  9
-10
-11</pre></div></td>
+10</pre></div></td>
 
      <td class="code">
 
@@ -298,11 +262,10 @@
 
        <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">RIPEMD160-DIGEST-LEN</span> <span class="mi">20</span><span class="p">)</span> <span class="c1">; <a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes))" style="color: inherit">bytes</a></span>
 
-<span class="c1">; from crypto/ripemd/ripemd.h</span>
+<span class="c1">; from crypto/ripemd/ripemd.h:</span>
 <span class="c1">;  unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *RIPEMD160(const unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *d, size_t n, unsigned <a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._char))" style="color: inherit">char</a> *md);</span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">ripemd160</span>
-  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._get-ffi-obj))" style="color: inherit">get-ffi-obj</a></span>
-    <span class="ss">'RIPEMD160</span> <span class="nv">libcrypto</span>
+  <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html#(def._((lib._ffi/unsafe..rkt)._get-ffi-obj))" style="color: inherit">get-ffi-obj</a></span> <span class="ss">'RIPEMD160</span> <span class="nv">libcrypto</span>
     <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__fun))" style="color: inherit">_fun</a></span> <span class="p">[</span><span class="nf">input</span>     <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span><span class="p">]</span>
           <span class="p">[</span><span class="nf">input-len</span> <span class="nv">:</span> <span class="nv"><a href="http://docs.racket-lang.org/foreign/Numeric_Types.html#(def._((lib._ffi/unsafe..rkt).__ulong))" style="color: inherit">_ulong</a></span> <span class="nv"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3d))" style="color: inherit">=</a></span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes-length))" style="color: inherit">bytes-length</a> </span><span class="nv">input</span><span class="p">)]</span>
           <span class="p">[</span><span class="nf"><a href="http://docs.racket-lang.org/scribble-pp/text.html#(def._((lib._scribble/text..rkt)._output))" style="color: inherit">output</a></span>    <span class="nv">:</span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/foreign/foreign_procedures.html#(form._((lib._ffi/unsafe..rkt).__bytes))" style="color: inherit">_bytes</a></span> <span class="nv">o</span> <span class="nv">RIPEMD160-DIGEST-LEN</span><span class="p">)]</span>
@@ -315,7 +278,7 @@
  <h3 id="testing">Testing</h3>
 
 
- <p>To test our wrapper functions, let&rsquo;s see if we can duplicate <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin Wiki: Technical background of version 1 Bitcoin addresses">this example from the Bitcoin wiki</a>, which shows how to convert a Bitcoin private key into a public address. We covered <a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key">how to derive a public key from a private key</a> in a previous post, so we start with the public key here.</p>
+ <p>To test our wrapper functions, let&rsquo;s see if we can duplicate <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin Wiki: Technical background of version 1 Bitcoin addresses">this example from the Bitcoin wiki</a>, which shows how to convert a Bitcoin private key into a public address. We covered <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">how to derive a public key from a private key</a> in a previous post, so we start with the public key here.</p>
 
 
  <p>For ease of comparison, here&rsquo;s the sequence of expected hashes, copied from the Bitcoin wiki example:</p>
@@ -335,12 +298,10 @@
 
   <li>SHA&ndash;256 (checksum is first 4 bytes): <code>D61967F63C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30</code></li>
 
-  <li>
-
-   <h1 id="4--checksum--hex-address-00010966776006953d5567439e5e39f86a0d273beed61967f6">4 + checksum = (hex) address: <code>00010966776006953D5567439E5E39F86A0D273BEED61967F6</code></h1></li></ol>
+  <li>step 4 result + checksum = (hex) address: <code>00010966776006953D5567439E5E39F86A0D273BEED61967F6</code></li></ol>
 
 
- <p>The hashes are all in hexdecimal form so we need to extend our hash functions to convert to and from hex strings (<code>bytes-&gt;hex-string</code> and <code>hex-string-&gt;bytes</code> are Racket built-in functions):</p>
+ <p>The hashes are all in hexdecimal form so we extend our hash functions to convert to and from hex strings (<code>bytes-&gt;hex-string</code> and <code>hex-string-&gt;bytes</code> are Racket built-in functions):</p>
 
 
  <div class="brush: racket">
@@ -375,7 +336,36 @@
 </div>
 
 
- <p>We can use <a href="http://docs.racket-lang.org/guide/intro.html?q=repl#%28tech._repl%29" title="Interacting with Racket">the Racket REPL</a>, and the <a href="http://www.lostintransaction.com/code/crypto.rkt">code from this post</a> (which I saved to a file <code>crypto.rkt</code>) to get the same results:</p>
+ <p>For convenience, we also define a few more helper functions:</p>
+
+
+ <div class="brush: racket">
+
+  <table class="sourcetable">
+
+   <tbody>
+
+    <tr>
+
+     <td class="linenos">
+
+      <div class="linenodiv">
+
+       <pre>1
+2</pre></div></td>
+
+     <td class="code">
+
+      <div class="source">
+
+       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">add-version0</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-append))" style="color: inherit">string-append</a> </span><span class="s">"00"</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">))</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">get-checksum</span> <span class="nv">hstr</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._substring))" style="color: inherit">substring</a> </span><span class="nv">hstr</span> <span class="mi">0</span> <span class="mi">8</span><span class="p">))</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+
+ <p>We duplicate this example using <a href="http://docs.racket-lang.org/xrepl/index.html" title="XREPL">the Racket (extended) REPL</a>, and the <a href="http://www.lostintransaction.com/code/crypto.rkt">code from this post</a> (saved to a file <code>crypto.rkt</code>). (The <code>^</code> token in the REPL represents the last printed result.)</p>
 
 
  <pre><code>$ racket
@@ -384,24 +374,23 @@ Welcome to Racket v6.0.0.3.
 -&gt; (define pub-key "0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6")
 -&gt; (sha256/hex pub-key)
 "600ffe422b4e00731a59557a5cca46cc183944191006324a447bdb2d98d4b408"
--&gt; (ripemd160/hex (sha256/hex pub-key))
+-&gt; (ripemd160/hex ^)
 "010966776006953d5567439e5e39f86a0d273bee"
--&gt; (define hash160 (ripemd160/hex (sha256/hex pub-key)))
--&gt; (define hash160/extended (string-append "00" hash160))
--&gt; (sha256/hex hash160/extended)
+-&gt; (add-version0 ^)
+"00010966776006953d5567439e5e39f86a0d273bee"
+-&gt; (define hash160+version ^)
+-&gt; (sha256/hex ^)
 "445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
--&gt; (sha256/hex (sha256/hex hash160/extended))
+-&gt; (sha256/hex ^)
 "d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
--&gt; (define checksum (substring (sha256/hex (sha256/hex hash160/extended)) 0 8))
--&gt; checksum
+-&gt; (get-checksum ^)
 "d61967f6"
--&gt; (define address/hex (string-append hash160/extended checksum))
--&gt; address/hex
+-&gt; (string-append hash160+version ^)
 "00010966776006953d5567439e5e39f86a0d273beed61967f6"
    </code></pre>
 
 
- <p>The last command computes the Bitcoin address in hexadecimal format. The Bitcoin wiki article performs one more step to convert to <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a>, which is the standard representation for Bitcoin addresses. We&rsquo;ll look at Base58Check encoding in the next post!</p>
+ <p>The final result is the same Bitcoin address, in hexadecimal format, as tje example. The Bitcoin wiki article performs one more step to convert to <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a>, which is the standard representation for Bitcoin addresses. We&rsquo;ll look at Base58Check encoding in the next post!</p>
 
 
  <h3 id="software">Software</h3>
@@ -422,12 +411,12 @@ Welcome to Racket v6.0.0.3.
           }
       }(document,"script","twitter-wjs");
     </script>
-    <a class="twitter-share-button" data-dnt="true" data-url="http://www.lostintransaction.com/blog/2014/03/15/converting-a-bitcoin-public-key-to-a-hex-address/" href="https://twitter.com/share">
+    <a class="twitter-share-button" data-dnt="true" data-url="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/" href="https://twitter.com/share">
       "Tweet"</a>
 
   <script src="https://apis.google.com/js/plusone.js" type="text/javascript"></script>
 
-  <g:plusone href="http://www.lostintransaction.com/blog/2014/03/15/converting-a-bitcoin-public-key-to-a-hex-address/" size="medium"></g:plusone>
+  <g:plusone href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/" size="medium"></g:plusone>
 
   <script type="text/javascript">
       var disqus_shortname = 'lostintransaction';
@@ -449,7 +438,7 @@ Welcome to Racket v6.0.0.3.
     </li>
 
    <li class="next">
-      <a href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/"><em>Deriving a Bitcoin Public Key From a Private Key</em> &rarr;</a>
+      <a href="/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/"><em>Computing a Bitcoin Address, Part 1: Private to Public Key</em> &rarr;</a>
     </li>
     </ul>
   </footer>
@@ -481,7 +470,7 @@ Welcome to Racket v6.0.0.3.
         the <strong>fr</strong>ozen bl<strong>og</strong> tool.
         Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
 <!--        <p><em>Your legal notice here</em>.</p>-->
-        <p><em>Don't believe anything you read here</em>.</p>
+<!--        <p><em></em></p>-->
         <p><a href="bitcoin:18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS">18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS</a></p>
       </footer>
     </div>

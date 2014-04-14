@@ -32,6 +32,14 @@
 (define (ripemd160/hex input)
   (bytes->hex-string (ripemd160 (hex-string->bytes input))))
 
+;; misc helper functions
+(define (hash160/hex hstr) (ripemd160/hex (sha256/hex hstr)))
+(define (add-version0 str) (string-append "00" str))
+(define (get-checksum hstr) (substring hstr 0 8))
+(define (sha256/hexx2 hstr) (sha256/hex (sha256/hex hstr)))
+(define (compute-checksum hstr) (get-checksum (sha256/hexx2 hstr)))
+(define (add-checksum hstr) (string-append hstr (compute-checksum hstr)))
+
 (module+ test
   (require (prefix-in r: rackunit))
   (define-syntax-rule (check-hex-equal? x y) 
@@ -55,8 +63,12 @@
                     pub-key-sha256)
   (check-hex-equal? (ripemd160/hex (sha256/hex pub-key))
                     hash160)
+  (check-hex-equal? (hash160/hex pub-key) hash160)
   (check-hex-equal? (string-append "00" (ripemd160/hex (sha256/hex pub-key)))
                     hash160/extended)
+  (check-hex-equal? hash160/extended (add-version0 hash160))
+  (check-hex-equal? (compute-checksum hash160/extended) checksum)
+  (check-hex-equal? (add-checksum hash160/extended) address/hex)
   (check-hex-equal? 
     (sha256/hex (string-append "00" (ripemd160/hex (sha256/hex pub-key))))
     hash160/ext-sha256)

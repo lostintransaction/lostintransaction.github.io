@@ -3,15 +3,15 @@
   <head>
 
     <meta charset="utf-8">
-    <title>Base58Check Encoding and Decoding</title>
+    <title>Computing a Bitcoin Address, Part 3: Base58Check Encoding</title>
     <meta name="description" content="In previous posts, we looked at computing a Bitcoin public key from a private key, and computing a Bitcoin address from a public key. However, these posts dealt with the keys and addresses in hexadecimal (hex) form, which is not the representation familiar to most Bitcoin users. Bitcoin addresses more commonly are encoded as Base58Check strings, which we explore in this post. ...">
     <meta name="author"      content="The Unknown Blogger">
-    <meta name="keywords"    content="Base58Check, Racket, Bitcoin addresses">
+    <meta name="keywords"    content="Base58Check, Bitcoin addresses, Racket">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
     <link rel="icon"      href="/favicon.ico">
-    <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/03/18/base58check-encoding-and-decoding/">
-    <link rel="next" href="/blog/2014/03/15/converting-a-bitcoin-public-key-to-a-hex-address/">
-
+    <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/">
+    <link rel="next" href="/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/">
+    <link rel="prev" href="/blog/2014/04/09/wallet-import-format-wif/">
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/css/pygments.css">
@@ -70,7 +70,11 @@
 
 <li><a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a></li>
 
+<li><a href="/tags/Bitcoin-wallets.html">Bitcoin wallets</a></li>
+
 <li><a href="/tags/C.html">C</a></li>
+
+<li><a href="/tags/Dorian-Nakamoto.html">Dorian Nakamoto</a></li>
 
 <li><a href="/tags/elliptic-curve.html">elliptic curve</a></li>
 
@@ -82,15 +86,17 @@
 
 <li><a href="/tags/OpenSSL.html">OpenSSL</a></li>
 
+<li><a href="/tags/PGP.html">PGP</a></li>
+
 <li><a href="/tags/private-key.html">private key</a></li>
 
 <li><a href="/tags/public-key.html">public key</a></li>
 
 <li><a href="/tags/Racket.html">Racket</a></li>
 
-<li><a href="/tags/RIPEMD.html">RIPEMD</a></li>
+<li><a href="/tags/RIPEMD160.html">RIPEMD160</a></li>
 
-<li><a href="/tags/SHA.html">SHA</a></li>
+<li><a href="/tags/SHA256.html">SHA256</a></li>
 
 <li><a href="/tags/signatures.html">signatures</a></li>
               </ul>
@@ -119,10 +125,10 @@
 
  <header>
 
-  <h1>Base58Check Encoding and Decoding</h1>
+  <h1>Computing a Bitcoin Address, Part 3: Base58Check Encoding</h1>
 
   <p class="date-and-tags">
-   <time datetime="2014-03-18" pubdate="true">2014-03-18</time> :: <span class="tags"><a href="/tags/Base58Check.html">Base58Check</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a></span></p>
+   <time datetime="2014-03-18" pubdate="true">2014-03-18</time> :: <span class="tags"><a href="/tags/Base58Check.html">Base58Check</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a>, <a href="/tags/Racket.html">Racket</a></span></p>
   </header>
 
 
@@ -520,12 +526,12 @@ Welcome to Racket v6.0.0.3.
           }
       }(document,"script","twitter-wjs");
     </script>
-    <a class="twitter-share-button" data-dnt="true" data-url="http://www.lostintransaction.com/blog/2014/03/18/base58check-encoding-and-decoding/" href="https://twitter.com/share">
+    <a class="twitter-share-button" data-dnt="true" data-url="http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/" href="https://twitter.com/share">
       "Tweet"</a>
 
   <script src="https://apis.google.com/js/plusone.js" type="text/javascript"></script>
 
-  <g:plusone href="http://www.lostintransaction.com/blog/2014/03/18/base58check-encoding-and-decoding/" size="medium"></g:plusone>
+  <g:plusone href="http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/" size="medium"></g:plusone>
 
   <script type="text/javascript">
       var disqus_shortname = 'lostintransaction';
@@ -542,9 +548,12 @@ Welcome to Racket v6.0.0.3.
 
   <ul class="pager">
 
+   <li class="previous">
+      <a href="/blog/2014/04/09/wallet-import-format-wif/">&larr; <em>Wallet Import Format (WIF)</em></a>
+    </li>
 
    <li class="next">
-      <a href="/blog/2014/03/15/converting-a-bitcoin-public-key-to-a-hex-address/"><em>Converting a Bitcoin Public Key to a (Hex) Address</em> &rarr;</a>
+      <a href="/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/"><em>Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address</em> &rarr;</a>
     </li>
     </ul>
   </footer>
@@ -576,7 +585,7 @@ Welcome to Racket v6.0.0.3.
         the <strong>fr</strong>ozen bl<strong>og</strong> tool.
         Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
 <!--        <p><em>Your legal notice here</em>.</p>-->
-        <p><em>Don't believe anything you read here</em>.</p>
+<!--        <p><em></em></p>-->
         <p><a href="bitcoin:18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS">18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS</a></p>
       </footer>
     </div>

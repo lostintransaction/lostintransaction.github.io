@@ -1,6 +1,6 @@
 http://www.lostintransaction.com/blog/2014/04/09/wallet-import-format-wif/
-http://www.lostintransaction.com/blog/2014/03/18/base58check-encoding-and-decoding/
-http://www.lostintransaction.com/blog/2014/03/15/converting-a-bitcoin-public-key-to-a-hex-address/
+http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/
+http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/
 http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/
 http://www.lostintransaction.com/blog/2014/03/07/verifying-andreas-s-fundraising-for-dorian-message/
 http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/

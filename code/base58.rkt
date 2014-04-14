@@ -6,29 +6,32 @@
 (define BASE58-CHARS 
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
 
+;; case-insensitive character equality operator
 (define (anycase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
 
-;; convert char to base10
+;; convert hex digit to base10 number
 (define (hex-char->num ch)
   (define index 
     (for/first ([(c n) (in-indexed HEX-CHARS)] #:when (anycase=? c ch)) n))
   (or index (error 'hex-char->num "invalid hex char: ~a\n" ch)))
 
+;; convert base58check digit to base10 number
 (define (base58-char->num ch)
   (define index 
     (for/first ([(c n) (in-indexed BASE58-CHARS)] #:when (char=? c ch)) n))
   (or index (error 'base58-char->num "invalid base58 char: ~a\n" ch)))
 
-;; convert str to base10 num
+;; convert hex string to base10 number
 (define (hex-str->num hstr)
   (for/fold ([num 0]) ([ch (in-string hstr)]) 
     (+ (* 16 num) (hex-char->num ch))))
 
+;; convert base58check string to base10 number
 (define (base58-str->num b58str)
   (for/fold ([num 0]) ([ch (in-string b58str)]) 
     (+ (* 58 num) (base58-char->num ch))))
 
-;; convert base10 to base58 string
+;; convert base10 number to base58 string
 (define (num->base58-char n)
   (when (or (< n 0) (>= n 58))
     (error 'num->base58-char "cannot convert to base-58: ~a\n" n))

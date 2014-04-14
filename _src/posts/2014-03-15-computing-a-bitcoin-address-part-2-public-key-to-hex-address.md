@@ -1,6 +1,6 @@
     Title: Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address
     Date: 2014-03-15T04:09:45
-    Tags: OpenSSL, C, Racket, FFI, hashes, SHA256, RIPEMD160, Bitcoin addresses, public key
+    Tags: public key, Bitcoin addresses, hashes, SHA256, RIPEMD160, OpenSSL, C, Racket, FFI
 
 This series of posts figures out how to compute a Bitcoin address from
 a private key. In a previous post, we
@@ -134,11 +134,12 @@ For convenience, we also define a few more helper functions:
 (define (get-checksum hstr) (substring hstr 0 8))
 ```
 
-We duplicate this example using
-[the Racket (extended) REPL][racket:xrepl], and the
+Finally, we can duplicate the sequence of hashes from the example,
+using the
 [code from this post](http://www.lostintransaction.com/code/crypto.rkt)
-(saved to a file `crypto.rkt`). (The `^` token in the REPL represents
-the last printed result.)
+(saved to a file `crypto.rkt`) and
+[the Racket (extended) REPL][racket:xrepl] (the `^` token in the REPL
+represents the last printed result):
 
 [racket:repl]: http://docs.racket-lang.org/guide/intro.html?q=repl#%28tech._repl%29 "Interacting with Racket"
 [racket:xrepl]: http://docs.racket-lang.org/xrepl/index.html "XREPL"
@@ -163,8 +164,8 @@ the last printed result.)
 	-> (string-append hash160+version ^)
 	"00010966776006953d5567439e5e39f86a0d273beed61967f6"
 	   
-The final result is the same Bitcoin address, in hexadecimal format,
-as tje example. The Bitcoin wiki article performs one more step to
+The final result is the Bitcoin address from the example, in
+hexadecimal format. The Bitcoin wiki article performs one more step to
 convert to [Base58Check encoding][bwiki:b58], which is the standard
 representation for Bitcoin addresses. We'll look at Base58Check
 encoding in the next post!

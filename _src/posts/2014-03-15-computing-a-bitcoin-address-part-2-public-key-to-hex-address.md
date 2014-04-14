@@ -19,9 +19,9 @@ implementation of the [SHA-256][wiki:sha] and
 [wiki:sha]: http://en.wikipedia.org/wiki/SHA-2 "Wikipedia: SHA-2"
 [wiki:ripemd]: http://en.wikipedia.org/wiki/RIPEMD "Wikipedia: RIPEMD"
 
-Conveniently, the standard Racket distribution already defines [a hook into the `libcrypto` library](pltgit:libcrypto), also named `libcrypto`. Racket comes
-with wrapper functions for some `libcrypto` C functions, but not for
-`SHA256` or `RIPEMD160` so now we'll create those.
+Conveniently, the standard Racket distribution already defines [a hook into the `libcrypto` library][pltgit:libcrypto], also named `libcrypto`. Racket comes
+with wrapper functions for some `libcrypto` C functions, but not
+`SHA256` or `RIPEMD160` so we'll create those.
 
 [pltgit:libcrypto]: https://github.com/plt/racket/blob/master/racket/collects/openssl/libcrypto.rkt "Racket source: libcrypto.rkt"
 [racket:ffilib]: http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29 "Racket docs: ffi-lib"
@@ -34,8 +34,8 @@ unsigned char *SHA256( const unsigned char *d, size_t n, unsigned char *md );
 ```
 
 We use the Racket [`get-ffi-obj`][racket:getffiobj] function to create
-a Racket wrapper for `SHA256`. Here's a definition of a `sha256`
-Racket function that calls the `SHA256` C function:
+a Racket wrapper for `SHA256`. Here's a Racket `sha256` function that
+calls the C `SHA256` function:
 
 ```racket
 (define SHA256-DIGEST-LEN 32) ; bytes
@@ -49,7 +49,7 @@ Racket function that calls the `SHA256` C function:
 ```
 
 The first argument to `get-ffi-obj` is the name of the C function and
-the second argument is the book into the appropriate library. The
+the second argument is the hook into the appropriate library. The
 third argument is the type, which specifies how to mediate between
 Racket and C values. [`_fun`][racket:fun] is the function type and in
 this case the function has three arguments (each delimited with
@@ -63,7 +63,7 @@ argument.
 
 2. The second argument is the length of the input byte array. The `=`
 and the expression following it describe how to calculate this
-argument automatically. Thus a caller of `sha256` need not provide
+argument automatically. Thus a caller of `sha256` does not provide
 this argument.
 
 3. The third argument is the output byte array. The `o` indicates a
@@ -78,7 +78,7 @@ library.
 [racket:fun]: http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29 "Racket docs: _fun"
 [openssl:sha256const]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133 "OpenSSL source: crypto/sha/sha.h"
 
-And here's an analogous wrapper for `ripemd160`:
+Similarly, here's the definition for a Racket `ripemd160` function:
 
 ```racket
 (define RIPEMD160-DIGEST-LEN 20) ; bytes
@@ -106,6 +106,12 @@ a previous post, so we start with the public key here.
 
 For ease of comparison, here's the sequence of expected hashes, copied
 from the Bitcoin wiki example:
+
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      | centered      |   $12 |
+| zebra stripes | are neat      |    $1 |
 
 1. public key: `0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6`
 2. SHA-256: `600FFE422B4E00731A59557A5CCA46CC183944191006324A447BDB2D98D4B408`

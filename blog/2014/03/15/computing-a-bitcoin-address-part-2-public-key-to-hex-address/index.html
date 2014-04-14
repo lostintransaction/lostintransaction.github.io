@@ -138,7 +138,7 @@
  <p>To convert from a public key to a Bitcoin address, we need an implementation of the <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a> hash functions. Racket doesn&rsquo;t come with these functions but we can easily call to OpenSSL&rsquo;s implementation of these hash functions via Racket&rsquo;s C <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a>.</p>
 
 
- <p>Conveniently, the standard Racket distribution already defines <a href="pltgit:libcrypto">a hook into the <code>libcrypto</code> library</a>, also named <code>libcrypto</code>. Racket comes with wrapper functions for some <code>libcrypto</code> C functions, but not for <code>SHA256</code> or <code>RIPEMD160</code> so now we&rsquo;ll create those.</p>
+ <p>Conveniently, the standard Racket distribution already defines <a href="https://github.com/plt/racket/blob/master/racket/collects/openssl/libcrypto.rkt" title="Racket source: libcrypto.rkt">a hook into the <code>libcrypto</code> library</a>, also named <code>libcrypto</code>. Racket comes with wrapper functions for some <code>libcrypto</code> C functions, but not <code>SHA256</code> or <code>RIPEMD160</code> so we&rsquo;ll create those.</p>
 
 
  <p>Here&rsquo;s the header for the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"><code>SHA256</code> C function</a>:</p>
@@ -168,7 +168,7 @@
 </div>
 
 
- <p>We use the Racket <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"><code>get-ffi-obj</code></a> function to create a Racket wrapper for <code>SHA256</code>. Here&rsquo;s a definition of a <code>sha256</code> Racket function that calls the <code>SHA256</code> C function:</p>
+ <p>We use the Racket <a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"><code>get-ffi-obj</code></a> function to create a Racket wrapper for <code>SHA256</code>. Here&rsquo;s a Racket <code>sha256</code> function that calls the C <code>SHA256</code> function:</p>
 
 
  <div class="brush: racket">
@@ -209,7 +209,7 @@
 </div>
 
 
- <p>The first argument to <code>get-ffi-obj</code> is the name of the C function and the second argument is the book into the appropriate library. The third argument is the type, which specifies how to mediate between Racket and C values. <a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"><code>_fun</code></a> is the function type and in this case the function has three arguments (each delimited with brackets by convention).</p>
+ <p>The first argument to <code>get-ffi-obj</code> is the name of the C function and the second argument is the hook into the appropriate library. The third argument is the type, which specifies how to mediate between Racket and C values. <a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"><code>_fun</code></a> is the function type and in this case the function has three arguments (each delimited with brackets by convention).</p>
 
 
  <p>Examining the types of the arguments:</p>
@@ -223,14 +223,14 @@
 
   <li>
 
-   <p>The second argument is the length of the input byte array. The <code>=</code> and the expression following it describe how to calculate this argument automatically. Thus a caller of <code>sha256</code> need not provide this argument.</p></li>
+   <p>The second argument is the length of the input byte array. The <code>=</code> and the expression following it describe how to calculate this argument automatically. Thus a caller of <code>sha256</code> does not provide this argument.</p></li>
 
   <li>
 
    <p>The third argument is the output byte array. The <code>o</code> indicates a return pointer and is followed by the expected length of the output array, which should be 32 bytes here. We define a constant <code>SHA256-DIGEST-LEN</code> which is analogous to <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133" title="OpenSSL source: crypto/sha/sha.h">the <code>SHA256_DIGEST_LENGTH</code> constant</a> in the C library.</p></li></ol>
 
 
- <p>And here&rsquo;s an analogous wrapper for <code>ripemd160</code>:</p>
+ <p>Similarly, here&rsquo;s the definition for a Racket <code>ripemd160</code> function:</p>
 
 
  <div class="brush: racket">
@@ -282,6 +282,9 @@
 
 
  <p>For ease of comparison, here&rsquo;s the sequence of expected hashes, copied from the Bitcoin wiki example:</p>
+
+
+ <p>| Tables | Are | Cool | | &mdash;&mdash;&mdash;&mdash;- |:&mdash;&mdash;&mdash;&mdash;-:| &mdash;&mdash;:| | col 3 is | right-aligned | $1600 | | col 2 is | centered | $12 | | zebra stripes | are neat | $1 |</p>
 
 
  <ol>

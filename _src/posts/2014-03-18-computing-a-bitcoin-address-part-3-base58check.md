@@ -1,6 +1,6 @@
-    Title: Base58Check Encoding and Decoding
+    Title: Computing a Bitcoin Address, Part 3: Base58Check Encoding
     Date: 2014-03-18T05:44:11
-    Tags: Base58Check, Racket, Bitcoin addresses
+    Tags: Base58Check, Bitcoin addresses, Racket
 
 In previous posts, we looked at
 [computing a Bitcoin public key from a private key][LiT:pubfrompriv],

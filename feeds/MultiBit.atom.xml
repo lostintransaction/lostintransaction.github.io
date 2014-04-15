@@ -4,7 +4,42 @@
  <link rel="self" href="http://www.lostintransaction.com/feeds/MultiBit.atom.xml" />
  <link href="http://www.lostintransaction.com/tags/MultiBit.html" />
  <id>urn:http-www-lostintransaction-com:-tags-MultiBit-html</id>
- <updated>2014-03-05T06:44:02Z</updated>
+ <updated>2014-04-09T03:02:03Z</updated>
+ <entry>
+  <title type="text">Wallet Import Format (WIF)</title>
+  <link rel="alternate" href="http://www.lostintransaction.com/blog/2014/04/09/wallet-import-format-wif/?utm_source=MultiBit&amp;utm_medium=Atom" />
+  <id>urn:http-www-lostintransaction-com:-blog-2014-04-09-wallet-import-format-wif</id>
+  <published>2014-04-09T03:02:03Z</published>
+  <updated>2014-04-09T03:02:03Z</updated>
+  <author>
+   <name>The Unknown Author</name></author>
+  <content type="html">
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=MultiBit&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F04%2F09%2Fwallet-import-format-wif%2F" height="1" width="1" /&gt;
+ &lt;p&gt;In previous posts, we figured out how to compute a Bitcoin address from a private key, using an example from the Bitcoin wiki. In this post we try to convert a private key generated from an actual (MultiBit) wallet to an address.&lt;/p&gt;
+ &lt;p&gt;I created a new wallet in MultiBit and it generated address &lt;code&gt;1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j&lt;/code&gt;. I then exported the private key associated with this address into a file. Here&amp;rsquo;s the contents of that file:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;# KEEP YOUR PRIVATE KEYS SAFE !
+# Anyone who can read this file can spend your bitcoin.
+#
+# Format:
+#   &amp;lt;Base58 encoded private key&amp;gt;[&amp;lt;whitespace&amp;gt;[&amp;lt;key createdAt&amp;gt;]]
+#
+#   The Base58 encoded private keys are the same format as
+#   produced by the Satoshi client/ sipa dumpprivkey utility.
+#
+#   Key createdAt is in UTC format as specified by ISO 8601
+#   e.g: 2011-12-31T16:42:00Z . The century, 'T' and 'Z' are mandatory
+#
+L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe` 2014-03-10T06:12:28Z
+# End of private keys&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Let&amp;rsquo;s see if the program we wrote in the last series of posts can compute the address (&lt;code&gt;1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j&lt;/code&gt;) from the private key (&lt;code&gt;L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe&lt;/code&gt;). The key is in base58 so we need convert to hex first.&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ racket
+Welcome to Racket v6.0.0.3.
+-&amp;gt; (require "priv2addr.rkt" "base58.rkt")
+-&amp;gt; (define priv/hex (base58-str-&amp;gt;hex-str "L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe"))
+-&amp;gt; (priv-key-&amp;gt;addr priv/hex)
+"1GoZxLR83RfoZeqzNSdTZuEb4vHAc6zFfc"
+&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Hmm, we get the wrong address.&lt;/p&gt;&lt;/html&gt;</content></entry>
  <entry>
   <title type="text">Verifying Hashes and Signatures</title>
   <link rel="alternate" href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/?utm_source=MultiBit&amp;utm_medium=Atom" />

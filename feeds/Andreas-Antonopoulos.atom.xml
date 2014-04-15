@@ -55,4 +55,6 @@ sig  sig3  B1632E74 2014-01-22 __________ 2015-01-22 [selfsig]
 sig  sig   2878DE4F 2014-01-22 __________ __________ Andreas M. Antonopoulos &amp;lt;andreas@antonopoulos.com&amp;gt;
 sig  sig   CF8338F5 2014-03-07 __________ __________ Christopher David Howie &amp;lt;me@chrishowie.com&amp;gt;&lt;/code&gt;&lt;/pre&gt;
    &lt;p&gt;Other than Andreas himself, there&amp;rsquo;s only one other person that is vouching for the key.&lt;/p&gt;&lt;/li&gt;
-  &lt;li&gt;Luckily, Andreas anticipated this issue, and &lt;a href="http://www.youtube.com/watch?v=JCF1u1Wqfv0" title="Andreas PGP key YouTube video"&gt;issued a statement on YouTube&lt;/a&gt;, confirming his key. It&amp;rsquo;s a match! Now we are assured that the message is authentic.&lt;/li&gt;&lt;/ol&gt;&lt;/html&gt;</content></entry></feed>
+  &lt;li&gt;Luckily, Andreas anticipated this issue, and &lt;a href="http://www.youtube.com/watch?v=JCF1u1Wqfv0" title="Andreas PGP key YouTube video"&gt;issued a statement on YouTube&lt;/a&gt;, confirming his key. It&amp;rsquo;s a match! Now we are assured that the message is authentic.&lt;/li&gt;&lt;/ol&gt;
+ &lt;h3 id="software"&gt;Software&lt;/h3&gt;
+ &lt;p&gt;In this post, I used GnuPG 2.0.22 (Gpgwin 2.2.1) and libgcrypt 1.5.3, running in Windows 7 64-bit.&lt;/p&gt;&lt;/html&gt;</content></entry></feed>

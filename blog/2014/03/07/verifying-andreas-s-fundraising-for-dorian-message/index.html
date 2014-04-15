@@ -6,12 +6,12 @@
     <title>Verifying Andreas's "Fundraising for Dorian" Message</title>
     <meta name="description" content="Today, Andreas M. Antonopoulos, Chief Security Officer of Blockchain.info, started a fundraiser for Dorian Nakamoto, the guy who's being harassed by the media due to Newsweek's recent article about Satoshi Nakamoto. To prove that the message is not fake, Andreas signed the message with his public key. Since I've recently been playing with digital signatures, this seemed like a great chance to explore some more. Let's try to to verify the message. ...">
     <meta name="author"      content="The Unknown Blogger">
-    <meta name="keywords"    content="Andreas Antonopoulos, signatures">
+    <meta name="keywords"    content="Andreas Antonopoulos, signatures, Dorian Nakamoto, PGP">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
     <link rel="icon"      href="/favicon.ico">
     <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/03/07/verifying-andreas-s-fundraising-for-dorian-message/">
     <link rel="next" href="/blog/2014/03/05/verifying-hashes-and-signatures/">
-    <link rel="prev" href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">
+    <link rel="prev" href="/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/css/pygments.css">
@@ -70,7 +70,11 @@
 
 <li><a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a></li>
 
+<li><a href="/tags/Bitcoin-wallets.html">Bitcoin wallets</a></li>
+
 <li><a href="/tags/C.html">C</a></li>
+
+<li><a href="/tags/Dorian-Nakamoto.html">Dorian Nakamoto</a></li>
 
 <li><a href="/tags/elliptic-curve.html">elliptic curve</a></li>
 
@@ -82,15 +86,17 @@
 
 <li><a href="/tags/OpenSSL.html">OpenSSL</a></li>
 
+<li><a href="/tags/PGP.html">PGP</a></li>
+
 <li><a href="/tags/private-key.html">private key</a></li>
 
 <li><a href="/tags/public-key.html">public key</a></li>
 
 <li><a href="/tags/Racket.html">Racket</a></li>
 
-<li><a href="/tags/RIPEMD.html">RIPEMD</a></li>
+<li><a href="/tags/RIPEMD160.html">RIPEMD160</a></li>
 
-<li><a href="/tags/SHA.html">SHA</a></li>
+<li><a href="/tags/SHA256.html">SHA256</a></li>
 
 <li><a href="/tags/signatures.html">signatures</a></li>
               </ul>
@@ -122,7 +128,7 @@
   <h1>Verifying Andreas&rsquo;s &ldquo;Fundraising for Dorian&rdquo; Message</h1>
 
   <p class="date-and-tags">
-   <time datetime="2014-03-07" pubdate="true">2014-03-07</time> :: <span class="tags"><a href="/tags/Andreas-Antonopoulos.html">Andreas Antonopoulos</a>, <a href="/tags/signatures.html">signatures</a></span></p>
+   <time datetime="2014-03-07" pubdate="true">2014-03-07</time> :: <span class="tags"><a href="/tags/Andreas-Antonopoulos.html">Andreas Antonopoulos</a>, <a href="/tags/signatures.html">signatures</a>, <a href="/tags/Dorian-Nakamoto.html">Dorian Nakamoto</a>, <a href="/tags/PGP.html">PGP</a></span></p>
   </header>
 
 
@@ -203,6 +209,12 @@ sig  sig   CF8338F5 2014-03-07 __________ __________ Christopher David Howie &lt
 
   <li>Luckily, Andreas anticipated this issue, and <a href="http://www.youtube.com/watch?v=JCF1u1Wqfv0" title="Andreas PGP key YouTube video">issued a statement on YouTube</a>, confirming his key. It&rsquo;s a match! Now we are assured that the message is authentic.</li></ol>
 
+
+ <h3 id="software">Software</h3>
+
+
+ <p>In this post, I used GnuPG 2.0.22 (Gpgwin 2.2.1) and libgcrypt 1.5.3, running in Windows 7 64-bit.</p>
+
  <footer>
 
   <script type="text/javascript">
@@ -239,7 +251,7 @@ sig  sig   CF8338F5 2014-03-07 __________ __________ Christopher David Howie &lt
   <ul class="pager">
 
    <li class="previous">
-      <a href="/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/">&larr; <em>Deriving a Bitcoin Public Key From a Private Key</em></a>
+      <a href="/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">&larr; <em>Computing a Bitcoin Address, Part 1: Private to Public Key</em></a>
     </li>
 
    <li class="next">
@@ -275,7 +287,7 @@ sig  sig   CF8338F5 2014-03-07 __________ __________ Christopher David Howie &lt
         the <strong>fr</strong>ozen bl<strong>og</strong> tool.
         Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
 <!--        <p><em>Your legal notice here</em>.</p>-->
-        <p><em>Don't believe anything you read here</em>.</p>
+<!--        <p><em></em></p>-->
         <p><a href="bitcoin:18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS">18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS</a></p>
       </footer>
     </div>

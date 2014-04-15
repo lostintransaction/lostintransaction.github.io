@@ -1,6 +1,6 @@
     Title: Verifying Andreas's "Fundraising for Dorian" Message
     Date: 2014-03-07T18:52:52
-    Tags: Andreas Antonopoulos, signatures
+    Tags: Andreas Antonopoulos, signatures, Dorian Nakamoto, PGP
 
 Today, Andreas M. Antonopoulos, Chief Security Officer of
 Blockchain.info, started a [fundraiser][reddit] for Dorian Nakamoto,
@@ -88,3 +88,7 @@ match! Now we are assured that the message is authentic.
 
 [andreaskey]: http://pgp.mit.edu/pks/lookup?op=vindex&search=0x339B0210B1632E74 "Andreas Antonopoulos public key signatures"
 [youtube]: http://www.youtube.com/watch?v=JCF1u1Wqfv0 "Andreas PGP key YouTube video"
+
+### Software
+
+In this post, I used GnuPG 2.0.22 (Gpgwin 2.2.1) and libgcrypt 1.5.3, running in Windows 7 64-bit.

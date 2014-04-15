@@ -14,8 +14,39 @@
    <pubDate>Wed, 09 Apr 2014 03:02:03 UTC</pubDate>
    <description>
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=Racket&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F04%2F09%2Fcomputing-a-bitcoin-address-part-4-wallet-import-format-wif%2F" height="1" width="1" /&gt;
- &lt;p&gt;In previous posts, we figured out how to compute a Bitcoin address from a private key, using an example from the Bitcoin wiki. In this post we try to convert a private key generated from an actual (MultiBit) wallet to an address.&lt;/p&gt;
- &lt;p&gt;I created a new wallet in MultiBit and it generated address &lt;code&gt;1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j&lt;/code&gt;. I then exported the private key associated with this address into a file. Here&amp;rsquo;s the contents of that file:&lt;/p&gt;
+ &lt;p&gt;In previous posts, we figured out how to compute a Bitcoin address from a private key and we tested our code with an &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: Bitcoin addresses"&gt;example from the Bitcoin wiki&lt;/a&gt;. In this post we try to convert a private key from a real wallet (MultiBit) to its corresponding address.&lt;/p&gt;
+ &lt;h3 id="from-private-key-to-public-address"&gt;From Private Key to Public Address&lt;/h3&gt;
+ &lt;p&gt;Let&amp;rsquo;s consolidate the code from the previous posts in the series to create one function that performs all the steps to convert from a private key to a public address. First we create some helper functions:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (hash160/hex hstr) (ripemd160/hex (sha256/hex hstr)))
+(define (add-version0 str) (string-append "00" str))
+
+;; checksum is 1st 4 bytes (8 chars) of double sha256 hash of given hex string
+(define (sha256x2/hex hstr) (sha256/hex (sha256/hex hstr)))
+(define (get-checksum hstr) (substring hstr 0 8))
+(define (compute-checksum hstr) (get-checksum (sha256x2/hex hstr)))
+(define (add-checksum hstr) (string-append hstr (compute-checksum hstr)))&lt;/code&gt;&lt;/pre&gt;
+ &lt;ul&gt;
+  &lt;li&gt;&lt;code&gt;hash160/hex&lt;/code&gt; performs a SHA&amp;ndash;256 hash followed by a RIPEMD&amp;ndash;160 hash on an input hex string.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;add-version0&lt;/code&gt; prepends a &lt;code&gt;0x00&lt;/code&gt; to a hex string.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;sha256x2/hex&lt;/code&gt; performs SHA&amp;ndash;256 twice on an input hex string.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;add-checksum&lt;/code&gt; computes a checksum (first four bytes of a double SHA&amp;ndash;256 hash) on the input and appends it to the end of the string.&lt;/li&gt;&lt;/ul&gt;
+ &lt;p&gt;Here&amp;rsquo;s a function &lt;code&gt;priv-key-&amp;gt;addr&lt;/code&gt; that converts a private key (in hex) to a public address (in Base58Check):&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;;; computes base58 addr from hex string priv key
+(define priv-key-&amp;gt;addr
+  (compose hex-str-&amp;gt;base58-str
+           add-checksum
+           add-version0
+           hash160/hex
+           priv-key-&amp;gt;pub-key))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;We use Racket&amp;rsquo;s &lt;code&gt;compose&lt;/code&gt; function, which strings together a series of functions. The functions are called in the reverse order in which they are listed, so &lt;code&gt;priv-key-&amp;gt;addr&lt;/code&gt; first calls &lt;code&gt;priv-key-&amp;gt;pub-key&lt;/code&gt;, then &lt;code&gt;hash160/hex&lt;/code&gt;, and so on. Let&amp;rsquo;s test it on &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: Bitcoin addresses"&gt;our running example&lt;/a&gt;. We save the above code to the file &lt;code&gt;priv2addr.rkt&lt;/code&gt;.&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ racket
+Welcome to Racket v6.0.0.3.
+-&amp;gt; (require "priv2addr.rkt")
+-&amp;gt; (define priv-key "18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725")
+-&amp;gt; (priv-key-&amp;gt;addr priv-key)
+"16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"&lt;/code&gt;&lt;/pre&gt;
+ &lt;h3 id="a-multibit-wallet"&gt;A MultiBit Wallet&lt;/h3&gt;
+ &lt;p&gt;Now let&amp;rsquo;s test our function on a real private key. I created a new wallet in MultiBit and it generated address &lt;code&gt;1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j&lt;/code&gt;. I then exported the private key associated with this address into a file. Here&amp;rsquo;s the contents of that file:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;# KEEP YOUR PRIVATE KEYS SAFE !
 # Anyone who can read this file can spend your bitcoin.
 #
@@ -30,15 +61,120 @@
 #
 L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe` 2014-03-10T06:12:28Z
 # End of private keys&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Let&amp;rsquo;s see if the program we wrote in the last series of posts can compute the address (&lt;code&gt;1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j&lt;/code&gt;) from the private key (&lt;code&gt;L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe&lt;/code&gt;). The key is in base58 so we need convert to hex first.&lt;/p&gt;
+ &lt;p&gt;Let&amp;rsquo;s see if we can convert this private key (&lt;code&gt;L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe&lt;/code&gt;) to its public address (&lt;code&gt;1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j&lt;/code&gt;). The key is in base&amp;ndash;58 so we need convert to hex first.&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
 -&amp;gt; (require "priv2addr.rkt" "base58.rkt")
--&amp;gt; (define priv/hex (base58-str-&amp;gt;hex-str "L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe"))
+-&amp;gt; (define priv/base58 "L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe")
+-&amp;gt; (define priv/hex (base58-str-&amp;gt;hex-str priv/base58))
 -&amp;gt; (priv-key-&amp;gt;addr priv/hex)
 "1GoZxLR83RfoZeqzNSdTZuEb4vHAc6zFfc"
 &lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Hmm, we get the wrong address.&lt;/p&gt;&lt;/html&gt;</description></item>
+ &lt;p&gt;Hmm, we get the wrong address! Querying the private key at &lt;a href="http://bitaddress.org"&gt;bitaddress.org&lt;/a&gt; reveals that the private key is&lt;/p&gt;
+ &lt;ol&gt;
+  &lt;li&gt;in &lt;a href="https://en.bitcoin.it/wiki/Wallet_import_format" title="Wallet import format"&gt;Wallet Import Format (WIF)&lt;/a&gt;, and&lt;/li&gt;
+  &lt;li&gt;in compressed form.&lt;/li&gt;&lt;/ol&gt;
+ &lt;p&gt;Here&amp;rsquo;s the relevant details of Wallet Import Format:&lt;/p&gt;
+ &lt;p&gt;Uncompressed WIF private key:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;0x80 + 32 byte raw private key + 4 byte checksum
+&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Compressed WIF private key:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;0x80 + 32 byte raw private key + 0x01 + 4 byte checksum
+&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;The &lt;code&gt;0x80&lt;/code&gt; prefix indicates an address on the main Bitcoin blockchain (as opposed to the testnet). The compressed form has an extra &lt;code&gt;0x01&lt;/code&gt; byte before the checksum.&lt;/p&gt;
+ &lt;h3 id="wif-checksum-checking"&gt;WIF Checksum Checking&lt;/h3&gt;
+ &lt;p&gt;Before converting the WIF private key to an address, let&amp;rsquo;s first write a function that checks the checksum for a WIF private key. We need to first determine if a WIF private key is compressed:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;;; wif is in base58
+(define (wif-compressed? wif)
+  (define len (string-length wif))
+    (when (not (or (= len 51) (= len 52)))
+      (error 'wif-compressed? "invalid WIF: ~a\n" wif))
+  (define c (string-ref wif 0))
+  (or (char=? c #\K) (char=? c #\L)))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;A compressed WIF private key begins with a &lt;code&gt;K&lt;/code&gt; or &lt;code&gt;L&lt;/code&gt; and &lt;code&gt;wif-compressed?&lt;/code&gt; checks for this.&lt;/p&gt;
+ &lt;p&gt;Next we define a prediate that verifies a WIF private key&amp;rsquo;s checksum. The checksum is again computed with a double SHA&amp;ndash;256.&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;;; splits wif into prefix + checksum
+;; wif is in base58 but results are in  hex
+(define (wif-split-checksum wif)
+  (define wif/hex (base58-str-&amp;gt;hex-str wif))
+  (cond [(wif-compressed? wif)
+         (values (substring wif/hex 0 68) (substring wif/hex 68 76))]
+        [else
+         (values (substring wif/hex 0 66) (substring wif/hex 66 74))]))
+
+(define (hex=? str1 str2) (string=? (string-upcase str1) (string-upcase str2)))
+
+;; wif is in base58
+(define (wif-checksum-ok? wif)
+  (define-values (wif-prefix wif-checksum) (wif-split-checksum wif))
+  (hex=? wif-checksum (compute-checksum wif-prefix)))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;First, &lt;code&gt;wif-split-checksum&lt;/code&gt; splits a WIF private key into a prefix and a checksum. Then, &lt;code&gt;wif-checksum-ok?&lt;/code&gt; computes a double SHA&amp;ndash;256 on the prefix and verifies that it matches the checksum.&lt;/p&gt;
+ &lt;p&gt;Let&amp;rsquo;s try these functions on our example:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ racket
+Welcome to Racket v6.0.0.3.
+-&amp;gt; (define wif/comp "L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe")
+-&amp;gt; (wif-checksum-ok? wif/comp)
+#t
+&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;We can also try on the uncompressed WIF private key, which according to &lt;a href="https://www.bitaddress.org"&gt;bitaddress.org&lt;/a&gt;, is &lt;code&gt;5KDwznXNT8sJbhtYheFNB1ho9Yb69hfJGgmTkW9cNVBr7LxFEje&lt;/code&gt;.&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;-&amp;gt; (define wif/uncomp "5KDwznXNT8sJbhtYheFNB1ho9Yb69hfJGgmTkW9cNVBr7LxFEje")
+-&amp;gt; (wif-checksum-ok? wif/uncomp)
+#t
+&lt;/code&gt;&lt;/pre&gt;
+ &lt;h3 id="from-wif-private-key-to-address"&gt;From WIF Private Key to Address&lt;/h3&gt;
+ &lt;p&gt;To convert from a WIF private key to an address, we need to:&lt;/p&gt;
+ &lt;ol&gt;
+  &lt;li&gt;decide whether the WIF private key is compressed,&lt;/li&gt;
+  &lt;li&gt;extract the raw private key, and&lt;/li&gt;
+  &lt;li&gt;compute either an uncompressed or compressed Bitcoin address.&lt;/li&gt;&lt;/ol&gt;
+ &lt;p&gt;We have already defined code for step 1. For step 2, we just drop all prefixes and checksums from the WIF private key:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;;; wif is in base58, priv key is in hex
+(define (wif-&amp;gt;priv-key wif) (substring (base58-str-&amp;gt;hex-str wif) 2 66))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;To verify, let&amp;rsquo;s check the hash160 of our running example, which &lt;a href="https://blockchain.info/address/1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j" title="blockchain.info 1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j"&gt;blockchain.info reports to be&lt;/a&gt; &lt;code&gt;a62bc20c511af7160a6150a72042b3fff8a86646&lt;/code&gt;:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ racket
+Welcome to Racket v6.0.0.3.
+-&amp;gt; (require "priv2addr.rkt" "priv2pub.rkt")
+-&amp;gt; (define wif "L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe")
+-&amp;gt; (wif-&amp;gt;priv-key wif)
+"B96CA0C6390D4734C80A44ECD4ACEF21E2886BA250EC1D8CF461F1C94FAE6EA9"
+-&amp;gt; (priv-key-&amp;gt;pub-key/compressed ^)
+"036eef34887c91e2ed2815de2192bd541867708bb1c7434cd571073ddecaaafc42"
+-&amp;gt; (hash160/hex ^)
+"a62bc20c511af7160a6150a72042b3fff8a86646"&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;For step 3, we first need a compressed version of our &lt;code&gt;priv-key-&amp;gt;addr&lt;/code&gt; function. This requires getting a compressed public key, but fortunately we&amp;rsquo;ve already defined a &lt;code&gt;priv-key-&amp;gt;pub-key/compressed&lt;/code&gt; in a &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key"&gt;previous post&lt;/a&gt;. Here&amp;rsquo;s &lt;code&gt;priv-key-&amp;gt;addr/compressed&lt;/code&gt;:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;;; computes base58 addr from compressed (hex) priv key
+(define priv-key-&amp;gt;addr/compressed
+  (compose hex-str-&amp;gt;base58-str
+           add-checksum
+           add-version0
+           hash160/hex
+           priv-key-&amp;gt;pub-key/compressed))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Finally, we can define &lt;code&gt;wif-&amp;gt;addr&lt;/code&gt;, which converts a WIF private key to a Bitcoin address:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;;; wif and addr are base58
+(define (wif-&amp;gt;addr wif)
+  (define priv (wif-&amp;gt;priv-key wif))
+  (if (wif-compressed? wif)
+      (priv-key-&amp;gt;addr/compressed priv)
+      (priv-key-&amp;gt;addr priv)))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Here&amp;rsquo;s our example, with the expected representations (from &lt;a href="https://www.bitaddress.org"&gt;bitaddress.org&lt;/a&gt;):&lt;/p&gt;
+ &lt;ul&gt;
+  &lt;li&gt;WIF private key, compressed: &lt;code&gt;L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;public address, compressed: &lt;code&gt;1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;WIF private key, uncompressed: &lt;code&gt;5KDwznXNT8sJbhtYheFNB1ho9Yb69hfJGgmTkW9cNVBr7LxFEje&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;public address, uncompressed: &lt;code&gt;15YzfXwEg5STm3GtEh87LAyzNbpVpdx5eN&lt;/code&gt;&lt;/li&gt;&lt;/ul&gt;
+ &lt;p&gt;Let&amp;rsquo;s test that our code gives the expected results:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ racket
+Welcome to Racket v6.0.0.3.
+-&amp;gt; (require "priv2addr.rkt")
+-&amp;gt; (define wif/comp "L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe")
+-&amp;gt; (wif-&amp;gt;addr wif/comp)
+"1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j"
+-&amp;gt; (define wif/uncomp "5KDwznXNT8sJbhtYheFNB1ho9Yb69hfJGgmTkW9cNVBr7LxFEje")
+-&amp;gt; (wif-&amp;gt;addr wif/uncomp)
+"15YzfXwEg5STm3GtEh87LAyzNbpVpdx5eN"
+&lt;/code&gt;&lt;/pre&gt;
+ &lt;h3 id="software"&gt;Software&lt;/h3&gt;
+ &lt;p&gt;All the code from this post &lt;a href="http://www.lostintransaction.com/code/priv2addr.rkt"&gt;is available here&lt;/a&gt;. In this post, I&amp;rsquo;m using Racket 6.0.0.3, running in Debian 7.0.&lt;/p&gt;&lt;/html&gt;</description></item>
   <item>
    <title>Computing a Bitcoin Address, Part 3: Base58Check Encoding</title>
    <link>http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/?utm_source=Racket&amp;utm_medium=RSS</link>
@@ -249,10 +385,7 @@ Welcome to Racket v6.0.0.3.
   
 (define (ripemd160/hex input)
   (bytes-&amp;gt;hex-string (ripemd160 (hex-string-&amp;gt;bytes input))))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;For convenience, we also define a few more helper functions:&lt;/p&gt;
- &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (add-version0 str) (string-append "00" str))
-(define (get-checksum hstr) (substring hstr 0 8))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Finally, we can duplicate the sequence of hashes from the example, using the &lt;a href="http://www.lostintransaction.com/code/crypto.rkt"&gt;code from this post&lt;/a&gt; (saved to a file &lt;code&gt;crypto.rkt&lt;/code&gt;) and &lt;a href="http://docs.racket-lang.org/xrepl/index.html" title="XREPL"&gt;the Racket (extended) REPL&lt;/a&gt; (the &lt;code&gt;^&lt;/code&gt; token in the REPL represents the last printed result):&lt;/p&gt;
+ &lt;p&gt;Now we can duplicate the sequence of hashes from the example, using the &lt;a href="http://www.lostintransaction.com/code/crypto.rkt"&gt;code from this post&lt;/a&gt; (saved to a file &lt;code&gt;crypto.rkt&lt;/code&gt;) and &lt;a href="http://docs.racket-lang.org/xrepl/index.html" title="XREPL"&gt;the Racket (extended) REPL&lt;/a&gt; (the &lt;code&gt;^&lt;/code&gt; token in the REPL represents the last printed result):&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
 -&amp;gt; (require "crypto.rkt")
@@ -261,14 +394,14 @@ Welcome to Racket v6.0.0.3.
 "600ffe422b4e00731a59557a5cca46cc183944191006324a447bdb2d98d4b408"
 -&amp;gt; (ripemd160/hex ^)
 "010966776006953d5567439e5e39f86a0d273bee"
--&amp;gt; (add-version0 ^)
+-&amp;gt; (string-append "00" ^)
 "00010966776006953d5567439e5e39f86a0d273bee"
 -&amp;gt; (define hash160+version ^)
 -&amp;gt; (sha256/hex ^)
 "445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
 -&amp;gt; (sha256/hex ^)
 "d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
--&amp;gt; (get-checksum ^)
+-&amp;gt; (substring ^ 0 8) ; checksum
 "d61967f6"
 -&amp;gt; (string-append hash160+version ^)
 "00010966776006953d5567439e5e39f86a0d273beed61967f6"

@@ -65,10 +65,7 @@
   
 (define (ripemd160/hex input)
   (bytes-&amp;gt;hex-string (ripemd160 (hex-string-&amp;gt;bytes input))))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;For convenience, we also define a few more helper functions:&lt;/p&gt;
- &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (add-version0 str) (string-append "00" str))
-(define (get-checksum hstr) (substring hstr 0 8))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Finally, we can duplicate the sequence of hashes from the example, using the &lt;a href="http://www.lostintransaction.com/code/crypto.rkt"&gt;code from this post&lt;/a&gt; (saved to a file &lt;code&gt;crypto.rkt&lt;/code&gt;) and &lt;a href="http://docs.racket-lang.org/xrepl/index.html" title="XREPL"&gt;the Racket (extended) REPL&lt;/a&gt; (the &lt;code&gt;^&lt;/code&gt; token in the REPL represents the last printed result):&lt;/p&gt;
+ &lt;p&gt;Now we can duplicate the sequence of hashes from the example, using the &lt;a href="http://www.lostintransaction.com/code/crypto.rkt"&gt;code from this post&lt;/a&gt; (saved to a file &lt;code&gt;crypto.rkt&lt;/code&gt;) and &lt;a href="http://docs.racket-lang.org/xrepl/index.html" title="XREPL"&gt;the Racket (extended) REPL&lt;/a&gt; (the &lt;code&gt;^&lt;/code&gt; token in the REPL represents the last printed result):&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
 -&amp;gt; (require "crypto.rkt")
@@ -77,14 +74,14 @@ Welcome to Racket v6.0.0.3.
 "600ffe422b4e00731a59557a5cca46cc183944191006324a447bdb2d98d4b408"
 -&amp;gt; (ripemd160/hex ^)
 "010966776006953d5567439e5e39f86a0d273bee"
--&amp;gt; (add-version0 ^)
+-&amp;gt; (string-append "00" ^)
 "00010966776006953d5567439e5e39f86a0d273bee"
 -&amp;gt; (define hash160+version ^)
 -&amp;gt; (sha256/hex ^)
 "445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
 -&amp;gt; (sha256/hex ^)
 "d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
--&amp;gt; (get-checksum ^)
+-&amp;gt; (substring ^ 0 8) ; checksum
 "d61967f6"
 -&amp;gt; (string-append hash160+version ^)
 "00010966776006953d5567439e5e39f86a0d273beed61967f6"

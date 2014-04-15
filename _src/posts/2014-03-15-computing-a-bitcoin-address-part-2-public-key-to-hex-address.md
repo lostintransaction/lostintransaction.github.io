@@ -127,14 +127,7 @@ functions to convert to and from hex strings (`bytes->hex-string` and
   (bytes->hex-string (ripemd160 (hex-string->bytes input))))
 ```
 
-For convenience, we also define a few more helper functions:
-
-```racket
-(define (add-version0 str) (string-append "00" str))
-(define (get-checksum hstr) (substring hstr 0 8))
-```
-
-Finally, we can duplicate the sequence of hashes from the example,
+Now we can duplicate the sequence of hashes from the example,
 using the
 [code from this post](http://www.lostintransaction.com/code/crypto.rkt)
 (saved to a file `crypto.rkt`) and
@@ -152,14 +145,14 @@ represents the last printed result):
 	"600ffe422b4e00731a59557a5cca46cc183944191006324a447bdb2d98d4b408"
 	-> (ripemd160/hex ^)
 	"010966776006953d5567439e5e39f86a0d273bee"
-	-> (add-version0 ^)
+	-> (string-append "00" ^)
 	"00010966776006953d5567439e5e39f86a0d273bee"
 	-> (define hash160+version ^)
 	-> (sha256/hex ^)
 	"445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
 	-> (sha256/hex ^)
 	"d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
-	-> (get-checksum ^)
+	-> (substring ^ 0 8) ; checksum
 	"d61967f6"
 	-> (string-append hash160+version ^)
 	"00010966776006953d5567439e5e39f86a0d273beed61967f6"

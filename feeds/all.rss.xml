@@ -4,17 +4,49 @@
   <title>Lost in Transaction: A neophyte explores Bitcoin: All Posts</title>
   <description>Lost in Transaction: A neophyte explores Bitcoin: All Posts</description>
   <link>http://www.lostintransaction.com/index.html</link>
-  <lastBuildDate>Tue, 18 Mar 2014 05:44:11 UTC</lastBuildDate>
-  <pubDate>Tue, 18 Mar 2014 05:44:11 UTC</pubDate>
+  <lastBuildDate>Wed, 09 Apr 2014 03:02:03 UTC</lastBuildDate>
+  <pubDate>Wed, 09 Apr 2014 03:02:03 UTC</pubDate>
   <ttl>1800</ttl>
   <item>
-   <title>Base58Check Encoding and Decoding</title>
-   <link>http://www.lostintransaction.com/blog/2014/03/18/base58check-encoding-and-decoding/?utm_source=all&amp;utm_medium=RSS</link>
-   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-18-base58check-encoding-and-decoding</guid>
+   <title>Wallet Import Format (WIF)</title>
+   <link>http://www.lostintransaction.com/blog/2014/04/09/wallet-import-format-wif/?utm_source=all&amp;utm_medium=RSS</link>
+   <guid>urn:http-www-lostintransaction-com:-blog-2014-04-09-wallet-import-format-wif</guid>
+   <pubDate>Wed, 09 Apr 2014 03:02:03 UTC</pubDate>
+   <description>
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F04%2F09%2Fwallet-import-format-wif%2F" height="1" width="1" /&gt;
+ &lt;p&gt;In previous posts, we figured out how to compute a Bitcoin address from a private key, using an example from the Bitcoin wiki. In this post we try to convert a private key generated from an actual (MultiBit) wallet to an address.&lt;/p&gt;
+ &lt;p&gt;I created a new wallet in MultiBit and it generated address &lt;code&gt;1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j&lt;/code&gt;. I then exported the private key associated with this address into a file. Here&amp;rsquo;s the contents of that file:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;# KEEP YOUR PRIVATE KEYS SAFE !
+# Anyone who can read this file can spend your bitcoin.
+#
+# Format:
+#   &amp;lt;Base58 encoded private key&amp;gt;[&amp;lt;whitespace&amp;gt;[&amp;lt;key createdAt&amp;gt;]]
+#
+#   The Base58 encoded private keys are the same format as
+#   produced by the Satoshi client/ sipa dumpprivkey utility.
+#
+#   Key createdAt is in UTC format as specified by ISO 8601
+#   e.g: 2011-12-31T16:42:00Z . The century, 'T' and 'Z' are mandatory
+#
+L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe` 2014-03-10T06:12:28Z
+# End of private keys&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Let&amp;rsquo;s see if the program we wrote in the last series of posts can compute the address (&lt;code&gt;1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j&lt;/code&gt;) from the private key (&lt;code&gt;L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe&lt;/code&gt;). The key is in base58 so we need convert to hex first.&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ racket
+Welcome to Racket v6.0.0.3.
+-&amp;gt; (require "priv2addr.rkt" "base58.rkt")
+-&amp;gt; (define priv/hex (base58-str-&amp;gt;hex-str "L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe"))
+-&amp;gt; (priv-key-&amp;gt;addr priv/hex)
+"1GoZxLR83RfoZeqzNSdTZuEb4vHAc6zFfc"
+&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Hmm, we get the wrong address.&lt;/p&gt;&lt;/html&gt;</description></item>
+  <item>
+   <title>Computing a Bitcoin Address, Part 3: Base58Check Encoding</title>
+   <link>http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/?utm_source=all&amp;utm_medium=RSS</link>
+   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-18-computing-a-bitcoin-address-part-3-base58check-encoding</guid>
    <pubDate>Tue, 18 Mar 2014 05:44:11 UTC</pubDate>
    <description>
-&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F18%2Fbase58check-encoding-and-decoding%2F" height="1" width="1" /&gt;
- &lt;p&gt;In previous posts, we looked at &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key"&gt;computing a Bitcoin public key from a private key&lt;/a&gt;, and &lt;a href="http://www.lostintransaction.com/blog/2014/03/15/adding-openssl-bindings-to-racket-via-its-ffi/" title="Adding OpenSSL bindings to Racket via its FFI"&gt;computing a Bitcoin address from a public key&lt;/a&gt;. However, these posts dealt with the keys and addresses in hexadecimal (hex) form, which is not the representation familiar to most Bitcoin users. Bitcoin addresses more commonly are encoded as &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Base58Check encoding"&gt;Base58Check&lt;/a&gt; strings, which we explore in this post.&lt;/p&gt;
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F18%2Fcomputing-a-bitcoin-address-part-3-base58check-encoding%2F" height="1" width="1" /&gt;
+ &lt;p&gt;In previous posts, we looked at &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key"&gt;computing a Bitcoin public key from a private key&lt;/a&gt;, and &lt;a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/" title="Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address"&gt;computing a Bitcoin address from a public key&lt;/a&gt;. However, these posts dealt with the keys and addresses in hexadecimal (hex) form, which is not the representation familiar to most Bitcoin users. Bitcoin addresses more commonly are encoded as &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Base58Check encoding"&gt;Base58Check&lt;/a&gt; strings, which we explore in this post.&lt;/p&gt;
  &lt;p&gt;The &lt;a href="https://github.com/bitcoin/bitcoin/blob/f76c122e2eac8ef66f69d142231bd33c88a24c50/src/base58.h#L7-L12" title="src/base58.h"&gt;Bitcoin reference code&lt;/a&gt; provides the following rationale for using Base58Check (instead of a more common base&amp;ndash;64 encoding):&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;// Why base-58 instead of standard base-64 encoding?
 // - Don't want 0OIl characters that look the same in some fonts and
@@ -22,36 +54,41 @@
 // - A string with non-alphanumeric characters is not as easily accepted as an account number.
 // - E-mail usually won't line-break if there's no punctuation to break at.
 // - Double-clicking selects the whole number as one word if it's all alphanumeric.&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Essentially, the goal with Base58Check is to make it easier for humans to read and handle Bitcoin addresses. In this post, instead of the C++ used in the Bitcoin reference, we implement Base58Check encoding and decoding using &lt;a href="http://racket-lang.org"&gt;Racket&lt;/a&gt;, which lets us avoid the hassle of dealing with &lt;code&gt;BIGNUM&lt;/code&gt;s.&lt;/p&gt;
+ &lt;p&gt;Essentially, the goal with Base58Check is to make it easier for humans to read and handle Bitcoin addresses. In this post, instead of the C++ used in the Bitcoin reference, we implement Base58Check encoding and decoding using &lt;a href="http://racket-lang.org"&gt;Racket&lt;/a&gt;, which lets us avoid the hassle of dealing with &lt;code&gt;BIGNUM&lt;/code&gt; numbers.&lt;/p&gt;
  &lt;h3 id="encoding"&gt;Encoding&lt;/h3&gt;
  &lt;p&gt;To convert a hex string to Base58Check, we need to repeatedly perform modulo and division operations on the string. However, Racket doesn&amp;rsquo;t come with modulo and division operations on hex strings so it&amp;rsquo;ll be easier to convert to a base&amp;ndash;10 number first. Here&amp;rsquo;s a Racket function &lt;code&gt;hex-str-&amp;gt;num&lt;/code&gt; that converts from hex to base&amp;ndash;10.&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define HEX-CHARS "0123456789ABCDEF")
 
+; case-insensitive character equality operator
 (define (anycase=? c1 c2) (char=? (char-upcase c1) (char-upcase c2)))
 
+; convert hex digit to base-10 number
 (define (hex-char-&amp;gt;num ch)
   (define index 
     (for/first ([(c n) (in-indexed HEX-CHARS)] #:when (anycase=? c ch)) n))
   (or index (error 'hex-char-&amp;gt;num "invalid hex char: ~a\n" ch)))
-   
+      
+; convert hex string to base-10 number
 (define (hex-str-&amp;gt;num hstr)
   (for/fold ([num 0]) ([ch (in-string hstr)]) 
     (+ (* 16 num) (hex-char-&amp;gt;num ch))))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;The &lt;code&gt;fold/for&lt;/code&gt; form defines an intermediate result &lt;code&gt;num&lt;/code&gt; that is initially 0 and then for each hex character in the input &lt;code&gt;hstr&lt;/code&gt;, multiplies the intermediate result by 16 and adds to it the base&amp;ndash;10 representation of that hex character, as computed by &lt;code&gt;hex-char-&amp;gt;num&lt;/code&gt;. The &lt;code&gt;hex-char-&amp;gt;num&lt;/code&gt; function converts a hex character to a number by computing the position of the character in the &lt;code&gt;HEX-CHARS&lt;/code&gt; constant string (or throws an error if the input character is not valid hex). Note that &lt;code&gt;hex-char-&amp;gt;num&lt;/code&gt; accepts both upper and lowercase hex characters, and uses &lt;code&gt;anycase=?&lt;/code&gt; to compare characters for equality.&lt;/p&gt;
+ &lt;p&gt;The &lt;code&gt;fold/for&lt;/code&gt; form defines an intermediate result &lt;code&gt;num&lt;/code&gt; that is initially 0 and then for each hex character in the input &lt;code&gt;hstr&lt;/code&gt;, multiplies the intermediate result by 16 and adds to it the base&amp;ndash;10 representation of that hex character, as computed by &lt;code&gt;hex-char-&amp;gt;num&lt;/code&gt;. The &lt;code&gt;hex-char-&amp;gt;num&lt;/code&gt; function converts a hex character to a number by computing the position of the character in the &lt;code&gt;HEX-CHARS&lt;/code&gt; constant string (or throws an error if the input character is not valid hex). Note that &lt;code&gt;hex-char-&amp;gt;num&lt;/code&gt; accepts both upper and lowercase hex characters, and uses the case-insensitive &lt;code&gt;anycase=?&lt;/code&gt; to compare characters for equality.&lt;/p&gt;
  &lt;p&gt;Let&amp;rsquo;s see what the (hex) Bitcoin address from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses"&gt;this Bitcoin Wiki article&lt;/a&gt; (step 8) is in base&amp;ndash;10 (the above code is saved to a file &lt;code&gt;base58.rkt&lt;/code&gt; with &lt;code&gt;hex-str-&amp;gt;num&lt;/code&gt; exported):&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
 -&amp;gt; (require "base58.rkt")
 -&amp;gt; (hex-str-&amp;gt;num "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
 25420294593250030202636073700053352635053786165627414518&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;We can now use base&amp;ndash;10 modulo and divide to convert from base&amp;ndash;10 to Base58Check. Here&amp;rsquo;s an initial attempt at converting to base&amp;ndash;58:&lt;/p&gt;
+ &lt;p&gt;We can now use standard (base&amp;ndash;10) modulo and divide operations to convert from base&amp;ndash;10 to Base58Check. Here&amp;rsquo;s an initial attempt at converting to base&amp;ndash;58:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define BASE58-CHARS "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
 
+; convert base10 number to base58 digit
 (define (num-&amp;gt;base58-char n)
   (when (or (&amp;lt; n 0) (&amp;gt;= n 58))
     (error 'num-&amp;gt;base58-char "cannot convert to base-58: ~a\n" n))
   (string-ref BASE58-CHARS n))
   
+;; convert base10 number to base58check string (first attempt)
 (define (num-&amp;gt;base58-str.v0 n)
   (list-&amp;gt;string
     (reverse
@@ -61,21 +98,26 @@ Welcome to Racket v6.0.0.3.
             (list (num-&amp;gt;base58-char r))
             (cons (num-&amp;gt;base58-char r) (loop q)))))))
 
+; convert hex string to base58check string (first attempt)
 (define (hex-str-&amp;gt;base58-str.v0 hstr) 
   (num-&amp;gt;base58-str.v0 (hex-str-&amp;gt;num hstr)))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;The &lt;code&gt;hex-str-&amp;gt;base58-str.v0&lt;/code&gt; function first converts its hex string input to a base&amp;ndash;10 number using the previously defined &lt;code&gt;hex-str-&amp;gt;num&lt;/code&gt;. It then calls &lt;code&gt;num-&amp;gt;base58-str.v0&lt;/code&gt; to convert the base&amp;ndash;10 number to base&amp;ndash;58. The &lt;code&gt;num-&amp;gt;base58-str.v0&lt;/code&gt; function repeatedly performs &lt;code&gt;modulo 58&lt;/code&gt; and integer division operations on the given number &amp;mdash; the &lt;code&gt;quotient/remainder&lt;/code&gt; Racket function conveniently performs both the operations in one step. Passing the &lt;code&gt;modulo&lt;/code&gt; result (ie the remainder &lt;code&gt;r&lt;/code&gt;) to &lt;code&gt;num-&amp;gt;base58-char&lt;/code&gt; gives in the next base&amp;ndash;58 digit and the division result (ie the quotient &lt;code&gt;q&lt;/code&gt;) is used in the next &lt;code&gt;loop&lt;/code&gt; iteration. The end result of the &lt;code&gt;loop&lt;/code&gt; is a list of base&amp;ndash;58 digits. The digits are computed in reverse order so they are reversed before converting back to a string.&lt;/p&gt;
+ &lt;p&gt;The &lt;code&gt;hex-str-&amp;gt;base58-str.v0&lt;/code&gt; function first converts its hex string input to a base&amp;ndash;10 number using the previously defined &lt;code&gt;hex-str-&amp;gt;num&lt;/code&gt;. It then calls &lt;code&gt;num-&amp;gt;base58-str.v0&lt;/code&gt; to convert the base&amp;ndash;10 number to base&amp;ndash;58. The &lt;code&gt;num-&amp;gt;base58-str.v0&lt;/code&gt; function repeatedly performs &lt;code&gt;modulo 58&lt;/code&gt; and integer division operations on the given number &amp;mdash; the &lt;code&gt;quotient/remainder&lt;/code&gt; Racket function conveniently performs both these operations in one step. Passing the &lt;code&gt;modulo&lt;/code&gt; result (ie the remainder &lt;code&gt;r&lt;/code&gt;) to &lt;code&gt;num-&amp;gt;base58-char&lt;/code&gt; gives in the next base&amp;ndash;58 digit and the division result (ie the quotient &lt;code&gt;q&lt;/code&gt;) is used in the next &lt;code&gt;loop&lt;/code&gt; iteration. The end result of the &lt;code&gt;loop&lt;/code&gt; is a list of base&amp;ndash;58 digits. The digits are computed in reverse order so they are reversed before converting back to a string.&lt;/p&gt;
  &lt;p&gt;Let&amp;rsquo;s test our code. Following &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses"&gt;the same example from the Bitcoin wiki&lt;/a&gt;, the hex address &lt;code&gt;00010966776006953D5567439E5E39F86A0D273BEED61967F6&lt;/code&gt; is &lt;code&gt;16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM&lt;/code&gt; in Base58Check.&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
 -&amp;gt; (require "base58.rkt")
 -&amp;gt; (hex-str-&amp;gt;base58-str.v0 "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
 "6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Our initial attempt produces the wrong answer! What happened? It turns out that the leading zeros in a hex string matter when the string is viewed as a Bitcoin address. But when we converted to base&amp;ndash;10, the leading zeros got lost since they don&amp;rsquo;t matter for numbers.&lt;/p&gt;
+ &lt;p&gt;Our initial attempt produces the wrong answer! What happened? It turns out that the leading zeros in a hex string matter when the string is viewed as a Bitcoin address. But when we converted to base&amp;ndash;10, the leading zeros got dropped since they don&amp;rsquo;t matter for numbers.&lt;/p&gt;
  &lt;p&gt;To complete the base&amp;ndash;58 conversion, following the Bitcoin reference code, we count the number of leading zeros in the hex string and add one leading &amp;lsquo;1&amp;rsquo; character to the base&amp;ndash;58 address for each leading zero &lt;em&gt;byte&lt;/em&gt; in the hex string, ie, we add one leading base&amp;ndash;58 &amp;lsquo;1&amp;rsquo; per two leading hex &amp;rsquo;0&amp;rsquo;s. Here&amp;rsquo;s an updated conversion function:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (count-leading-zeros str)
   (for/sum ([c (in-string str)] #:break (not (char=? #\0 c))) 1))
+
+; converts base10 number to base58check string
 (define (num-&amp;gt;base58-str n) 
   (if (zero? n) "" (num-&amp;gt;base58-str.v0 n)))
+  
+; converts hex string to base58check string
 (define (hex-str-&amp;gt;base58-str hstr)
   (define num-leading-ones (quotient (count-leading-zeros hstr) 2))
   (define leading-ones (make-string num-leading-ones #\1))
@@ -88,21 +130,26 @@ Welcome to Racket v6.0.0.3.
 "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"&lt;/code&gt;&lt;/pre&gt;
  &lt;h3 id="decoding"&gt;Decoding&lt;/h3&gt;
  &lt;p&gt;To convert from base&amp;ndash;58 back to hex, we reverse the above steps. We first convert from base&amp;ndash;58 to base&amp;ndash;10 and then from base&amp;ndash;10 to hex.&lt;/p&gt;
- &lt;p&gt;The conversion from base&amp;ndash;58 strings into base&amp;ndash;10 numbers looks a lot like the &lt;code&gt;hex-str-&amp;gt;num&lt;/code&gt; function we defined above:&lt;/p&gt;
- &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (base58-char-&amp;gt;num ch)
+ &lt;p&gt;The conversion from base&amp;ndash;58 strings into base&amp;ndash;10 numbers looks a lot like the &lt;code&gt;hex-str-&amp;gt;num&lt;/code&gt; and &lt;code&gt;hex-char-&amp;gt;num&lt;/code&gt; functions we defined above:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;; converts base58check digit to base10 number
+(define (base58-char-&amp;gt;num ch)
   (define index
     (for/first ([(c n) (in-indexed BASE58-CHARS)] #:when (char=? c ch)) n))
   (or index (error 'base58-char-&amp;gt;num "invalid base58 char: ~a\n" ch)))
 
+; converts base58check string to base10 number
 (define (base58-str-&amp;gt;num b58str)
   (for/fold ([num 0]) ([ch (in-string b58str)])
     (+ (* 58 num) (base58-char-&amp;gt;num ch))))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Note that unlike &lt;code&gt;hex-char-&amp;gt;num&lt;/code&gt;, &lt;code&gt;base58-char-&amp;gt;num&lt;/code&gt; is case-sensitive.&lt;/p&gt;
  &lt;p&gt;Similarly, the conversion from base&amp;ndash;10 to hex looks mostly like the &lt;code&gt;num-&amp;gt;base58-str&lt;/code&gt; function above:&lt;/p&gt;
- &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (num-&amp;gt;hex-char n)
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;; convert base10 number to hex digit
+(define (num-&amp;gt;hex-char n)
   (when (or (&amp;lt; n 0) (&amp;gt;= n 16))
     (error 'num-&amp;gt;hex-char "cannot convert to hex: ~a\n" n))
   (string-ref HEX-CHARS n))
 
+; convert base10 number to hex string
 (define (num-&amp;gt;hex-str n)
   (if (zero? n) ""
       (list-&amp;gt;string
@@ -112,10 +159,11 @@ Welcome to Racket v6.0.0.3.
             (if (zero? q)
                 (list (num-&amp;gt;hex-char r))
                 (cons (num-&amp;gt;hex-char r) (loop q))))))))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Putting it all together gives us a &lt;code&gt;base58-str-&amp;gt;hex-str&lt;/code&gt; decoding function. Here we need to count leading &amp;lsquo;1&amp;rsquo;s. Note that we add an extra &amp;rsquo;0&amp;rsquo; to odd-length hex strings so the result is always byte-aligned.&lt;/p&gt;
+ &lt;p&gt;Putting it all together gives us a &lt;code&gt;base58-str-&amp;gt;hex-str&lt;/code&gt; decoding function. This time we don&amp;rsquo;t forget to count the leading digits, &amp;lsquo;1&amp;rsquo;s here instead of &amp;rsquo;0&amp;rsquo;s. Note that we add an extra &amp;rsquo;0&amp;rsquo; to odd-length hex strings so the result is always byte-aligned.&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (count-leading-ones str)
   (for/sum ([c (in-string str)] #:break (not (char=? #\1 c))) 1))
   
+; converts a base58check string to a hex string
 (define (base58-str-&amp;gt;hex-str b58str)
   (define hex-str/no-leading-zeros (num-&amp;gt;hex-str (base58-str-&amp;gt;num b58str)))
   (define num-leading-ones (count-leading-ones b58str))
@@ -125,71 +173,67 @@ Welcome to Racket v6.0.0.3.
         (add1 (* num-leading-ones 2)))) ; add extra 0 to byte-align
   (define leading-zeros (make-string num-leading-zeros #\0))
   (string-append leading-zeros hex-str/no-leading-zeros))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;And trying it on our example returns the expected results:&lt;/p&gt;
+ &lt;p&gt;And trying it on our [example][bwik:addr] returns the expected results (the &lt;code&gt;^&lt;/code&gt; token in the &lt;a href="http://docs.racket-lang.org/xrepl/index.html"&gt;Racket Extended REPL&lt;/a&gt; is bound to the last printed value):&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
 -&amp;gt; (require "base58.rkt")
--&amp;gt; (hex-str-&amp;gt;base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
+-&amp;gt; (define addr/hex "00010966776006953D5567439E5E39F86A0D273BEED61967F6")
+-&amp;gt; (hex-str-&amp;gt;base58-str addr/hex)
 "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"
--&amp;gt; (base58-str-&amp;gt;hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM")
+-&amp;gt; (define addr/base58 ^)
+-&amp;gt; (base58-str-&amp;gt;hex-str ^)
 "00010966776006953D5567439E5E39F86A0D273BEED61967F6"
--&amp;gt; (base58-str-&amp;gt;hex-str (hex-str-&amp;gt;base58-str "00010966776006953D5567439E5E39F86A0D273BEED61967F6"))
-"00010966776006953D5567439E5E39F86A0D273BEED61967F6"
--&amp;gt; (hex-str-&amp;gt;base58-str (base58-str-&amp;gt;hex-str "16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"))
-"16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM"&lt;/code&gt;&lt;/pre&gt;
+-&amp;gt; (equal? addr/hex ^)
+#t
+-&amp;gt; (equal? (base58-str-&amp;gt;hex-str (hex-str-&amp;gt;base58-str addr/hex)) addr/hex)
+#t
+-&amp;gt; (equal? (hex-str-&amp;gt;base58-str (base58-str-&amp;gt;hex-str addr/base58)) addr/base58)
+#t&lt;/code&gt;&lt;/pre&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
- &lt;p&gt;All the code from this post &lt;a href="http://www.lostintransaction.com/code/base58.rkt"&gt;is available here&lt;/a&gt;. Examples were executed with Racket 6.0.0.3, running in Debian 7.0.&lt;/p&gt;&lt;!--todo: explain decode code--&gt;&lt;/html&gt;</description></item>
+ &lt;p&gt;All the code from this post &lt;a href="http://www.lostintransaction.com/code/base58.rkt"&gt;is available here&lt;/a&gt;. Examples were executed with Racket 6.0.0.3, running in Debian 7.0.&lt;/p&gt;&lt;/html&gt;</description></item>
   <item>
-   <title>Converting a Bitcoin Public Key to a (Hex) Address</title>
-   <link>http://www.lostintransaction.com/blog/2014/03/15/converting-a-bitcoin-public-key-to-a-hex-address/?utm_source=all&amp;utm_medium=RSS</link>
-   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-15-converting-a-bitcoin-public-key-to-a-hex-address</guid>
+   <title>Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address</title>
+   <link>http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/?utm_source=all&amp;utm_medium=RSS</link>
+   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-15-computing-a-bitcoin-address-part-2-public-key-to-hex-address</guid>
    <pubDate>Sat, 15 Mar 2014 04:09:45 UTC</pubDate>
    <description>
-&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F15%2Fconverting-a-bitcoin-public-key-to-a-hex-address%2F" height="1" width="1" /&gt;
- &lt;p&gt;In a previous post, we &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key"&gt;derived a Bitcoin public key from a private key&lt;/a&gt;. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&amp;rsquo;ll be using &lt;a href="http://racket-lang.org"&gt;the Racket language&lt;/a&gt; to help me.&lt;/p&gt;
- &lt;p&gt;C is great for many programming tasks but sometimes it&amp;rsquo;s nice to use a higher-level language that automatically handles things like arbitrary-precision arithmetic and memory management. &lt;a href="http://racket-lang.org"&gt;Racket&lt;/a&gt;, a LISP dialect, has linguistic support for these features (and more) and I enjoy using it to experiment with Bitcoin.&lt;/p&gt;
- &lt;p&gt;Unfortunately, Racket doesn&amp;rsquo;t have a complete crypto library. It does have, however, an &lt;a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI"&gt;FFI&lt;/a&gt; that enables Racket code to directly call C functions. So first we&amp;rsquo;ll create Racket bindings for two important hashing functions used by Bitcoin, &lt;a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2"&gt;SHA&amp;ndash;256&lt;/a&gt; and &lt;a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD"&gt;RIPEMD&amp;ndash;160&lt;/a&gt;.&lt;/p&gt;
- &lt;h3 id="ffi-lib"&gt;&lt;code&gt;ffi-lib&lt;/code&gt;&lt;/h3&gt;
- &lt;p&gt;The &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"&gt;&lt;code&gt;ffi-lib&lt;/code&gt;&lt;/a&gt; function creates a Racket value through which programmers can access functions in the specified C library. For example, the following code evaluates to a Racket value for the OpenSSL &lt;code&gt;libcrypto&lt;/code&gt; library:&lt;/p&gt;
- &lt;pre class="brush: racket"&gt;&lt;code&gt;(ffi-lib '(so "libcrypto") '("" "1.0.1e" "1.0.0" "1.0" "0.9.8b" "0.9.8" "0.9.7"))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Here the first argument to &lt;code&gt;ffi-lib&lt;/code&gt; specifies a dynamic C library and the second argument is a list of acceptable version numbers. (Check the &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29" title="Racket docs: ffi-lib"&gt;&lt;code&gt;ffi-lib&lt;/code&gt; documentation&lt;/a&gt; for other possible use cases.)&lt;/p&gt;
- &lt;p&gt;The standard Racket distribution pre-defines an identifier (also named &lt;code&gt;librypto&lt;/code&gt;) that is bound to the &lt;code&gt;libcrypto&lt;/code&gt; library (Racket comes with wrapper functions for some &lt;code&gt;libcrypto&lt;/code&gt; C functions, but not for &lt;code&gt;SHA256&lt;/code&gt; or &lt;code&gt;RIPEMD160&lt;/code&gt;).&lt;/p&gt;
- &lt;h3 id="get-ffi-obj"&gt;&lt;code&gt;get-ffi-obj&lt;/code&gt;&lt;/h3&gt;
- &lt;p&gt;Next we create a Racket wrapper function for the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"&gt;&lt;code&gt;SHA256&lt;/code&gt; C function&lt;/a&gt;. Here&amp;rsquo;s the header:&lt;/p&gt;
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F15%2Fcomputing-a-bitcoin-address-part-2-public-key-to-hex-address%2F" height="1" width="1" /&gt;
+ &lt;p&gt;This series of posts figures out how to compute a Bitcoin address from a private key. In a previous post, we &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key"&gt;derived a Bitcoin public key from a private key&lt;/a&gt;. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&amp;rsquo;ll be using &lt;a href="http://racket-lang.org"&gt;the Racket language&lt;/a&gt; to help me.&lt;/p&gt;
+ &lt;p&gt;To convert from a public key to a Bitcoin address, we need an implementation of the &lt;a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2"&gt;SHA&amp;ndash;256&lt;/a&gt; and &lt;a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD"&gt;RIPEMD&amp;ndash;160&lt;/a&gt; hash functions. Racket doesn&amp;rsquo;t come with these functions but we can easily call to OpenSSL&amp;rsquo;s implementation of these hash functions via Racket&amp;rsquo;s C &lt;a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI"&gt;FFI&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;Conveniently, the standard Racket distribution already defines &lt;a href="https://github.com/plt/racket/blob/master/racket/collects/openssl/libcrypto.rkt" title="Racket source: libcrypto.rkt"&gt;a hook into the &lt;code&gt;libcrypto&lt;/code&gt; library&lt;/a&gt;, also named &lt;code&gt;libcrypto&lt;/code&gt;. Racket comes with wrapper functions for some &lt;code&gt;libcrypto&lt;/code&gt; C functions, but not &lt;code&gt;SHA256&lt;/code&gt; or &lt;code&gt;RIPEMD160&lt;/code&gt; so we&amp;rsquo;ll create those.&lt;/p&gt;
+ &lt;p&gt;Here&amp;rsquo;s the header for the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"&gt;&lt;code&gt;SHA256&lt;/code&gt; C function&lt;/a&gt;:&lt;/p&gt;
  &lt;pre class="brush: C"&gt;&lt;code&gt;unsigned char *SHA256( const unsigned char *d, size_t n, unsigned char *md );&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;To create a Racket wrapper function, we use &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"&gt;&lt;code&gt;get-ffi-obj&lt;/code&gt;&lt;/a&gt;. Here&amp;rsquo;s a definition of a &lt;code&gt;sha256&lt;/code&gt; Racket function that calls the &lt;code&gt;SHA256&lt;/code&gt; C function:&lt;/p&gt;
+ &lt;p&gt;We use the Racket &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"&gt;&lt;code&gt;get-ffi-obj&lt;/code&gt;&lt;/a&gt; function to create a Racket wrapper for &lt;code&gt;SHA256&lt;/code&gt;. Here&amp;rsquo;s a Racket &lt;code&gt;sha256&lt;/code&gt; function that calls the C &lt;code&gt;SHA256&lt;/code&gt; function:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define SHA256-DIGEST-LEN 32) ; bytes
 
 (define sha256
-  (get-ffi-obj
-    'SHA256 libcrypto
+  (get-ffi-obj 'SHA256 libcrypto
     (_fun [input     : _bytes]
           [input-len : _ulong = (bytes-length input)]
           [output    : (_bytes o SHA256-DIGEST-LEN)]
           -&amp;gt; (_bytes o SHA256-DIGEST-LEN))))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;The first argument to &lt;code&gt;get-ffi-obj&lt;/code&gt; is the name of the C function and the second argument is the library value that we created earlier with &lt;code&gt;ffi-lib&lt;/code&gt;. The third argument is the type, which specifies how to mediate between Racket and C values. &lt;a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"&gt;&lt;code&gt;_fun&lt;/code&gt;&lt;/a&gt; is the function type and in this case the function has three arguments (each delimited with brackets by convention).&lt;/p&gt;
+ &lt;p&gt;The first argument to &lt;code&gt;get-ffi-obj&lt;/code&gt; is the name of the C function and the second argument is the hook into the appropriate library. The third argument is the type, which specifies how to mediate between Racket and C values. &lt;a href="http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29" title="Racket docs: _fun"&gt;&lt;code&gt;_fun&lt;/code&gt;&lt;/a&gt; is the function type and in this case the function has three arguments (each delimited with brackets by convention).&lt;/p&gt;
  &lt;p&gt;Examining the types of the arguments:&lt;/p&gt;
  &lt;ol&gt;
   &lt;li&gt;
    &lt;p&gt;The first argument to the &lt;code&gt;SHA256&lt;/code&gt; C function is an array of input bytes. Accordingly, we give &lt;code&gt;get-ffi-obj&lt;/code&gt; a &lt;code&gt;_bytes&lt;/code&gt; type for this argument.&lt;/p&gt;&lt;/li&gt;
   &lt;li&gt;
-   &lt;p&gt;The second argument is the length of the input byte array. The &lt;code&gt;=&lt;/code&gt; and the following expression describe how to calculate this argument automatically. Thus a caller of the &lt;code&gt;sha256&lt;/code&gt; Racket function need not provide this argument.&lt;/p&gt;&lt;/li&gt;
+   &lt;p&gt;The second argument is the length of the input byte array. The &lt;code&gt;=&lt;/code&gt; and the expression following it describe how to calculate this argument automatically. Thus a caller of &lt;code&gt;sha256&lt;/code&gt; does not provide this argument.&lt;/p&gt;&lt;/li&gt;
   &lt;li&gt;
    &lt;p&gt;The third argument is the output byte array. The &lt;code&gt;o&lt;/code&gt; indicates a return pointer and is followed by the expected length of the output array, which should be 32 bytes here. We define a constant &lt;code&gt;SHA256-DIGEST-LEN&lt;/code&gt; which is analogous to &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133" title="OpenSSL source: crypto/sha/sha.h"&gt;the &lt;code&gt;SHA256_DIGEST_LENGTH&lt;/code&gt; constant&lt;/a&gt; in the C library.&lt;/p&gt;&lt;/li&gt;&lt;/ol&gt;
- &lt;p&gt;And here&amp;rsquo;s a wrapper for &lt;code&gt;ripemd160&lt;/code&gt;:&lt;/p&gt;
+ &lt;p&gt;Similarly, here&amp;rsquo;s the definition for a Racket &lt;code&gt;ripemd160&lt;/code&gt; function:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define RIPEMD160-DIGEST-LEN 20) ; bytes
 
-; from crypto/ripemd/ripemd.h
+; from crypto/ripemd/ripemd.h:
 ;  unsigned char *RIPEMD160(const unsigned char *d, size_t n, unsigned char *md);
 (define ripemd160
-  (get-ffi-obj
-    'RIPEMD160 libcrypto
+  (get-ffi-obj 'RIPEMD160 libcrypto
     (_fun [input     : _bytes]
           [input-len : _ulong = (bytes-length input)]
           [output    : (_bytes o RIPEMD160-DIGEST-LEN)]
           -&amp;gt; (_bytes o RIPEMD160-DIGEST-LEN))))&lt;/code&gt;&lt;/pre&gt;
  &lt;h3 id="testing"&gt;Testing&lt;/h3&gt;
- &lt;p&gt;To test our wrapper functions, let&amp;rsquo;s see if we can duplicate &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin Wiki: Technical background of version 1 Bitcoin addresses"&gt;this example from the Bitcoin wiki&lt;/a&gt;, which shows how to convert a Bitcoin private key into a public address. We covered &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/" title="Deriving a Bitcoin Public Key From a Private Key"&gt;how to derive a public key from a private key&lt;/a&gt; in a previous post, so we start with the public key here.&lt;/p&gt;
+ &lt;p&gt;To test our wrapper functions, let&amp;rsquo;s see if we can duplicate &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin Wiki: Technical background of version 1 Bitcoin addresses"&gt;this example from the Bitcoin wiki&lt;/a&gt;, which shows how to convert a Bitcoin private key into a public address. We covered &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key"&gt;how to derive a public key from a private key&lt;/a&gt; in a previous post, so we start with the public key here.&lt;/p&gt;
  &lt;p&gt;For ease of comparison, here&amp;rsquo;s the sequence of expected hashes, copied from the Bitcoin wiki example:&lt;/p&gt;
  &lt;ol&gt;
   &lt;li&gt;public key: &lt;code&gt;0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;&lt;/li&gt;
@@ -198,49 +242,51 @@ Welcome to Racket v6.0.0.3.
   &lt;li&gt;prepend &lt;code&gt;0x00&lt;/code&gt;: &lt;code&gt;00010966776006953D5567439E5E39F86A0D273BEE&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;SHA&amp;ndash;256: &lt;code&gt;445C7A8007A93D8733188288BB320A8FE2DEBD2AE1B47F0F50BC10BAE845C094&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;SHA&amp;ndash;256 (checksum is first 4 bytes): &lt;code&gt;D61967F63C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;
-   &lt;h1 id="4--checksum--hex-address-00010966776006953d5567439e5e39f86a0d273beed61967f6"&gt;4 + checksum = (hex) address: &lt;code&gt;00010966776006953D5567439E5E39F86A0D273BEED61967F6&lt;/code&gt;&lt;/h1&gt;&lt;/li&gt;&lt;/ol&gt;
- &lt;p&gt;The hashes are all in hexdecimal form so we need to extend our hash functions to convert to and from hex strings (&lt;code&gt;bytes-&amp;gt;hex-string&lt;/code&gt; and &lt;code&gt;hex-string-&amp;gt;bytes&lt;/code&gt; are Racket built-in functions):&lt;/p&gt;
+  &lt;li&gt;step 4 result + checksum = (hex) address: &lt;code&gt;00010966776006953D5567439E5E39F86A0D273BEED61967F6&lt;/code&gt;&lt;/li&gt;&lt;/ol&gt;
+ &lt;p&gt;The hashes are all in hexdecimal form so we extend our hash functions to convert to and from hex strings (&lt;code&gt;bytes-&amp;gt;hex-string&lt;/code&gt; and &lt;code&gt;hex-string-&amp;gt;bytes&lt;/code&gt; are Racket built-in functions):&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (sha256/hex input)
   (bytes-&amp;gt;hex-string (sha256 (hex-string-&amp;gt;bytes input))))
   
 (define (ripemd160/hex input)
   (bytes-&amp;gt;hex-string (ripemd160 (hex-string-&amp;gt;bytes input))))&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;We can use &lt;a href="http://docs.racket-lang.org/guide/intro.html?q=repl#%28tech._repl%29" title="Interacting with Racket"&gt;the Racket REPL&lt;/a&gt;, and the &lt;a href="http://www.lostintransaction.com/code/crypto.rkt"&gt;code from this post&lt;/a&gt; (which I saved to a file &lt;code&gt;crypto.rkt&lt;/code&gt;) to get the same results:&lt;/p&gt;
+ &lt;p&gt;For convenience, we also define a few more helper functions:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (add-version0 str) (string-append "00" str))
+(define (get-checksum hstr) (substring hstr 0 8))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;Finally, we can duplicate the sequence of hashes from the example, using the &lt;a href="http://www.lostintransaction.com/code/crypto.rkt"&gt;code from this post&lt;/a&gt; (saved to a file &lt;code&gt;crypto.rkt&lt;/code&gt;) and &lt;a href="http://docs.racket-lang.org/xrepl/index.html" title="XREPL"&gt;the Racket (extended) REPL&lt;/a&gt; (the &lt;code&gt;^&lt;/code&gt; token in the REPL represents the last printed result):&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ racket
 Welcome to Racket v6.0.0.3.
 -&amp;gt; (require "crypto.rkt")
 -&amp;gt; (define pub-key "0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6")
 -&amp;gt; (sha256/hex pub-key)
 "600ffe422b4e00731a59557a5cca46cc183944191006324a447bdb2d98d4b408"
--&amp;gt; (ripemd160/hex (sha256/hex pub-key))
+-&amp;gt; (ripemd160/hex ^)
 "010966776006953d5567439e5e39f86a0d273bee"
--&amp;gt; (define hash160 (ripemd160/hex (sha256/hex pub-key)))
--&amp;gt; (define hash160/extended (string-append "00" hash160))
--&amp;gt; (sha256/hex hash160/extended)
+-&amp;gt; (add-version0 ^)
+"00010966776006953d5567439e5e39f86a0d273bee"
+-&amp;gt; (define hash160+version ^)
+-&amp;gt; (sha256/hex ^)
 "445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
--&amp;gt; (sha256/hex (sha256/hex hash160/extended))
+-&amp;gt; (sha256/hex ^)
 "d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
--&amp;gt; (define checksum (substring (sha256/hex (sha256/hex hash160/extended)) 0 8))
--&amp;gt; checksum
+-&amp;gt; (get-checksum ^)
 "d61967f6"
--&amp;gt; (define address/hex (string-append hash160/extended checksum))
--&amp;gt; address/hex
+-&amp;gt; (string-append hash160+version ^)
 "00010966776006953d5567439e5e39f86a0d273beed61967f6"
    &lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;The last command computes the Bitcoin address in hexadecimal format. The Bitcoin wiki article performs one more step to convert to &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding"&gt;Base58Check encoding&lt;/a&gt;, which is the standard representation for Bitcoin addresses. We&amp;rsquo;ll look at Base58Check encoding in the next post!&lt;/p&gt;
+ &lt;p&gt;The final result is the Bitcoin address from the example, in hexadecimal format. The Bitcoin wiki article performs one more step to convert to &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding"&gt;Base58Check encoding&lt;/a&gt;, which is the standard representation for Bitcoin addresses. We&amp;rsquo;ll look at Base58Check encoding in the next post!&lt;/p&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
  &lt;p&gt;All the code from this post &lt;a href="http://www.lostintransaction.com/code/crypto.rkt"&gt;is available here&lt;/a&gt;. In this post, I&amp;rsquo;m using OpenSSL 1.0.1e with Racket 6.0.0.3, running in Debian 7.0.&lt;/p&gt;&lt;/html&gt;</description></item>
   <item>
-   <title>Deriving a Bitcoin Public Key From a Private Key</title>
-   <link>http://www.lostintransaction.com/blog/2014/03/14/deriving-a-bitcoin-public-key-from-a-private-key/?utm_source=all&amp;utm_medium=RSS</link>
-   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-14-deriving-a-bitcoin-public-key-from-a-private-key</guid>
+   <title>Computing a Bitcoin Address, Part 1: Private to Public Key</title>
+   <link>http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/?utm_source=all&amp;utm_medium=RSS</link>
+   <guid>urn:http-www-lostintransaction-com:-blog-2014-03-14-computing-a-bitcoin-address-part-1-private-to-public-key</guid>
    <pubDate>Fri, 14 Mar 2014 05:28:01 UTC</pubDate>
    <description>
-&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F14%2Fderiving-a-bitcoin-public-key-from-a-private-key%2F" height="1" width="1" /&gt;
- &lt;p&gt;I&amp;rsquo;ve been wondering about the relationship between Bitcoin public and private keys. I know they are &lt;a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA"&gt;Elliptic Curve DSA (ECDSA)&lt;/a&gt; key pairs, and I&amp;rsquo;ve seen the &lt;a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"&gt;&lt;code&gt;Q = dG&lt;/code&gt; explanation&lt;/a&gt; on a few sites, but they leave out some details. I wanted to experiment for myself, so this post describes how to derive a public key from a private key with runnable C code.&lt;/p&gt;
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=all&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F14%2Fcomputing-a-bitcoin-address-part-1-private-to-public-key%2F" height="1" width="1" /&gt;
+ &lt;p&gt;I&amp;rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to go from a Bitcoin private key to a public address.&lt;/p&gt;
+ &lt;p&gt;I know that Bitcoin public and private keys are &lt;a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA"&gt;Elliptic Curve DSA (ECDSA)&lt;/a&gt; key pairs, and I&amp;rsquo;ve seen the &lt;a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"&gt;&lt;code&gt;Q = dG&lt;/code&gt; explanation&lt;/a&gt; on a few sites, but they leave out some details. I want to experiment for myself, so this post describes how to derive a public key from a private key with runnable code.&lt;/p&gt;
  &lt;p&gt;The &lt;a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer"&gt;accepted Stack Overflow answer from the previous link&lt;/a&gt; says that in the &lt;code&gt;Q = dG&lt;/code&gt; equation, &lt;code&gt;Q&lt;/code&gt; is the public key and &lt;code&gt;d&lt;/code&gt; is the private key, but does not explain &lt;code&gt;G&lt;/code&gt;, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the &lt;a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"&gt;&lt;code&gt;secp256k1&lt;/code&gt; ECDSA curve&lt;/a&gt;.&lt;/p&gt;
- &lt;p&gt;Next, I looked at the &lt;a href="https://www.openssl.org/" title="OpenSSL"&gt;OpenSSL&lt;/a&gt; &lt;code&gt;libcrypto&lt;/code&gt; library, in the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c"&gt;function mentioned in the Stack Overflow post, &lt;code&gt;EC_KEY_generate_key&lt;/code&gt;&lt;/a&gt;. Here&amp;rsquo;s the line that performs the multiplication:&lt;/p&gt;
+ &lt;p&gt;Next, I looked at the &lt;a href="https://www.openssl.org/" title="OpenSSL"&gt;OpenSSL&lt;/a&gt; &lt;code&gt;libcrypto&lt;/code&gt; C library, in &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c"&gt;&lt;code&gt;EC_KEY_generate_key&lt;/code&gt; (the function mentioned in the Stack Overflow post)&lt;/a&gt;. Here&amp;rsquo;s the line that performs the multiplication:&lt;/p&gt;
  &lt;pre class="brush: c"&gt;&lt;code&gt;EC_POINT_mul(eckey-&amp;gt;group, pub_key, priv_key, NULL, NULL, ctx);&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;In this case, I&amp;rsquo;m supplying &lt;code&gt;priv_key&lt;/code&gt;, and &lt;code&gt;pub_key&lt;/code&gt; is the output parameter, so I just need the appropriate group for the first parameter. OpenSSL has &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/objects/obj_mac.h;h=b5ea7cdab4f84b90280f0a3aae1478a8d715c7a7;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l385" title="crypto/objects/obj_mac.h"&gt;already defined the &lt;code&gt;secp256k1&lt;/code&gt; curve&lt;/a&gt;, so it&amp;rsquo;s just a matter of getting the right data representation. Here is the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l643" title="crypto/ec/ec.h"&gt;header for &lt;code&gt;EC_POINT_mul&lt;/code&gt;&lt;/a&gt; from the OpenSSL library:&lt;/p&gt;
  &lt;pre class="brush: c"&gt;&lt;code&gt;/** Computes r = generator * n + q * m
@@ -253,20 +299,15 @@ Welcome to Racket v6.0.0.3.
  *  \return 1 on success and 0 if an error occured
  */
 int EC_POINT_mul(const EC_GROUP *group, EC_POINT *r, const BIGNUM *n, const EC_POINT *q, const BIGNUM *m, BN_CTX *ctx);&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Looks like we need an &lt;code&gt;EC_GROUP&lt;/code&gt; and to create one we can use &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"&gt;&lt;code&gt;EC_GROUP_new_by_curve_name&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
- &lt;p&gt;Putting everything together, here&amp;rsquo;s what I came up with to compute a public key from a private key (disclaimer: the code has no error-checking and is obviously not production-quality):&lt;/p&gt;
- &lt;pre class="brush: c"&gt;&lt;code&gt;#include &amp;lt;stdlib.h&amp;gt;
-#include &amp;lt;stdio.h&amp;gt;
-#include &amp;lt;openssl/ec.h&amp;gt;
-#include &amp;lt;openssl/obj_mac.h&amp;gt; // for NID_secp256k1
-
-#define PRIV_KEY_LEN 32
-#define PUB_KEY_LEN 65
-
-// calculates and returns the public key associated with the given private key
+ &lt;p&gt;Looks like we need an &lt;code&gt;EC_GROUP&lt;/code&gt;. To create one we call &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_curve.c;h=c72fb2697ca2823a4aac36b027012bed6c457288;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l2057" title="crypco/ec/ec_curve.c"&gt;&lt;code&gt;EC_GROUP_new_by_curve_name&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;Putting everything together, here&amp;rsquo;s a function &lt;code&gt;priv2pub&lt;/code&gt; that computes a public key from a private key (disclaimer: the code has no error-checking so don&amp;rsquo;t use this in production):&lt;/p&gt;
+ &lt;pre class="brush: c"&gt;&lt;code&gt;// calculates and returns the public key associated with the given private key
 // - input private key and output public key are in hexadecimal
-unsigned char *priv2pub( const unsigned char *priv_hex )
+// form = POINT_CONVERSION_[UNCOMPRESSED|COMPRESSED|HYBRID]
+unsigned char *priv2pub( const unsigned char *priv_hex,
+                         point_conversion_form_t form )
 {
+  // create group
   EC_GROUP *ecgrp = EC_GROUP_new_by_curve_name( NID_secp256k1 );
   
   // convert priv key from hexadecimal to BIGNUM
@@ -276,42 +317,106 @@ unsigned char *priv2pub( const unsigned char *priv_hex )
   // compute pub key from priv key and group
   EC_POINT *pub = EC_POINT_new( ecgrp );
   EC_POINT_mul( ecgrp, pub, priv_bn, NULL, NULL, NULL );
-                              
-  // convert pub_key from EC_POINT curve coordinate to hexadecimal
-  unsigned char *ret = EC_POINT_point2hex( ecgrp, pub, POINT_CONVERSION_UNCOMPRESSED, NULL );
-    
+                           
+  // convert pub_key from elliptic curve coordinate to hexadecimal
+  unsigned char *ret = EC_POINT_point2hex( ecgrp, pub, form, NULL );
+ 
   EC_GROUP_free( ecgrp ); BN_free( priv_bn ); EC_POINT_free( pub );
   
   return ret;
-}
-
-int main( int argc, const unsigned char *argv[] )
+}&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;The function assumes that the input private key is in hex, and returned public key is in hex as well. I had to first convert the private key to &lt;code&gt;BIGNUM&lt;/code&gt;, which is OpenSSL&amp;rsquo;s number representation for arbitrary precision arithmetic. The computed public key is an OpenSSL &lt;code&gt;EC_POINT&lt;/code&gt; data structure, which represents a curve coordinate. The curve coordinate is converted back to hex using &lt;code&gt;EC_POINT_point2hex&lt;/code&gt;. &lt;a href="https://en.bitcoin.it/wiki/Elliptic_Curve_Digital_Signature_Algorithm" title="Bitcoin Wiki: Elliptic Curve Digital Signature Algorithm"&gt;Public keys can either be compressed or uncompressed&lt;/a&gt;, and the format of the output of &lt;code&gt;priv2pub&lt;/code&gt; depends on the &lt;code&gt;form&lt;/code&gt; input parameter, &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l104" title="crypto/ec/ec.h"&gt;which can be one of three values&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;To test this function, I found a sample public/private key pair from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses"&gt;this Bitcoin wiki article&lt;/a&gt;. The private key from the article is &lt;code&gt;18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725&lt;/code&gt; and the public key is &lt;code&gt;0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;. The public key begins with &lt;code&gt;0x04&lt;/code&gt; &lt;a href="http://www.secg.org/collateral/sec1.pdf" title="SEC: Elliptic Curve Cryptography"&gt;so we know it&amp;rsquo;s in uncompressed form&lt;/a&gt; and is 65 bytes long (see ANSI X9.62 for more details).&lt;/p&gt;
+ &lt;p&gt;I used the following main function to test if &lt;code&gt;priv2pub&lt;/code&gt; can compute the public key with the private key from the example:&lt;/p&gt;
+ &lt;pre class="brush: c"&gt;&lt;code&gt;int main( int argc, const unsigned char *argv[] )
 {
-  // compute pub key
-  unsigned char *pub_hex = priv2pub( argv[1] );
+  // get priv key from cmd line and compute pub key
+  unsigned char *pub_hex = priv2pub( argv[1], POINT_CONVERSION_UNCOMPRESSED );
   
-  // print computed pub key
-  for( size_t i = 0; i &amp;lt; PUB_KEY_LEN * 2; i++ ) {
-    printf( "%c", pub_hex[i] );
-  }
-  printf( "\n" );
-  
+  printf( "%s\n", pub_hex );
+ 
   free( pub_hex );
   
   return 0;
 }&lt;/code&gt;&lt;/pre&gt;
- &lt;p&gt;Bitcoin private keys are 32 bytes and public keys are 65 bytes. The &lt;code&gt;priv2pub&lt;/code&gt; function computes the public key associated with the given private key. Both the input private key and the output public key are in hexadecimal. I had to first convert the private key to &lt;code&gt;BIGNUM&lt;/code&gt;, which is OpenSSL&amp;rsquo;s number representation for arbitrary precision arithmetic. The computed public key is a curve coordinate in OpenSSL&amp;rsquo;s &lt;code&gt;EC_POINT&lt;/code&gt; representation. I then convert back to hex using &lt;code&gt;EC_POINT_point2hex&lt;/code&gt;.&lt;/p&gt;
- &lt;p&gt;To test, I found a sample public/private key pair from &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses"&gt;this Bitcoin wiki article&lt;/a&gt;. The private key from the article is &lt;code&gt;18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725&lt;/code&gt; and the public key is &lt;code&gt;0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;. Let&amp;rsquo;s see if our program can recover this public key from the private key. (I save the code above to a file &lt;code&gt;priv2pub.c&lt;/code&gt;.)&lt;/p&gt;
+ &lt;p&gt;I save the code above to a file &lt;code&gt;priv2pub.c&lt;/code&gt;:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ gcc -lcrypto -std=c99 priv2pub.c -o priv2pub
 $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;Success!&lt;/p&gt;
- &lt;p&gt;Let&amp;rsquo;s do another one. I generated a private key with &lt;a href="https://www.bitaddress.org"&gt;bitaddress.org&lt;/a&gt;, &lt;code&gt;5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe&lt;/code&gt;, but it&amp;rsquo;s in &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding"&gt;Base58Check encoding&lt;/a&gt; and not hex. So I went to the &amp;ldquo;Wallet Details&amp;rdquo; tab, entered the base58 key, and &lt;a href="https://www.bitaddress.org"&gt;bitaddress.org&lt;/a&gt; reports that the private key in hex is &lt;code&gt;4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61&lt;/code&gt; and public key is &lt;code&gt;0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117&lt;/code&gt;. Let&amp;rsquo;s check with our code:&lt;/p&gt;
+ &lt;p&gt;Let&amp;rsquo;s try another example. I generated a private key with &lt;a href="https://www.bitaddress.org"&gt;bitaddress.org&lt;/a&gt;, &lt;code&gt;5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe&lt;/code&gt;, but it&amp;rsquo;s in &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding"&gt;Base58Check encoding&lt;/a&gt; and not hex. We&amp;rsquo;ll deal with Base58 encoding later so for now I went to the &amp;ldquo;Wallet Details&amp;rdquo; tab at &lt;a href="https://www.bitaddress.org"&gt;bitaddress.org&lt;/a&gt;, entered the base58 key, and got back that the private key in hex is &lt;code&gt;4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61&lt;/code&gt; and public key is &lt;code&gt;0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117&lt;/code&gt;. Let&amp;rsquo;s check what our code says:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;$ ./priv2pub 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
 0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;Hurrah!&lt;/p&gt;
+ &lt;h3 id="a-racket-version"&gt;A Racket Version&lt;/h3&gt;
+ &lt;p&gt;I&amp;rsquo;m using &lt;a href="http://racket-lang.org"&gt;Racket&lt;/a&gt;, a modern LISP dialect, to experiment with Bitcoin so I want a Racket version of my conversion function as well. Fortunately, Racket has an &lt;a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI"&gt;FFI&lt;/a&gt; that enables Racket code to call C functions directly.&lt;/p&gt;
+ &lt;p&gt;First I create a slightly different version of my C function:&lt;/p&gt;
+ &lt;pre class="brush: c"&gt;&lt;code&gt;// calculates and returns the public key associated with the given private key
+// - input private key is in hexadecimal
+// - output public key is in raw bytes
+// form = POINT_CONVERSION_[UNCOMPRESSED|COMPRESSED|HYBRID]
+unsigned char *priv2pub_bytes( const unsigned char *priv_hex,
+                               point_conversion_form_t form,
+                               unsigned char *ret )
+{
+  // create group
+  EC_GROUP *ecgrp = EC_GROUP_new_by_curve_name( NID_secp256k1 );
+  
+  // convert priv key from hexadecimal to BIGNUM
+  BIGNUM *priv_bn = BN_new();
+  BN_hex2bn( &amp;amp;priv_bn, priv_hex );
+  
+  // compute pub key from priv key and group
+  EC_POINT *pub = EC_POINT_new( ecgrp );
+  EC_POINT_mul( ecgrp, pub, priv_bn, NULL, NULL, NULL );
+  
+  // convert pub key from elliptic curve coordinate to bytes
+  //  (first call gets the appropriate length to use)
+  size_t len = EC_POINT_point2oct( ecgrp, pub, form, NULL, 0, NULL );
+  EC_POINT_point2oct( ecgrp, pub, form, ret, len, NULL );
+        
+  EC_GROUP_free( ecgrp ); BN_free( priv_bn ); EC_POINT_free( pub );
+  
+  return ret;
+}&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;The difference is an extra parameter and the representation of the public key output. This new function uses &lt;code&gt;EC_POINT_point2oct&lt;/code&gt; to return a byte string instead of a hex string. The problem is that the hex conversion function, &lt;code&gt;EC_POINT_point2hex&lt;/code&gt;, allocates, but I don&amp;rsquo;t want to manually manage memory in Racket. Because &lt;code&gt;priv2pub_bytes&lt;/code&gt; consumes an additional buffer parameter, Racket can allocate a buffer controlled by the GC prior to calling the function, and then pass in this allocated buffer.&lt;/p&gt;
+ &lt;p&gt;Next I use Racket&amp;rsquo;s FFI to create a Racket wrapper function for the &lt;code&gt;priv2pub_bytes&lt;/code&gt; C function. The FFI requires a library file, so I compile the &lt;code&gt;.c&lt;/code&gt; file to a &lt;code&gt;.so&lt;/code&gt; library.&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ gcc -lcrypto -std=c99 -fPIC -shared -Wl,-soname,libpriv2pub.so.1 priv2pub.c -o libpriv2pub.so.1.0
+&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;This creates a dynamic library file named &lt;code&gt;libpriv2pub.so.1.0&lt;/code&gt;.&lt;/p&gt;
+ &lt;p&gt;To create a Racket value for this library, we use the Racket &lt;code&gt;ffi-lib&lt;/code&gt; function:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define-runtime-path libpriv2pub-so '(so "libpriv2pub"))
+
+(define libpriv2pub (ffi-lib libpriv2pub-so '("1.0")))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;The first argument to &lt;code&gt;ffi-lib&lt;/code&gt; is the path of the library and the second argument specifies a list of acceptable version numbers.&lt;/p&gt;
+ &lt;p&gt;Once we have a hook into the C library, we can create Racket wrappers for individual functions in the library. We use the Racket &lt;code&gt;get-ffi-obj&lt;/code&gt; function to do this:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define UNCOMPRESSED-LEN 65)
+(define priv2pub_bytes
+  (get-ffi-obj 'priv2pub_bytes libpriv2pub
+    (_fun _string _int (_bytes o UNCOMPRESSED-LEN)
+          -&amp;gt; (_bytes o UNCOMPRESSED-LEN))))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;This creates a Racket function &lt;code&gt;priv2pub_bytes&lt;/code&gt; where the first argument is a (Racket) string, the second is an int indicating whether the output should be in compressed or uncompressed form, and the third is the output buffer. A pointer to the output buffer is also returned by the function. We make the size the output buffer equal to the uncompressed form since that is the maximum size.&lt;/p&gt;
+ &lt;p&gt;Let&amp;rsquo;s make things easier to use with a couple more functions:&lt;/p&gt;
+ &lt;pre class="brush: racket"&gt;&lt;code&gt;(define COMPRESSED 2) ; POINT_CONVERSION_COMPRESSED
+(define UNCOMPRESSED 4) ; POINT_CONVERSION_UNCOMPRESSED
+(define COMPRESSED-LEN 33)
+(define (priv-key-&amp;gt;pub-key/compressed priv/hex)
+  (bytes-&amp;gt;hex-string 
+    (subbytes (priv2pub_bytes priv/hex COMPRESSED) 0 COMPRESSED-LEN)))
+(define (priv-key-&amp;gt;pub-key priv/hex)
+  (bytes-&amp;gt;hex-string 
+    (priv2pub_bytes priv/hex UNCOMPRESSED)))&lt;/code&gt;&lt;/pre&gt;
+ &lt;p&gt;&lt;code&gt;priv-key-&amp;gt;pub-key&lt;/code&gt; consumes a private key in hex and returns an uncompressed public key, also in hex. &lt;code&gt;priv-key-&amp;gt;pub-key/compressed&lt;/code&gt; is similar except it returns a compressed public key (note that this function extracts only the first 33 bytes of the output buffer).&lt;/p&gt;
+ &lt;p&gt;Testing our examples again, with &lt;a href="http://docs.racket-lang.org/xrepl/index.html" title="XREPL"&gt;the Racket (extended) REPL&lt;/a&gt;, we see that our Racket functions produce the same results:&lt;/p&gt;
+ &lt;pre&gt;&lt;code&gt;$ racket
+Welcome to Racket v6.0.0.3.
+-&amp;gt; (require "priv2pub.rkt")
+-&amp;gt; (priv-key-&amp;gt;pub-key "18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725")
+"0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6"
+-&amp;gt; (priv-key-&amp;gt;pub-key "4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61")
+"0492edc09a7311c2ab83ef3d133331d7b73117902bb391d9dac3be261547f571e171f16775dda6d09a6aaf1f3f6e6aa3cfcd854dcaa6aed0fa7af9a5ed9965e117"&lt;/code&gt;&lt;/pre&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
- &lt;p&gt;All the code from this post &lt;a href="http://www.lostintransaction.com/code/priv2pub.c"&gt;is available here&lt;/a&gt;. In this post, I&amp;rsquo;m using OpenSSL 1.0.1e and gcc 4.7.2, running in Debian 7.0. I had to install the &lt;code&gt;libssl-dev&lt;/code&gt; package to get the proper header files.&lt;/p&gt;&lt;/html&gt;</description></item>
+ &lt;p&gt;The C code from this post &lt;a href="http://www.lostintransaction.com/code/priv2pub.c"&gt;is available here&lt;/a&gt; and the Racket code &lt;a href="http://www.lostintransaction.com/code/priv2pub.rkt"&gt;is available here&lt;/a&gt;. In this post, I&amp;rsquo;m using OpenSSL 1.0.1e and gcc 4.7.2, running in Debian 7.0. I had to install the &lt;code&gt;libssl-dev&lt;/code&gt; package to get the proper header files.&lt;/p&gt;&lt;/html&gt;</description></item>
   <item>
    <title>Verifying Andreas's "Fundraising for Dorian" Message</title>
    <link>http://www.lostintransaction.com/blog/2014/03/07/verifying-andreas-s-fundraising-for-dorian-message/?utm_source=all&amp;utm_medium=RSS</link>
@@ -359,7 +464,9 @@ sig  sig3  B1632E74 2014-01-22 __________ 2015-01-22 [selfsig]
 sig  sig   2878DE4F 2014-01-22 __________ __________ Andreas M. Antonopoulos &amp;lt;andreas@antonopoulos.com&amp;gt;
 sig  sig   CF8338F5 2014-03-07 __________ __________ Christopher David Howie &amp;lt;me@chrishowie.com&amp;gt;&lt;/code&gt;&lt;/pre&gt;
    &lt;p&gt;Other than Andreas himself, there&amp;rsquo;s only one other person that is vouching for the key.&lt;/p&gt;&lt;/li&gt;
-  &lt;li&gt;Luckily, Andreas anticipated this issue, and &lt;a href="http://www.youtube.com/watch?v=JCF1u1Wqfv0" title="Andreas PGP key YouTube video"&gt;issued a statement on YouTube&lt;/a&gt;, confirming his key. It&amp;rsquo;s a match! Now we are assured that the message is authentic.&lt;/li&gt;&lt;/ol&gt;&lt;/html&gt;</description></item>
+  &lt;li&gt;Luckily, Andreas anticipated this issue, and &lt;a href="http://www.youtube.com/watch?v=JCF1u1Wqfv0" title="Andreas PGP key YouTube video"&gt;issued a statement on YouTube&lt;/a&gt;, confirming his key. It&amp;rsquo;s a match! Now we are assured that the message is authentic.&lt;/li&gt;&lt;/ol&gt;
+ &lt;h3 id="software"&gt;Software&lt;/h3&gt;
+ &lt;p&gt;In this post, I used GnuPG 2.0.22 (Gpgwin 2.2.1) and libgcrypt 1.5.3, running in Windows 7 64-bit.&lt;/p&gt;&lt;/html&gt;</description></item>
   <item>
    <title>Verifying Hashes and Signatures</title>
    <link>http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/?utm_source=all&amp;utm_medium=RSS</link>

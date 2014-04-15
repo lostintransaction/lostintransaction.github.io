@@ -3,14 +3,14 @@
   <head>
 
     <meta charset="utf-8">
-    <title>Posts tagged 'Racket' (page 1)</title>
-    <meta name="description" content="Posts tagged 'Racket' (page 1)">
+    <title>Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)</title>
+    <meta name="description" content="In previous posts, we figured out how to compute a Bitcoin address from a private key, using an example from the Bitcoin wiki. In this post we try to convert a private key generated from an actual (MultiBit) wallet to an address. ...">
     <meta name="author"      content="The Unknown Blogger">
-    <meta name="keywords"    content="Racket">
+    <meta name="keywords"    content="private key, Bitcoin addresses, MultiBit, Bitcoin wallets, Racket">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
     <link rel="icon"      href="/favicon.ico">
-    <link rel="canonical" href="http://www.lostintransaction.com/tags/Racket.html">
-
+    <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">
+    <link rel="next" href="/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/">
 
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
@@ -19,9 +19,9 @@
     <link rel="stylesheet" type="text/css" href="/css/custom.css">
     <!-- Feeds -->
     <link ref="alternate" type="application/atom+xml"
-          href="/feeds/Racket.atom.xml" title="Atom Feed">
+          href="/feeds/all.atom.xml" title="Atom Feed">
     <link ref="alternate" type="application/rss+xml"
-          href="/feeds/Racket.rss.xml" title="RSS Feed">
+          href="/feeds/all.rss.xml" title="RSS Feed">
     <!-- JS -->
     <script type="text/javascript">
       var _gaq = _gaq || [];
@@ -104,8 +104,8 @@
             <li>
               <a href="/About.html">About</a>
             </li> 
-            <li><a href="/feeds/Racket.atom.xml">Atom</a></li>
-            <li><a href="/feeds/Racket.rss.xml">RSS</a></li>
+            <li><a href="/feeds/all.atom.xml">Atom</a></li>
+            <li><a href="/feeds/all.rss.xml">RSS</a></li>
           </ul>
         </div>
       </div>
@@ -118,14 +118,14 @@
 
 
 
-          <h1>Posts tagged <em>Racket</em></h1>
+
 
 
 <article>
 
  <header>
 
-  <h2><a href="/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)</a></h2>
+  <h1>Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)</h1>
 
   <p class="date-and-tags">
    <time datetime="2014-04-09" pubdate="true">2014-04-09</time> :: <span class="tags"><a href="/tags/private-key.html">private key</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a>, <a href="/tags/MultiBit.html">MultiBit</a>, <a href="/tags/Bitcoin-wallets.html">Bitcoin wallets</a>, <a href="/tags/Racket.html">Racket</a></span></p>
@@ -135,70 +135,81 @@
  <p>In previous posts, we figured out how to compute a Bitcoin address from a private key, using an example from the Bitcoin wiki. In this post we try to convert a private key generated from an actual (MultiBit) wallet to an address.</p>
 
 
- <footer class="read-more"><a href="/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">&hellip;more&hellip;</a></footer>
+ <p>I created a new wallet in MultiBit and it generated address <code>1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j</code>. I then exported the private key associated with this address into a file. Here&rsquo;s the contents of that file:</p>
+
+
+ <pre><code># KEEP YOUR PRIVATE KEYS SAFE !
+# Anyone who can read this file can spend your bitcoin.
+#
+# Format:
+#   &lt;Base58 encoded private key&gt;[&lt;whitespace&gt;[&lt;key createdAt&gt;]]
+#
+#   The Base58 encoded private keys are the same format as
+#   produced by the Satoshi client/ sipa dumpprivkey utility.
+#
+#   Key createdAt is in UTC format as specified by ISO 8601
+#   e.g: 2011-12-31T16:42:00Z . The century, 'T' and 'Z' are mandatory
+#
+L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe` 2014-03-10T06:12:28Z
+# End of private keys</code></pre>
+
+
+ <p>Let&rsquo;s see if the program we wrote in the last series of posts can compute the address (<code>1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j</code>) from the private key (<code>L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe</code>). The key is in base58 so we need convert to hex first.</p>
+
+
+ <pre><code>$ racket
+Welcome to Racket v6.0.0.3.
+-&gt; (require "priv2addr.rkt" "base58.rkt")
+-&gt; (define priv/hex (base58-str-&gt;hex-str "L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe"))
+-&gt; (priv-key-&gt;addr priv/hex)
+"1GoZxLR83RfoZeqzNSdTZuEb4vHAc6zFfc"
+</code></pre>
+
+
+ <p>Hmm, we get the wrong address.</p>
+
+ <footer>
+
+  <script type="text/javascript">
+      !function(d,s,id){
+          var js,fjs=d.getElementsByTagName(s)[0];
+          if(!d.getElementById(id)){
+              js=d.createElement(s);
+              js.id=id;
+              js.src="//platform.twitter.com/widgets.js";
+              fjs.parentNode.insertBefore(js,fjs);
+          }
+      }(document,"script","twitter-wjs");
+    </script>
+    <a class="twitter-share-button" data-dnt="true" data-url="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" href="https://twitter.com/share">
+      "Tweet"</a>
+
+  <script src="https://apis.google.com/js/plusone.js" type="text/javascript"></script>
+
+  <g:plusone href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" size="medium"></g:plusone>
+
+  <script type="text/javascript">
+      var disqus_shortname = 'lostintransaction';
+      (function() {
+          var dsq = document.createElement('script');
+          dsq.type = 'text/javascript';
+          dsq.async = true;
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+
+  <div id="disqus_thread"></div>
+
+  <ul class="pager">
+
+
+   <li class="next">
+      <a href="/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/"><em>Computing a Bitcoin Address, Part 3: Base58Check Encoding</em> &rarr;</a>
+    </li>
+    </ul>
+  </footer>
 </article>
-
-<article>
-
- <header>
-
-  <h2><a href="/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/">Computing a Bitcoin Address, Part 3: Base58Check Encoding</a></h2>
-
-  <p class="date-and-tags">
-   <time datetime="2014-03-18" pubdate="true">2014-03-18</time> :: <span class="tags"><a href="/tags/Base58Check.html">Base58Check</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a>, <a href="/tags/Racket.html">Racket</a></span></p>
-  </header>
-
-
- <p>In previous posts, we looked at <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">computing a Bitcoin public key from a private key</a>, and <a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/" title="Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address">computing a Bitcoin address from a public key</a>. However, these posts dealt with the keys and addresses in hexadecimal (hex) form, which is not the representation familiar to most Bitcoin users. Bitcoin addresses more commonly are encoded as <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Base58Check encoding">Base58Check</a> strings, which we explore in this post.</p>
-
-
- <footer class="read-more"><a href="/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/">&hellip;more&hellip;</a></footer>
-</article>
-
-<article>
-
- <header>
-
-  <h2><a href="/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/">Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address</a></h2>
-
-  <p class="date-and-tags">
-   <time datetime="2014-03-15" pubdate="true">2014-03-15</time> :: <span class="tags"><a href="/tags/public-key.html">public key</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a>, <a href="/tags/hashes.html">hashes</a>, <a href="/tags/SHA256.html">SHA256</a>, <a href="/tags/RIPEMD160.html">RIPEMD160</a>, <a href="/tags/OpenSSL.html">OpenSSL</a>, <a href="/tags/C.html">C</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/FFI.html">FFI</a></span></p>
-  </header>
-
-
- <p>This series of posts figures out how to compute a Bitcoin address from a private key. In a previous post, we <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">derived a Bitcoin public key from a private key</a>. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&rsquo;ll be using <a href="http://racket-lang.org">the Racket language</a> to help me.</p>
-
-
- <footer class="read-more"><a href="/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/">&hellip;more&hellip;</a></footer>
-</article>
-
-<article>
-
- <header>
-
-  <h2><a href="/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">Computing a Bitcoin Address, Part 1: Private to Public Key</a></h2>
-
-  <p class="date-and-tags">
-   <time datetime="2014-03-14" pubdate="true">2014-03-14</time> :: <span class="tags"><a href="/tags/public-key.html">public key</a>, <a href="/tags/private-key.html">private key</a>, <a href="/tags/elliptic-curve.html">elliptic curve</a>, <a href="/tags/OpenSSL.html">OpenSSL</a>, <a href="/tags/C.html">C</a>, <a href="/tags/Racket.html">Racket</a>, <a href="/tags/FFI.html">FFI</a></span></p>
-  </header>
-
-
- <p>I&rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to go from a Bitcoin private key to a public address.</p>
-
-
- <p>I know that Bitcoin public and private keys are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but they leave out some details. I want to experiment for myself, so this post describes how to derive a public key from a private key with runnable code.</p>
-
-
- <footer class="read-more"><a href="/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">&hellip;more&hellip;</a></footer>
-</article>
-
-<footer>
- <ul class="pagination">
-  <li class="disabled"><a href="#">
-    <quote>&larr;</quote></a></li>
-  <li class="active"><a href="/tags/Racket.html">1</a></li>
-  <li class="disabled"><a href="#">
-    <quote>&rarr;</quote></a></li></ul></footer>
         </div>
       </div>
       <footer>

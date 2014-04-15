@@ -8,12 +8,12 @@
   <pubDate>Wed, 09 Apr 2014 03:02:03 UTC</pubDate>
   <ttl>1800</ttl>
   <item>
-   <title>Wallet Import Format (WIF)</title>
-   <link>http://www.lostintransaction.com/blog/2014/04/09/wallet-import-format-wif/?utm_source=Bitcoin-addresses&amp;utm_medium=RSS</link>
-   <guid>urn:http-www-lostintransaction-com:-blog-2014-04-09-wallet-import-format-wif</guid>
+   <title>Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)</title>
+   <link>http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/?utm_source=Bitcoin-addresses&amp;utm_medium=RSS</link>
+   <guid>urn:http-www-lostintransaction-com:-blog-2014-04-09-computing-a-bitcoin-address-part-4-wallet-import-format-wif</guid>
    <pubDate>Wed, 09 Apr 2014 03:02:03 UTC</pubDate>
    <description>
-&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=Bitcoin-addresses&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F04%2F09%2Fwallet-import-format-wif%2F" height="1" width="1" /&gt;
+&lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=Bitcoin-addresses&amp;amp;utm_medium=RSS&amp;amp;utm_campaign=%2Fblog%2F2014%2F04%2F09%2Fcomputing-a-bitcoin-address-part-4-wallet-import-format-wif%2F" height="1" width="1" /&gt;
  &lt;p&gt;In previous posts, we figured out how to compute a Bitcoin address from a private key, using an example from the Bitcoin wiki. In this post we try to convert a private key generated from an actual (MultiBit) wallet to an address.&lt;/p&gt;
  &lt;p&gt;I created a new wallet in MultiBit and it generated address &lt;code&gt;1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j&lt;/code&gt;. I then exported the private key associated with this address into a file. Here&amp;rsquo;s the contents of that file:&lt;/p&gt;
  &lt;pre&gt;&lt;code&gt;# KEEP YOUR PRIVATE KEYS SAFE !

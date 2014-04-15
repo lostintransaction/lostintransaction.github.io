@@ -1,4 +1,4 @@
-    Title: Wallet Import Format (WIF)
+    Title: Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)
     Date: 2014-04-09T03:02:03
     Tags: private key, Bitcoin addresses, MultiBit, Bitcoin wallets, Racket
 

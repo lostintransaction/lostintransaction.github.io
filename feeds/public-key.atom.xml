@@ -17,7 +17,7 @@
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=public-key&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F15%2Fcomputing-a-bitcoin-address-part-2-public-key-to-hex-address%2F" height="1" width="1" /&gt;
  &lt;p&gt;In a previous post, we &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key"&gt;derived a Bitcoin public key from a private key&lt;/a&gt;. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&amp;rsquo;ll be using &lt;a href="http://racket-lang.org"&gt;the Racket language&lt;/a&gt; to help me.&lt;/p&gt;
  &lt;blockquote&gt;
-  &lt;p&gt;This is the second post in a four-part titled series &amp;ldquo;Computing a Bitcoin Address&amp;rdquo;. Here are all the articles in the series:&lt;/p&gt;
+  &lt;p&gt;This is the second post in a four-part series titled &amp;ldquo;Computing a Bitcoin Address&amp;rdquo;. Here are all the articles in the series:&lt;/p&gt;
   &lt;ul&gt;
    &lt;li&gt;Part 1: &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/"&gt;Private to Public Key&lt;/a&gt;&lt;/li&gt;
    &lt;li&gt;Part 2: &lt;a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/"&gt;Public Key to (Hex) Address&lt;/a&gt; (this post)&lt;/li&gt;
@@ -110,7 +110,7 @@ Welcome to Racket v6.0.0.3.
  &lt;p&gt;I&amp;rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to transform a Bitcoin private key to a public address.&lt;/p&gt;
  &lt;p&gt;I know that Bitcoin public and private keys are &lt;a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA"&gt;Elliptic Curve DSA (ECDSA)&lt;/a&gt; key pairs, and I&amp;rsquo;ve seen the &lt;a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"&gt;&lt;code&gt;Q = dG&lt;/code&gt; explanation&lt;/a&gt; on a few sites, but they leave out some details. I want to experiment for myself, so this post describes how to derive a public key from a private key with runnable code.&lt;/p&gt;
  &lt;blockquote&gt;
-  &lt;p&gt;This is the first post in a four-part titled series &amp;ldquo;Computing a Bitcoin Address&amp;rdquo;.  Here are all the articles in the series:&lt;/p&gt;
+  &lt;p&gt;This is the first post in a four-part series titled &amp;ldquo;Computing a Bitcoin Address&amp;rdquo;.  Here are all the articles in the series:&lt;/p&gt;
   &lt;ul&gt;
    &lt;li&gt;Part 1: &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/"&gt;Private to Public Key&lt;/a&gt; (this post)&lt;/li&gt;
    &lt;li&gt;Part 2: &lt;a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/"&gt;Public Key to (Hex) Address&lt;/a&gt;&lt;/li&gt;

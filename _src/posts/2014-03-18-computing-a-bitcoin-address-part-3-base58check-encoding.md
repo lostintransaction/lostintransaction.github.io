@@ -16,7 +16,7 @@ users. Bitcoin addresses more commonly are encoded as
 
 <!-- more -->
 
-> This is the third post in a four-part titled series "Computing a Bitcoin Address".
+> This is the third post in a four-part series titled "Computing a Bitcoin Address".
 > Here are all the articles in the series:
 >
 > * Part 1: [Private to Public Key](http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/)

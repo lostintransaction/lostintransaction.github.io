@@ -10,7 +10,7 @@ post explores how to convert that public key into a Bitcoin address
 
 <!-- more -->
 
-> This is the second post in a four-part titled series "Computing a Bitcoin Address".
+> This is the second post in a four-part series titled "Computing a Bitcoin Address".
 > Here are all the articles in the series:
 >
 > * Part 1: [Private to Public Key](http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/)

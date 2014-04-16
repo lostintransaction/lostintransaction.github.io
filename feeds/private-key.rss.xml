@@ -23,7 +23,7 @@
    &lt;li&gt;Part 3: &lt;a href="http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/"&gt;Base58Check Encoding&lt;/a&gt;&lt;/li&gt;
    &lt;li&gt;Part 4: &lt;a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/"&gt;Wallet Import Format (WIF)&lt;/a&gt; (this post)&lt;/li&gt;&lt;/ul&gt;&lt;/blockquote&gt;
  &lt;h3 id="from-private-key-to-public-address"&gt;From Private Key to Public Address&lt;/h3&gt;
- &lt;p&gt;Let&amp;rsquo;s consolidate the code from the previous posts in the series to create one function that performs all the steps to convert a private key to a public address. First we create some helper functions:&lt;/p&gt;
+ &lt;p&gt;Let&amp;rsquo;s consolidate the code from the previous posts to create one function that performs all the steps to convert a private key to a public address. First we create some helper functions:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (hash160/hex hstr) (ripemd160/hex (sha256/hex hstr)))
 (define (add-version0 str) (string-append "00" str))
 
@@ -33,10 +33,10 @@
 (define (compute-checksum hstr) (get-checksum (sha256x2/hex hstr)))
 (define (add-checksum hstr) (string-append hstr (compute-checksum hstr)))&lt;/code&gt;&lt;/pre&gt;
  &lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;hash160/hex&lt;/code&gt; performs a SHA&amp;ndash;256 hash followed by a RIPEMD&amp;ndash;160 hash on an input hex string.&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;add-version0&lt;/code&gt; prepends a &lt;code&gt;0x00&lt;/code&gt; to a hex string.&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;sha256x2/hex&lt;/code&gt; performs SHA&amp;ndash;256 twice on an input hex string.&lt;/li&gt;
-  &lt;li&gt;&lt;code&gt;add-checksum&lt;/code&gt; computes a checksum (first four bytes of a double SHA&amp;ndash;256 hash) on the input and appends it to the end of the string.&lt;/li&gt;&lt;/ul&gt;
+  &lt;li&gt;&lt;code&gt;hash160/hex&lt;/code&gt;: performs a SHA&amp;ndash;256 hash followed by a RIPEMD&amp;ndash;160 hash on an input hex string.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;add-version0&lt;/code&gt;: prepends a &lt;code&gt;0x00&lt;/code&gt; to a hex string.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;sha256x2/hex&lt;/code&gt;: performs SHA&amp;ndash;256 twice on an input hex string.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;add-checksum&lt;/code&gt;: computes a checksum (first four bytes of a double SHA&amp;ndash;256 hash) on the input and appends it to the end of the string.&lt;/li&gt;&lt;/ul&gt;
  &lt;p&gt;Here&amp;rsquo;s a function &lt;code&gt;priv-key-&amp;gt;addr&lt;/code&gt; that converts a private key (in hex) to a public address (in Base58Check):&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;;; computes base58 addr from hex string priv key
 (define priv-key-&amp;gt;addr

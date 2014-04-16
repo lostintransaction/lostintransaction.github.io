@@ -22,9 +22,9 @@ corresponding address.
 
 ### From Private Key to Public Address
 
-Let's consolidate the code from the previous posts in the series to
-create one function that performs all the steps to convert a private
-key to a public address. First we create some helper functions:
+Let's consolidate the code from the previous posts to create one
+function that performs all the steps to convert a private key to a
+public address. First we create some helper functions:
 
 ```racket
 (define (hash160/hex hstr) (ripemd160/hex (sha256/hex hstr)))
@@ -37,11 +37,11 @@ key to a public address. First we create some helper functions:
 (define (add-checksum hstr) (string-append hstr (compute-checksum hstr)))
 ```
 
-* `hash160/hex` performs a SHA-256 hash followed by a RIPEMD-160 hash
+* `hash160/hex`: performs a SHA-256 hash followed by a RIPEMD-160 hash
 on an input hex string.
-* `add-version0` prepends a `0x00` to a hex string.
-* `sha256x2/hex` performs SHA-256 twice on an input hex string.
-* `add-checksum` computes a checksum (first four bytes of a double SHA-256 hash) on the input and appends it to the end of the string.
+* `add-version0`: prepends a `0x00` to a hex string.
+* `sha256x2/hex`: performs SHA-256 twice on an input hex string.
+* `add-checksum`: computes a checksum (first four bytes of a double SHA-256 hash) on the input and appends it to the end of the string.
 
 Here's a function `priv-key->addr` that converts a private key (in hex) to a public address (in Base58Check):
 

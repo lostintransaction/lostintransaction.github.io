@@ -153,7 +153,7 @@
  <h3 id="from-private-key-to-public-address">From Private Key to Public Address</h3>
 
 
- <p>Let&rsquo;s consolidate the code from the previous posts in the series to create one function that performs all the steps to convert a private key to a public address. First we create some helper functions:</p>
+ <p>Let&rsquo;s consolidate the code from the previous posts to create one function that performs all the steps to convert a private key to a public address. First we create some helper functions:</p>
 
 
  <div class="brush: racket">
@@ -196,13 +196,13 @@
 
  <ul>
 
-  <li><code>hash160/hex</code> performs a SHA&ndash;256 hash followed by a RIPEMD&ndash;160 hash on an input hex string.</li>
+  <li><code>hash160/hex</code>: performs a SHA&ndash;256 hash followed by a RIPEMD&ndash;160 hash on an input hex string.</li>
 
-  <li><code>add-version0</code> prepends a <code>0x00</code> to a hex string.</li>
+  <li><code>add-version0</code>: prepends a <code>0x00</code> to a hex string.</li>
 
-  <li><code>sha256x2/hex</code> performs SHA&ndash;256 twice on an input hex string.</li>
+  <li><code>sha256x2/hex</code>: performs SHA&ndash;256 twice on an input hex string.</li>
 
-  <li><code>add-checksum</code> computes a checksum (first four bytes of a double SHA&ndash;256 hash) on the input and appends it to the end of the string.</li></ul>
+  <li><code>add-checksum</code>: computes a checksum (first four bytes of a double SHA&ndash;256 hash) on the input and appends it to the end of the string.</li></ul>
 
 
  <p>Here&rsquo;s a function <code>priv-key-&gt;addr</code> that converts a private key (in hex) to a public address (in Base58Check):</p>

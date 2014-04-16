@@ -138,9 +138,6 @@
  <p>I know that Bitcoin public and private keys are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but they leave out some details. I want to experiment for myself, so this post describes how to derive a public key from a private key with runnable code.</p>
 
 
- <hr />
-
-
  <blockquote>
 
   <p>This is the first post in a four-part titled series &ldquo;Computing a Bitcoin Address&rdquo;.  Here are all the articles in the series:</p>
@@ -156,10 +153,7 @@
    <li>Part 4: <a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">Wallet Import Format (WIF)</a></li></ul></blockquote>
 
 
- <hr />
-
-
- <p>The <a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer">accepted Stack Overflow answer from the elliptic curve question</a> says that in the <code>Q = dG</code> equation, <code>Q</code> is the public key and <code>d</code> is the private key, but does not explain <code>G</code>, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the <a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"><code>secp256k1</code> ECDSA curve</a>.</p>
+ <p>The <a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer">accepted Stack Overflow answer from the linked elliptic curve question above</a> says that in the <code>Q = dG</code> equation, <code>Q</code> is the public key and <code>d</code> is the private key, but does not explain <code>G</code>, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the <a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"><code>secp256k1</code> ECDSA curve</a>.</p>
 
 
  <p>Next, I looked at the <a href="https://www.openssl.org/" title="OpenSSL">OpenSSL</a> <code>libcrypto</code> C library, in <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c"><code>EC_KEY_generate_key</code> (the function mentioned in the Stack Overflow post)</a>. Here&rsquo;s the line that performs the multiplication:</p>

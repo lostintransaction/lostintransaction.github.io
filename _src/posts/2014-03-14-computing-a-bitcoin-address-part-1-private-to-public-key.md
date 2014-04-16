@@ -17,8 +17,6 @@ to derive a public key from a private key with runnable code.
 
 <!-- more -->
 
--------------------------------------------------------------------------------
-
 > This is the first post in a four-part titled series "Computing a Bitcoin Address". 
 > Here are all the articles in the series:
 >
@@ -27,10 +25,8 @@ to derive a public key from a private key with runnable code.
 > * Part 3: [Base58Check Encoding](http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/)
 > * Part 4: [Wallet Import Format (WIF)](http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/)
 
--------------------------------------------------------------------------------
-
 The
-[accepted Stack Overflow answer from the elliptic curve question][so2]
+[accepted Stack Overflow answer from the linked elliptic curve question above][so2]
 says that in the `Q = dG` equation, `Q` is the public key and `d` is
 the private key, but does not explain `G`, the group
 parameter. Luckily, some Googling quickly finds that Bitcoin uses the

@@ -79,4 +79,8 @@
   (define wif/uncomp "5KDwznXNT8sJbhtYheFNB1ho9Yb69hfJGgmTkW9cNVBr7LxFEje")
   (define addr/uncomp "15YzfXwEg5STm3GtEh87LAyzNbpVpdx5eN")
   (check-true (wif-checksum-ok? wif/uncomp))
-  (check-equal? (wif->addr wif/uncomp) addr/uncomp))
+  (check-equal? (wif->addr wif/uncomp) addr/uncomp)
+  
+  (check-exn exn:fail? (lambda () (wif-compressed? "123")))
+  (check-true (wif-compressed? wif/comp))
+  (check-false (wif-compressed? wif/uncomp)))

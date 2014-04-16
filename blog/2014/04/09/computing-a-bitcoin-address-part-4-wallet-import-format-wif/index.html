@@ -247,7 +247,7 @@
  <p>We use Racket&rsquo;s <code>compose</code> function, which strings together a series of functions. The functions are called in the reverse order in which they are listed, so <code>priv-key-&gt;addr</code> first calls <code>priv-key-&gt;pub-key</code> on its input, then takes that results and give it to <code>hash160/hex</code>, and so on.</p>
 
 
- <p>Let&rsquo;s test this function on <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: Bitcoin addresses">the Bitcoin wiki example</a>:</p>
+ <p>Let&rsquo;s test our function on <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: Bitcoin addresses">this Bitcoin wiki example</a>:</p>
 
 
  <ul>
@@ -257,7 +257,7 @@
   <li>public address: <code>16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM</code></li></ul>
 
 
- <p>We save the code to the file <code>priv2addr.rkt</code>:</p>
+ <p>We save the code to the file <code>priv2addr.rkt</code> and use <a href="http://docs.racket-lang.org/xrepl/index.html">Racket&rsquo;s extended REPL</a>:</p>
 
 
  <pre><code>$ racket
@@ -290,7 +290,17 @@ L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe` 2014-03-10T06:12:28Z
 # End of private keys</code></pre>
 
 
- <p>Let&rsquo;s see if we can convert this private key (<code>L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe</code>) to its public address (<code>1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j</code>). The key is in base&ndash;58 so we need convert to hex first.</p>
+ <p>Let&rsquo;s see if our function can convert this private key to its public address.</p>
+
+
+ <ul>
+
+  <li>private key: <code>L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe</code></li>
+
+  <li>public address: <code>1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j</code></li></ul>
+
+
+ <p>The key is in base&ndash;58 so we need convert to hex first.</p>
 
 
  <pre><code>$ racket
@@ -310,33 +320,33 @@ Welcome to Racket v6.0.0.3.
 
   <li>in <a href="https://en.bitcoin.it/wiki/Wallet_import_format" title="Wallet import format">Wallet Import Format (WIF)</a>, and</li>
 
-  <li>in compressed form.</li></ol>
+  <li>in <a href="https://en.bitcoin.it/wiki/Private_key">&ldquo;compressed&rdquo; form</a>.</li></ol>
 
 
- <p>Here&rsquo;s the relevant details of Wallet Import Format:</p>
+ <p>&ldquo;Compressed&rdquo; is in quotes because the private key itself is not compressed, but rather has a flag that indicates that the public key should be compressed. Here&rsquo;s the relevant details of Wallet Import Format:</p>
 
 
- <p>Uncompressed WIF private key:</p>
+ <p>&ldquo;Uncompressed&rdquo; WIF private key:</p>
 
 
  <pre><code>0x80 + 32 byte raw private key + 4 byte checksum
 </code></pre>
 
 
- <p>Compressed WIF private key:</p>
+ <p>&ldquo;Compressed&rdquo; WIF private key:</p>
 
 
  <pre><code>0x80 + 32 byte raw private key + 0x01 + 4 byte checksum
 </code></pre>
 
 
- <p>The <code>0x80</code> prefix indicates an address on the main Bitcoin blockchain (as opposed to the testnet). The compressed form has an extra <code>0x01</code> byte before the checksum.</p>
+ <p>The <code>0x80</code> prefix indicates an address on the main Bitcoin blockchain (as opposed to the testnet). The &ldquo;compressed&rdquo; form has an extra <code>0x01</code> byte before the checksum.</p>
 
 
  <h3 id="wif-checksum-checking">WIF Checksum Checking</h3>
 
 
- <p>Before converting the WIF private key to an address, let&rsquo;s first write a function that checks the checksum for a WIF private key. We need to first determine if a WIF private key is compressed:</p>
+ <p>Before converting the WIF private key to an address, let&rsquo;s first write a function that checks the checksum for a WIF private key. To do this we need a predicate that determines if the compressed flag is set in a WIF private key:</p>
 
 
  <div class="brush: racket">
@@ -366,8 +376,8 @@ Welcome to Racket v6.0.0.3.
        <pre><span class="c1">;; wif is <a href="http://docs.racket-lang.org/web-server/templates.html#(form._((lib._web-server/templates..rkt)._in))" style="color: inherit">in</a> base58</span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">wif-compressed?</span> <span class="nv">wif</span><span class="p">)</span>
   <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">len</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-length))" style="color: inherit">string-length</a> </span><span class="nv">wif</span><span class="p">))</span>
-    <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/when_unless.html#(form._((lib._racket/private/letstx-scheme..rkt)._when))" style="color: inherit">when</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/booleans.html#(def._((quote._~23~25kernel)._not))" style="color: inherit">not</a> </span><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3d))" style="color: inherit">=</a> </span><span class="nv">len</span> <span class="mi">51</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3d))" style="color: inherit">=</a> </span><span class="nv">len</span> <span class="mi">52</span><span class="p">)))</span>
-      <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/exns.html#(def._((quote._~23~25kernel)._error))" style="color: inherit">error</a> </span><span class="ss">'wif-compressed?</span> <span class="s">"invalid WIF: ~a\n"</span> <span class="nv">wif</span><span class="p">))</span>
+  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/when_unless.html#(form._((lib._racket/private/letstx-scheme..rkt)._when))" style="color: inherit">when</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/booleans.html#(def._((quote._~23~25kernel)._not))" style="color: inherit">not</a> </span><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3d))" style="color: inherit">=</a> </span><span class="nv">len</span> <span class="mi">51</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._~3d))" style="color: inherit">=</a> </span><span class="nv">len</span> <span class="mi">52</span><span class="p">)))</span>
+    <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/exns.html#(def._((quote._~23~25kernel)._error))" style="color: inherit">error</a> </span><span class="ss">'wif-compressed?</span> <span class="s">"invalid WIF: ~a\n"</span> <span class="nv">wif</span><span class="p">))</span>
   <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">c</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-ref))" style="color: inherit">string-ref</a> </span><span class="nv">wif</span> <span class="mi">0</span><span class="p">))</span>
   <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((lib._racket/private/letstx-scheme..rkt)._or))" style="color: inherit">or</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/characters.html#(def._((quote._~23~25kernel)._char~3d~3f))" style="color: inherit">char=?</a> </span><span class="nv">c</span> <span class="sc">#\K</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/characters.html#(def._((quote._~23~25kernel)._char~3d~3f))" style="color: inherit">char=?</a> </span><span class="nv">c</span> <span class="sc">#\L</span><span class="p">)))</span>
 </pre></div>
@@ -375,10 +385,10 @@ Welcome to Racket v6.0.0.3.
 </div>
 
 
- <p>A compressed WIF private key begins with a <code>K</code> or <code>L</code> and <code>wif-compressed?</code> checks for this.</p>
+ <p>A WIF private key with the comrpession flag set begins with a <code>K</code> or <code>L</code> and <code>wif-compressed?</code> checks for this.</p>
 
 
- <p>Next we define a prediate that verifies a WIF private key&rsquo;s checksum. The checksum is again computed with a double SHA&ndash;256.</p>
+ <p>Next we define a predicate that verifies a WIF private key&rsquo;s checksum. The checksum is again computed with a double SHA&ndash;256.</p>
 
 
  <div class="brush: racket">
@@ -433,7 +443,7 @@ Welcome to Racket v6.0.0.3.
 </div>
 
 
- <p>First, <code>wif-split-checksum</code> splits a WIF private key into a prefix and a checksum. Then, <code>wif-checksum-ok?</code> computes a double SHA&ndash;256 on the prefix and verifies that it matches the checksum.</p>
+ <p>First, <code>wif-checksum-ok?</code> calls <code>wif-split-checksum</code> to split a WIF private key into a prefix and a checksum. Then, <code>wif-checksum-ok?</code> computes a double SHA&ndash;256 on the prefix and verifies that it matches the checksum.</p>
 
 
  <p>Let&rsquo;s try these functions on our example:</p>
@@ -464,7 +474,7 @@ Welcome to Racket v6.0.0.3.
 
  <ol>
 
-  <li>decide whether the WIF private key is compressed,</li>
+  <li>decide whether the compression flag is set in the WIF private key,</li>
 
   <li>extract the raw private key, and</li>
 
@@ -500,7 +510,7 @@ Welcome to Racket v6.0.0.3.
 </div>
 
 
- <p>To verify, let&rsquo;s check the hash160 of our running example, which <a href="https://blockchain.info/address/1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j" title="blockchain.info 1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j">blockchain.info reports to be</a> <code>a62bc20c511af7160a6150a72042b3fff8a86646</code>:</p>
+ <p>To verify that we properly extract the raw private key, let&rsquo;s check the hash160 (using <code>hash160/hex</code> defined above) of our running example, which <a href="https://blockchain.info/address/1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j" title="blockchain.info 1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j">blockchain.info reports to be</a> <code>a62bc20c511af7160a6150a72042b3fff8a86646</code>. The <code>^</code> token in the <a href="http://docs.racket-lang.org/xrepl/index.html">Racket XREPL</a> is bound to the last printed value.</p>
 
 
  <pre><code>$ racket
@@ -515,7 +525,10 @@ Welcome to Racket v6.0.0.3.
 "a62bc20c511af7160a6150a72042b3fff8a86646"</code></pre>
 
 
- <p>For step 3, we first need a compressed version of our <code>priv-key-&gt;addr</code> function. This requires getting a compressed public key, but fortunately we&rsquo;ve already defined a <code>priv-key-&gt;pub-key/compressed</code> in a <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">previous post</a>. Here&rsquo;s <code>priv-key-&gt;addr/compressed</code>:</p>
+ <p>Note that here we know that the compression flag in the WIF private key is set so we use <code>priv-key-&gt;pub-key/compressed</code>, <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">defined in a previous post</a>, to get the compressed public key.</p>
+
+
+ <p>For step 3, we already defined <code>priv-key-&gt;addr</code> above, which computes an uncompressed address, so we just need a version that computes a compressed address. Here&rsquo;s <code>priv-key-&gt;addr/compressed</code>, which uses <code>priv-key-&gt;pub-key/compressed</code>:</p>
 
 
  <div class="brush: racket">
@@ -591,7 +604,7 @@ Welcome to Racket v6.0.0.3.
 </div>
 
 
- <p>Here&rsquo;s our example, with the expected representations (from <a href="https://www.bitaddress.org">bitaddress.org</a>):</p>
+ <p>Let&rsquo;s test this code with the MultiBit wallet example from above. Here are the WIF private keys, both with compressed flag set and unset, and their associated public addresses:</p>
 
 
  <ul>

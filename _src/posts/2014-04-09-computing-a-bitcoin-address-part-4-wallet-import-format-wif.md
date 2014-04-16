@@ -61,12 +61,13 @@ are listed, so `priv-key->addr` first calls `priv-key->pub-key` on its
 input, then takes that results and give it to `hash160/hex`, and so
 on. 
 
-Let's test this function on [the Bitcoin wiki example][bwiki:addr]:
+Let's test our function on [this Bitcoin wiki example][bwiki:addr]:
 
 * private key: `18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725`
 * public address: `16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM`
 
-We save the code to the file `priv2addr.rkt`:
+We save the code to the file `priv2addr.rkt` and use
+[Racket's extended REPL](http://docs.racket-lang.org/xrepl/index.html):
 
     $ racket
     Welcome to Racket v6.0.0.3.
@@ -98,10 +99,13 @@ file:
 	L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe` 2014-03-10T06:12:28Z
 	# End of private keys
 
-Let's see if we can convert this private key
-(`L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe`) to its public
-address (`1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j`). The key is in base-58
-so we need convert to hex first.
+Let's see if our function can convert this private key to its public
+address.
+
+* private key: `L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe`
+* public address: `1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j`
+
+The key is in base-58 so we need convert to hex first.
 
 	$ racket
 	Welcome to Racket v6.0.0.3.
@@ -116,43 +120,49 @@ Hmm, we get the wrong address! Querying the private key at
 is
 
 1. in [Wallet Import Format (WIF)][bwiki:wif], and
-2. in compressed form.
+2. in ["compressed" form](https://en.bitcoin.it/wiki/Private_key).
 
 [bwiki:wif]: https://en.bitcoin.it/wiki/Wallet_import_format "Wallet import format"
 
-Here's the relevant details of Wallet Import Format:
+"Compressed" is in quotes because the private key itself is not
+compressed, but rather has a flag that indicates that the public key
+should be compressed. Here's the relevant details of Wallet Import
+Format:
 
-Uncompressed WIF private key:
+"Uncompressed" WIF private key:
 
     0x80 + 32 byte raw private key + 4 byte checksum
 	
-Compressed WIF private key:
+"Compressed" WIF private key:
 
     0x80 + 32 byte raw private key + 0x01 + 4 byte checksum
 	
 The `0x80` prefix indicates an address on the main Bitcoin blockchain
-(as opposed to the testnet). The compressed form has an extra `0x01`
+(as opposed to the testnet). The "compressed" form has an extra `0x01`
 byte before the checksum.
 
 ### WIF Checksum Checking
 
 Before converting the WIF private key to an address, let's first write
-a function that checks the checksum for a WIF private key. We need to first determine if a WIF private key is compressed:
+a function that checks the checksum for a WIF private key. To do this
+we need a predicate that determines if the compressed flag is set in a
+WIF private key:
 
 ```racket
 ;; wif is in base58
 (define (wif-compressed? wif)
   (define len (string-length wif))
-    (when (not (or (= len 51) (= len 52)))
-      (error 'wif-compressed? "invalid WIF: ~a\n" wif))
+  (when (not (or (= len 51) (= len 52)))
+    (error 'wif-compressed? "invalid WIF: ~a\n" wif))
   (define c (string-ref wif 0))
   (or (char=? c #\K) (char=? c #\L)))
 ```
 			
-A compressed WIF private key begins with a `K` or `L` and
-`wif-compressed?` checks for this.
+A WIF private key with the comrpession flag set begins with a `K` or
+`L` and `wif-compressed?` checks for this.
 
-Next we define a prediate that verifies a WIF private key's checksum. The checksum is again computed with a double SHA-256.
+Next we define a predicate that verifies a WIF private key's
+checksum. The checksum is again computed with a double SHA-256.
 
 ```racket
 ;; splits wif into prefix + checksum
@@ -172,9 +182,10 @@ Next we define a prediate that verifies a WIF private key's checksum. The checks
   (hex=? wif-checksum (compute-checksum wif-prefix)))
 ```
 
-First, `wif-split-checksum` splits a WIF private key into a prefix and
-a checksum. Then, `wif-checksum-ok?` computes a double SHA-256 on the
-prefix and verifies that it matches the checksum.
+First, `wif-checksum-ok?` calls `wif-split-checksum` to split a WIF
+private key into a prefix and a checksum. Then, `wif-checksum-ok?`
+computes a double SHA-256 on the prefix and verifies that it matches
+the checksum.
 
 Let's try these functions on our example:
 
@@ -196,7 +207,7 @@ to [bitaddress.org](https://www.bitaddress.org), is
 
 To convert from a WIF private key to an address, we need to:
 
-1. decide whether the WIF private key is compressed,
+1. decide whether the compression flag is set in the WIF private key,
 2. extract the raw private key, and
 3. compute either an uncompressed or compressed Bitcoin address.
 
@@ -208,7 +219,12 @@ prefixes and checksums from the WIF private key:
 (define (wif->priv-key wif) (substring (base58-str->hex-str wif) 2 66))
 ```
 
-To verify, let's check the hash160 of our running example, which [blockchain.info reports to be][blockchain] `a62bc20c511af7160a6150a72042b3fff8a86646`:
+To verify that we properly extract the raw private key, let's check
+the hash160 (using `hash160/hex` defined above) of our running
+example, which [blockchain.info reports to be][blockchain]
+`a62bc20c511af7160a6150a72042b3fff8a86646`. The `^` token in the
+[Racket XREPL](http://docs.racket-lang.org/xrepl/index.html) is bound
+to the last printed value.
 
 [blockchain]: https://blockchain.info/address/1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j "blockchain.info 1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j"
 
@@ -223,10 +239,15 @@ To verify, let's check the hash160 of our running example, which [blockchain.inf
 	-> (hash160/hex ^)
 	"a62bc20c511af7160a6150a72042b3fff8a86646"
 
-For step 3, we first need a compressed version of our `priv-key->addr`
-function. This requires getting a compressed public key, but
-fortunately we've already defined a `priv-key->pub-key/compressed` in
-a [previous post][LiT:priv2pub]. Here's `priv-key->addr/compressed`:
+Note that here we know that the compression flag in the WIF private
+key is set so we use `priv-key->pub-key/compressed`,
+[defined in a previous post][LiT:priv2pub], to get the compressed
+public key.
+
+For step 3, we already defined `priv-key->addr` above, which computes
+an uncompressed address, so we just need a version that computes a
+compressed address. Here's `priv-key->addr/compressed`, which uses
+`priv-key->pub-key/compressed`:
 
 [LiT:priv2pub]: http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/ "Computing a Bitcoin Address, Part 1: Private to Public Key"
 
@@ -252,7 +273,9 @@ to a Bitcoin address:
       (priv-key->addr priv)))
 ```
 
-Here's our example, with the expected representations (from [bitaddress.org](https://www.bitaddress.org)):
+Let's test this code with the MultiBit wallet example from above. Here
+are the WIF private keys, both with compressed flag set and unset, and
+their associated public addresses:
 
 * WIF private key, compressed: `L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe`
 * public address, compressed: `1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j`

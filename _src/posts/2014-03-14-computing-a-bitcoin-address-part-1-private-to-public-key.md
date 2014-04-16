@@ -19,9 +19,9 @@ to derive a public key from a private key with runnable code.
 
 -------------------------------------------------------------------------------
 
-> This is the first post in a four-part series titled "Computing a
+> This is the first post in a four-part series "Computing a
   Bitcoin Address". Here are all the articles in the series:
-> 
+ 
 > 1. [Private to Public Key](http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/) (this post)
 2. [Public Key to (Hex) Address](http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/)
 3. [Base58Check Encoding](http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/)
@@ -29,10 +29,11 @@ to derive a public key from a private key with runnable code.
 
 -------------------------------------------------------------------------------
 
-The [accepted Stack Overflow answer from the previous link][so2] says that in
-the `Q = dG` equation, `Q` is the public key and `d` is the private
-key, but does not explain `G`, the group parameter. Luckily, some
-Googling quickly finds that Bitcoin uses the
+The
+[accepted Stack Overflow answer from the elliptic curve question][so2]
+says that in the `Q = dG` equation, `Q` is the public key and `d` is
+the private key, but does not explain `G`, the group
+parameter. Luckily, some Googling quickly finds that Bitcoin uses the
 [`secp256k1` ECDSA curve][bwiki:secp].
 
 [so2]: http://stackoverflow.com/a/12482384/951881 "Stack Overflow: Public Key from Private Key Answer"

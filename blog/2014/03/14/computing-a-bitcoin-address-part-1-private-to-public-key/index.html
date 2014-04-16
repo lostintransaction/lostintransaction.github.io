@@ -143,13 +143,26 @@
 
  <blockquote>
 
-  <p>This is the first post in a four-part series titled &ldquo;Computing a  Bitcoin Address&rdquo;. Here are all the articles in the series: &gt;  &gt; 1. <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">Private to Public Key</a> (this post) 2. <a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/">Public Key to (Hex) Address</a> 3. <a href="http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/">Base58Check Encoding</a> 4. <a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">Wallet Import Format (WIF)</a></p></blockquote>
+  <p>This is the first post in a four-part series &ldquo;Computing a  Bitcoin Address&rdquo;. Here are all the articles in the series:</p></blockquote>
+
+
+ <blockquote>
+
+  <ol>
+
+   <li><a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">Private to Public Key</a> (this post)</li>
+
+   <li><a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/">Public Key to (Hex) Address</a></li>
+
+   <li><a href="http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/">Base58Check Encoding</a></li>
+
+   <li><a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">Wallet Import Format (WIF)</a></li></ol></blockquote>
 
 
  <hr />
 
 
- <p>The <a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer">accepted Stack Overflow answer from the previous link</a> says that in the <code>Q = dG</code> equation, <code>Q</code> is the public key and <code>d</code> is the private key, but does not explain <code>G</code>, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the <a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"><code>secp256k1</code> ECDSA curve</a>.</p>
+ <p>The <a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer">accepted Stack Overflow answer from the elliptic curve question</a> says that in the <code>Q = dG</code> equation, <code>Q</code> is the public key and <code>d</code> is the private key, but does not explain <code>G</code>, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the <a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"><code>secp256k1</code> ECDSA curve</a>.</p>
 
 
  <p>Next, I looked at the <a href="https://www.openssl.org/" title="OpenSSL">OpenSSL</a> <code>libcrypto</code> C library, in <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec_key.c;h=7fa247593d91b45347704e62e184e1138fc8bd01;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l236" title="crypto/ec/ec_key.c"><code>EC_KEY_generate_key</code> (the function mentioned in the Stack Overflow post)</a>. Here&rsquo;s the line that performs the multiplication:</p>

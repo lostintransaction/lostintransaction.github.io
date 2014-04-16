@@ -174,18 +174,16 @@
 4
 5
 6
-7
-8</pre></div></td>
+7</pre></div></td>
 
      <td class="code">
 
       <div class="source">
 
        <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">hash160/hex</span> <span class="nv">hstr</span><span class="p">)</span> <span class="p">(</span><span class="nf">ripemd160/hex</span> <span class="p">(</span><span class="nf">sha256/hex</span> <span class="nv">hstr</span><span class="p">)))</span>
-<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">add-version0</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-append))" style="color: inherit">string-append</a> </span><span class="s">"00"</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">))</span>
-
-<span class="c1">;; checksum is 1st 4 <a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes))" style="color: inherit">bytes</a> (8 chars) of double sha256 <a href="http://docs.racket-lang.org/reference/hashtables.html#(def._((quote._~23~25kernel)._hash))" style="color: inherit">hash</a> of given hex <a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string))" style="color: inherit">string</a></span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">sha256x2/hex</span> <span class="nv">hstr</span><span class="p">)</span> <span class="p">(</span><span class="nf">sha256/hex</span> <span class="p">(</span><span class="nf">sha256/hex</span> <span class="nv">hstr</span><span class="p">)))</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">add-version0</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-append))" style="color: inherit">string-append</a> </span><span class="s">"00"</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">))</span>
+<span class="c1">;; checksum is 1st 4 <a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes))" style="color: inherit">bytes</a> (8 chars) of double sha256 <a href="http://docs.racket-lang.org/reference/hashtables.html#(def._((quote._~23~25kernel)._hash))" style="color: inherit">hash</a> of given hex <a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string))" style="color: inherit">string</a></span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">get-checksum</span> <span class="nv">hstr</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._substring))" style="color: inherit">substring</a> </span><span class="nv">hstr</span> <span class="mi">0</span> <span class="mi">8</span><span class="p">))</span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">compute-checksum</span> <span class="nv">hstr</span><span class="p">)</span> <span class="p">(</span><span class="nf">get-checksum</span> <span class="p">(</span><span class="nf">sha256x2/hex</span> <span class="nv">hstr</span><span class="p">)))</span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">add-checksum</span> <span class="nv">hstr</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-append))" style="color: inherit">string-append</a> </span><span class="nv">hstr</span> <span class="p">(</span><span class="nf">compute-checksum</span> <span class="nv">hstr</span><span class="p">)))</span>
@@ -196,13 +194,15 @@
 
  <ul>
 
-  <li><code>hash160/hex</code>: performs a SHA&ndash;256 hash followed by a RIPEMD&ndash;160 hash on an input hex string.</li>
+  <li><code>hash160/hex</code>: performs a SHA&ndash;256 hash followed by a RIPEMD&ndash;160 hash on an input hex string</li>
 
-  <li><code>add-version0</code>: prepends a <code>0x00</code> to a hex string.</li>
+  <li><code>sha256x2/hex</code>: performs SHA&ndash;256 twice on an input hex string</li>
 
-  <li><code>sha256x2/hex</code>: performs SHA&ndash;256 twice on an input hex string.</li>
+  <li><code>add-version0</code>: prepends <code>0x00</code> to a hex string</li>
 
-  <li><code>add-checksum</code>: computes a checksum (first four bytes of a double SHA&ndash;256 hash) on the input and appends it to the end of the string.</li></ul>
+  <li><code>compute-checksum</code>: computes checksum (first 4 bytes of a double SHA&ndash;245 hash) of its input</li>
+
+  <li><code>add-checksum</code>: computes a checksum for its input and appends that checksum to the end of the input</li></ul>
 
 
  <p>Here&rsquo;s a function <code>priv-key-&gt;addr</code> that converts a private key (in hex) to a public address (in Base58Check):</p>
@@ -232,7 +232,7 @@
 
       <div class="source">
 
-       <pre><span class="c1">;; computes base58 addr from hex <a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string))" style="color: inherit">string</a> priv <a href="http://docs.racket-lang.org/teachpack/2htdpPlanet_Cute_Images.html#(def._((lib._2htdp/planetcute..rkt)._key))" style="color: inherit">key</a></span>
+       <pre><span class="c1">;; computes base58 addr from hex priv <a href="http://docs.racket-lang.org/teachpack/2htdpPlanet_Cute_Images.html#(def._((lib._2htdp/planetcute..rkt)._key))" style="color: inherit">key</a></span>
 <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">priv-key-&gt;addr</span>
   <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/procedures.html#(def._((lib._racket/private/list..rkt)._compose))" style="color: inherit">compose</a></span> <span class="nv">hex-str-&gt;base58-str</span>
            <span class="nv">add-checksum</span>
@@ -244,7 +244,20 @@
 </div>
 
 
- <p>We use Racket&rsquo;s <code>compose</code> function, which strings together a series of functions. The functions are called in the reverse order in which they are listed, so <code>priv-key-&gt;addr</code> first calls <code>priv-key-&gt;pub-key</code>, then <code>hash160/hex</code>, and so on. Let&rsquo;s test it on <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: Bitcoin addresses">our running example</a>. We save the above code to the file <code>priv2addr.rkt</code>.</p>
+ <p>We use Racket&rsquo;s <code>compose</code> function, which strings together a series of functions. The functions are called in the reverse order in which they are listed, so <code>priv-key-&gt;addr</code> first calls <code>priv-key-&gt;pub-key</code> on its input, then takes that results and give it to <code>hash160/hex</code>, and so on.</p>
+
+
+ <p>Let&rsquo;s test this function on <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: Bitcoin addresses">the Bitcoin wiki example</a>:</p>
+
+
+ <ul>
+
+  <li>private key: <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code></li>
+
+  <li>public address: <code>16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM</code></li></ul>
+
+
+ <p>We save the code to the file <code>priv2addr.rkt</code>:</p>
 
 
  <pre><code>$ racket

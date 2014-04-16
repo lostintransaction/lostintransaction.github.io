@@ -28,25 +28,25 @@ public address. First we create some helper functions:
 
 ```racket
 (define (hash160/hex hstr) (ripemd160/hex (sha256/hex hstr)))
-(define (add-version0 str) (string-append "00" str))
-
-;; checksum is 1st 4 bytes (8 chars) of double sha256 hash of given hex string
 (define (sha256x2/hex hstr) (sha256/hex (sha256/hex hstr)))
+(define (add-version0 str) (string-append "00" str))
+;; checksum is 1st 4 bytes (8 chars) of double sha256 hash of given hex string
 (define (get-checksum hstr) (substring hstr 0 8))
 (define (compute-checksum hstr) (get-checksum (sha256x2/hex hstr)))
 (define (add-checksum hstr) (string-append hstr (compute-checksum hstr)))
 ```
 
 * `hash160/hex`: performs a SHA-256 hash followed by a RIPEMD-160 hash
-on an input hex string.
-* `add-version0`: prepends a `0x00` to a hex string.
-* `sha256x2/hex`: performs SHA-256 twice on an input hex string.
-* `add-checksum`: computes a checksum (first four bytes of a double SHA-256 hash) on the input and appends it to the end of the string.
+on an input hex string
+* `sha256x2/hex`: performs SHA-256 twice on an input hex string
+* `add-version0`: prepends `0x00` to a hex string
+* `compute-checksum`: computes checksum (first 4 bytes of a double SHA-245 hash) of its input
+* `add-checksum`: computes a checksum for its input and appends that checksum to the end of the input
 
 Here's a function `priv-key->addr` that converts a private key (in hex) to a public address (in Base58Check):
 
 ```racket
-;; computes base58 addr from hex string priv key
+;; computes base58 addr from hex priv key
 (define priv-key->addr
   (compose hex-str->base58-str
            add-checksum
@@ -57,10 +57,16 @@ Here's a function `priv-key->addr` that converts a private key (in hex) to a pub
 
 We use Racket's `compose` function, which strings together a series of
 functions. The functions are called in the reverse order in which they
-are listed, so `priv-key->addr` first calls `priv-key->pub-key`, then
-`hash160/hex`, and so on. Let's test it on
-[our running example][bwiki:addr]. We save the above code to the file
-`priv2addr.rkt`.
+are listed, so `priv-key->addr` first calls `priv-key->pub-key` on its
+input, then takes that results and give it to `hash160/hex`, and so
+on. 
+
+Let's test this function on [the Bitcoin wiki example][bwiki:addr]:
+
+* private key: `18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725`
+* public address: `16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM`
+
+We save the code to the file `priv2addr.rkt`:
 
     $ racket
     Welcome to Racket v6.0.0.3.

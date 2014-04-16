@@ -3,7 +3,7 @@
     Tags: public key, private key, elliptic curve, OpenSSL, C, Racket, FFI
 
 I've been wondering how Bitcoin addresses are generated. This post and
-the ones following will explore, step by step, how to go from a
+the ones following will explore, step by step, how to transform a
 Bitcoin private key to a public address.
 
 I know that Bitcoin public and private keys are
@@ -16,6 +16,14 @@ to derive a public key from a private key with runnable code.
 [so]: http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl "Stack Overflow: Public Key from Private Key"
 
 <!-- more -->
+
+-------------------------------------------------------------------------------
+This is the first post in a four-part series. Here are the rest of the
+articles in the series:
+* [Part 2: Public Key to (Hex) Address](http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/)
+* [Part 3: Base58Check Encoding](http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/)
+* [Part 4: Wallet Import Format (WIF)](http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/)
+-------------------------------------------------------------------------------
 
 The [accepted Stack Overflow answer from the previous link][so2] says that in
 the `Q = dG` equation, `Q` is the public key and `d` is the private

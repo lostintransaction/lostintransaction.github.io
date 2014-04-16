@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Computing a Bitcoin Address, Part 1: Private to Public Key</title>
-    <meta name="description" content="I've been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to go from a Bitcoin private key to a public address. I know that Bitcoin public and private keys are Elliptic Curve DSA (ECDSA) key pairs, and I've seen the `Q = dG` explanation on a few sites, but they leave out some details. I want to experiment for myself, so this post describes how to derive a public key from a private key with runnable code. ...">
+    <meta name="description" content="I've been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to transform a Bitcoin private key to a public address. I know that Bitcoin public and private keys are Elliptic Curve DSA (ECDSA) key pairs, and I've seen the `Q = dG` explanation on a few sites, but they leave out some details. I want to experiment for myself, so this post describes how to derive a public key from a private key with runnable code. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="public key, private key, elliptic curve, OpenSSL, C, Racket, FFI">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -132,10 +132,16 @@
   </header>
 
 
- <p>I&rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to go from a Bitcoin private key to a public address.</p>
+ <p>I&rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to transform a Bitcoin private key to a public address.</p>
 
 
  <p>I know that Bitcoin public and private keys are <a href="http://en.wikipedia.org/wiki/Elliptic_Curve_DSA" title="Wikipedia: Elliptic Curve DSA">Elliptic Curve DSA (ECDSA)</a> key pairs, and I&rsquo;ve seen the <a href="http://stackoverflow.com/questions/12480776/how-do-i-obtain-the-public-key-from-an-ecdsa-private-key-in-openssl" title="Stack Overflow: Public Key from Private Key"><code>Q = dG</code> explanation</a> on a few sites, but they leave out some details. I want to experiment for myself, so this post describes how to derive a public key from a private key with runnable code.</p>
+
+
+ <hr />
+
+
+ <p>This is the first post in a four-part series. Here are the rest of the articles in the series: * <a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/">Part 2: Public Key to (Hex) Address</a> * <a href="http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/">Part 3: Base58Check Encoding</a> * <a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">Part 4: Wallet Import Format (WIF)</a> &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-</p>
 
 
  <p>The <a href="http://stackoverflow.com/a/12482384/951881" title="Stack Overflow: Public Key from Private Key Answer">accepted Stack Overflow answer from the previous link</a> says that in the <code>Q = dG</code> equation, <code>Q</code> is the public key and <code>d</code> is the private key, but does not explain <code>G</code>, the group parameter. Luckily, some Googling quickly finds that Bitcoin uses the <a href="https://en.bitcoin.it/wiki/Secp256k1" title="secp256k1 Bitcoin wiki entry"><code>secp256k1</code> ECDSA curve</a>.</p>

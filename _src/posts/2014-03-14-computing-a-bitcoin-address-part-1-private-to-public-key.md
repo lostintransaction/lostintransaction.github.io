@@ -19,13 +19,12 @@ to derive a public key from a private key with runnable code.
 
 -------------------------------------------------------------------------------
 
-> This is the first post in a four-part series "Computing a
-  Bitcoin Address". Here are all the articles in the series:
- 
+> This is the first post in a four-part series "Computing a Bitcoin Address". Here are all the articles in the series:
+>
 > 1. [Private to Public Key](http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/) (this post)
-2. [Public Key to (Hex) Address](http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/)
-3. [Base58Check Encoding](http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/)
-4. [Wallet Import Format (WIF)](http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/)
+> 2. [Public Key to (Hex) Address](http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/)
+> 3. [Base58Check Encoding](http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/)
+> 4. [Wallet Import Format (WIF)](http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/)
 
 -------------------------------------------------------------------------------
 

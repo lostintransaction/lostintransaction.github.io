@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address</title>
-    <meta name="description" content="This series of posts figures out how to compute a Bitcoin address from a private key. In a previous post, we derived a Bitcoin public key from a private key. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I'll be using the Racket language to help me. ...">
+    <meta name="description" content="In a previous post, we derived a Bitcoin public key from a private key. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I'll be using the Racket language to help me. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="public key, Bitcoin addresses, hashes, SHA256, RIPEMD160, OpenSSL, C, Racket, FFI">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -132,7 +132,22 @@
   </header>
 
 
- <p>This series of posts figures out how to compute a Bitcoin address from a private key. In a previous post, we <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">derived a Bitcoin public key from a private key</a>. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&rsquo;ll be using <a href="http://racket-lang.org">the Racket language</a> to help me.</p>
+ <p>In a previous post, we <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">derived a Bitcoin public key from a private key</a>. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&rsquo;ll be using <a href="http://racket-lang.org">the Racket language</a> to help me.</p>
+
+
+ <blockquote>
+
+  <p>This is the second post in a four-part titled series &ldquo;Computing a Bitcoin Address&rdquo;. Here are all the articles in the series:</p>
+
+  <ul>
+
+   <li>Part 1: <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">Private to Public Key</a></li>
+
+   <li>Part 2: <a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/">Public Key to (Hex) Address</a> (this post)</li>
+
+   <li>Part 3: <a href="http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/">Base58Check Encoding</a></li>
+
+   <li>Part 4: <a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">Wallet Import Format (WIF)</a></li></ul></blockquote>
 
 
  <p>To convert from a public key to a Bitcoin address, we need an implementation of the <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a> hash functions. Racket doesn&rsquo;t come with these functions but we can easily call to OpenSSL&rsquo;s implementation of these hash functions via Racket&rsquo;s C <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a>.</p>

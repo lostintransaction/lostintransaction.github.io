@@ -135,10 +135,25 @@
  <p>In previous posts, we figured out how to compute a Bitcoin address from a private key and we tested our code with an <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: Bitcoin addresses">example from the Bitcoin wiki</a>. In this post we try to convert a private key from a real wallet (MultiBit) to its corresponding address.</p>
 
 
+ <blockquote>
+
+  <p>This is the fourth post in a four-part titled series &ldquo;Computing a Bitcoin Address&rdquo;. Here are all the articles in the series:</p>
+
+  <ul>
+
+   <li>Part 1: <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">Private to Public Key</a></li>
+
+   <li>Part 2: <a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/">Public Key to (Hex) Address</a></li>
+
+   <li>Part 3: <a href="http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/">Base58Check Encoding</a></li>
+
+   <li>Part 4: <a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">Wallet Import Format (WIF)</a> (this post)</li></ul></blockquote>
+
+
  <h3 id="from-private-key-to-public-address">From Private Key to Public Address</h3>
 
 
- <p>Let&rsquo;s consolidate the code from the previous posts in the series to create one function that performs all the steps to convert from a private key to a public address. First we create some helper functions:</p>
+ <p>Let&rsquo;s consolidate the code from the previous posts in the series to create one function that performs all the steps to convert a private key to a public address. First we create some helper functions:</p>
 
 
  <div class="brush: racket">

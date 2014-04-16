@@ -5,8 +5,8 @@
 In previous posts, we looked at
 [computing a Bitcoin public key from a private key][LiT:pubfrompriv],
 and [computing a Bitcoin address from a public key][LiT:ffi]. However,
-these posts dealt with the keys and addresses in hexadecimal (hex)
-form, which is not the representation familiar to most Bitcoin
+these posts dealt with keys and addresses in hexadecimal (hex) form,
+which is not the representation familiar to most Bitcoin
 users. Bitcoin addresses more commonly are encoded as
 [Base58Check][bwiki:b58] strings, which we explore in this post.
 
@@ -15,6 +15,14 @@ users. Bitcoin addresses more commonly are encoded as
 [bwiki:b58]: https://en.bitcoin.it/wiki/Base58Check_encoding "Base58Check encoding"
 
 <!-- more -->
+
+> This is the third post in a four-part titled series "Computing a Bitcoin Address".
+> Here are all the articles in the series:
+>
+> * Part 1: [Private to Public Key](http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/)
+> * Part 2: [Public Key to (Hex) Address](http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/)
+> * Part 3: [Base58Check Encoding](http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/) (this post)
+> * Part 4: [Wallet Import Format (WIF)](http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/)
 
 The [Bitcoin reference code][bitcoinsrc] provides the following
 rationale for using Base58Check (instead of a more common base-64

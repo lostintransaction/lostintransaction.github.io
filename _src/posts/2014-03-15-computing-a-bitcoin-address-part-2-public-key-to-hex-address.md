@@ -2,8 +2,7 @@
     Date: 2014-03-15T04:09:45
     Tags: public key, Bitcoin addresses, hashes, SHA256, RIPEMD160, OpenSSL, C, Racket, FFI
 
-This series of posts figures out how to compute a Bitcoin address from
-a private key. In a previous post, we
+In a previous post, we
 [derived a Bitcoin public key from a private key][lit:pubfrompriv]. This
 post explores how to convert that public key into a Bitcoin address
 (in hexadecimal notation). I'll be using
@@ -11,17 +10,28 @@ post explores how to convert that public key into a Bitcoin address
 
 <!-- more -->
 
+> This is the second post in a four-part titled series "Computing a Bitcoin Address".
+> Here are all the articles in the series:
+>
+> * Part 1: [Private to Public Key](http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/)
+> * Part 2: [Public Key to (Hex) Address](http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/) (this post)
+> * Part 3: [Base58Check Encoding](http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/)
+> * Part 4: [Wallet Import Format (WIF)](http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/)
+
 To convert from a public key to a Bitcoin address, we need an
 implementation of the [SHA-256][wiki:sha] and
-[RIPEMD-160][wiki:ripemd] hash functions. Racket doesn't come with these functions but we can easily call to OpenSSL's implementation of these hash functions via Racket's C [FFI][racketffi].
+[RIPEMD-160][wiki:ripemd] hash functions. Racket doesn't come with
+these functions but we can easily call to OpenSSL's implementation of
+these hash functions via Racket's C [FFI][racketffi].
 
 [racketffi]: http://docs.racket-lang.org/foreign/index.html "Racket FFI"
 [wiki:sha]: http://en.wikipedia.org/wiki/SHA-2 "Wikipedia: SHA-2"
 [wiki:ripemd]: http://en.wikipedia.org/wiki/RIPEMD "Wikipedia: RIPEMD"
 
-Conveniently, the standard Racket distribution already defines [a hook into the `libcrypto` library][pltgit:libcrypto], also named `libcrypto`. Racket comes
-with wrapper functions for some `libcrypto` C functions, but not
-`SHA256` or `RIPEMD160` so we'll create those.
+Conveniently, the standard Racket distribution already defines
+[a hook into the `libcrypto` library][pltgit:libcrypto], also named
+`libcrypto`. Racket comes with wrapper functions for some `libcrypto`
+C functions, but not `SHA256` or `RIPEMD160` so we'll create those.
 
 [pltgit:libcrypto]: https://github.com/plt/racket/blob/master/racket/collects/openssl/libcrypto.rkt "Racket source: libcrypto.rkt"
 [racket:ffilib]: http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29 "Racket docs: ffi-lib"

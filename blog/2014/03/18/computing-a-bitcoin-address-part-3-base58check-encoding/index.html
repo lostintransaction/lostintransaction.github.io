@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Computing a Bitcoin Address, Part 3: Base58Check Encoding</title>
-    <meta name="description" content="In previous posts, we looked at computing a Bitcoin public key from a private key, and computing a Bitcoin address from a public key. However, these posts dealt with the keys and addresses in hexadecimal (hex) form, which is not the representation familiar to most Bitcoin users. Bitcoin addresses more commonly are encoded as Base58Check strings, which we explore in this post. ...">
+    <meta name="description" content="In previous posts, we looked at computing a Bitcoin public key from a private key, and computing a Bitcoin address from a public key. However, these posts dealt with keys and addresses in hexadecimal (hex) form, which is not the representation familiar to most Bitcoin users. Bitcoin addresses more commonly are encoded as Base58Check strings, which we explore in this post. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="Base58Check, Bitcoin addresses, Racket">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -132,7 +132,22 @@
   </header>
 
 
- <p>In previous posts, we looked at <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">computing a Bitcoin public key from a private key</a>, and <a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/" title="Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address">computing a Bitcoin address from a public key</a>. However, these posts dealt with the keys and addresses in hexadecimal (hex) form, which is not the representation familiar to most Bitcoin users. Bitcoin addresses more commonly are encoded as <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Base58Check encoding">Base58Check</a> strings, which we explore in this post.</p>
+ <p>In previous posts, we looked at <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">computing a Bitcoin public key from a private key</a>, and <a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/" title="Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address">computing a Bitcoin address from a public key</a>. However, these posts dealt with keys and addresses in hexadecimal (hex) form, which is not the representation familiar to most Bitcoin users. Bitcoin addresses more commonly are encoded as <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Base58Check encoding">Base58Check</a> strings, which we explore in this post.</p>
+
+
+ <blockquote>
+
+  <p>This is the third post in a four-part titled series &ldquo;Computing a Bitcoin Address&rdquo;. Here are all the articles in the series:</p>
+
+  <ul>
+
+   <li>Part 1: <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/">Private to Public Key</a></li>
+
+   <li>Part 2: <a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/">Public Key to (Hex) Address</a></li>
+
+   <li>Part 3: <a href="http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/">Base58Check Encoding</a> (this post)</li>
+
+   <li>Part 4: <a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">Wallet Import Format (WIF)</a></li></ul></blockquote>
 
 
  <p>The <a href="https://github.com/bitcoin/bitcoin/blob/f76c122e2eac8ef66f69d142231bd33c88a24c50/src/base58.h#L7-L12" title="src/base58.h">Bitcoin reference code</a> provides the following rationale for using Base58Check (instead of a more common base&ndash;64 encoding):</p>

@@ -3,19 +3,28 @@
     Tags: private key, Bitcoin addresses, MultiBit, Bitcoin wallets, Racket
 
 In previous posts, we figured out how to compute a Bitcoin address
-from a private key and we tested our code with an [example from the Bitcoin wiki][bwiki:addr]. In this
-post we try to convert a private key from a real wallet
-(MultiBit) to its corresponding address.
+from a private key and we tested our code with an
+[example from the Bitcoin wiki][bwiki:addr]. In this post we try to
+convert a private key from a real wallet (MultiBit) to its
+corresponding address.
 
 [bwiki:addr]: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses "Bitcoin wiki: Bitcoin addresses"
 
 <!-- more -->
 
+> This is the fourth post in a four-part titled series "Computing a Bitcoin Address".
+> Here are all the articles in the series:
+>
+> * Part 1: [Private to Public Key](http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/)
+> * Part 2: [Public Key to (Hex) Address](http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/)
+> * Part 3: [Base58Check Encoding](http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/)
+> * Part 4: [Wallet Import Format (WIF)](http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/) (this post)
+
 ### From Private Key to Public Address
 
 Let's consolidate the code from the previous posts in the series to
-create one function that performs all the steps to convert from a
-private key to a public address. First we create some helper functions:
+create one function that performs all the steps to convert a private
+key to a public address. First we create some helper functions:
 
 ```racket
 (define (hash160/hex hstr) (ripemd160/hex (sha256/hex hstr)))

@@ -1,6 +1,6 @@
     Title: Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)
     Date: 2014-04-09T03:02:03
-    Tags: private key, Bitcoin addresses, MultiBit, Bitcoin wallets, Racket
+    Tags: private key, WIF, Bitcoin addresses, MultiBit, Bitcoin wallets, Racket
 
 In previous posts, we figured out how to compute a Bitcoin address
 from a private key and we tested our code with an

@@ -6,12 +6,12 @@
     <title>Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)</title>
     <meta name="description" content="In previous posts, we figured out how to compute a Bitcoin address from a private key and we tested our code with an example from the Bitcoin wiki. In this post we try to convert a private key from a real wallet (MultiBit) to its corresponding address. ...">
     <meta name="author"      content="The Unknown Blogger">
-    <meta name="keywords"    content="private key, Bitcoin addresses, MultiBit, Bitcoin wallets, Racket">
+    <meta name="keywords"    content="private key, WIF, Bitcoin addresses, MultiBit, Bitcoin wallets, Racket">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
     <link rel="icon"      href="/favicon.ico">
     <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">
     <link rel="next" href="/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/">
-
+    <link rel="prev" href="/blog/2014/04/17/generating-a-vanity-address/">
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/css/pygments.css">
@@ -99,6 +99,8 @@
 <li><a href="/tags/SHA256.html">SHA256</a></li>
 
 <li><a href="/tags/signatures.html">signatures</a></li>
+
+<li><a href="/tags/WIF.html">WIF</a></li>
               </ul>
             </li>
             <li>
@@ -128,7 +130,7 @@
   <h1>Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)</h1>
 
   <p class="date-and-tags">
-   <time datetime="2014-04-09" pubdate="true">2014-04-09</time> :: <span class="tags"><a href="/tags/private-key.html">private key</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a>, <a href="/tags/MultiBit.html">MultiBit</a>, <a href="/tags/Bitcoin-wallets.html">Bitcoin wallets</a>, <a href="/tags/Racket.html">Racket</a></span></p>
+   <time datetime="2014-04-09" pubdate="true">2014-04-09</time> :: <span class="tags"><a href="/tags/private-key.html">private key</a>, <a href="/tags/WIF.html">WIF</a>, <a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a>, <a href="/tags/MultiBit.html">MultiBit</a>, <a href="/tags/Bitcoin-wallets.html">Bitcoin wallets</a>, <a href="/tags/Racket.html">Racket</a></span></p>
   </header>
 
 
@@ -673,6 +675,9 @@ Welcome to Racket v6.0.0.3.
 
   <ul class="pager">
 
+   <li class="previous">
+      <a href="/blog/2014/04/17/generating-a-vanity-address/">&larr; <em>Generating a Vanity Address</em></a>
+    </li>
 
    <li class="next">
       <a href="/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/"><em>Computing a Bitcoin Address, Part 3: Base58Check Encoding</em> &rarr;</a>

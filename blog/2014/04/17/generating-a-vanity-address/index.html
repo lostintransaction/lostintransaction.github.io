@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8">
+    <title>Generating a Vanity Address</title>
+    <meta name="description" content="This post is currently in DRAFT form and will likely be edited in the future. It a previous series of posts, we figured out how to derive a Bitcoin public address from a private key. What can we do with this new knowledge? Let's generate a bunch of addresses! Specifically, we'll create a &quot;vanity&quot; address generator. ...">
+    <meta name="author"      content="The Unknown Blogger">
+    <meta name="keywords"    content="Bitcoin addresses, private key, WIF, MultiBit, Racket">
+    <meta name="viewport"    content="width=device-width, initial-scale=1.0">
+    <link rel="icon"      href="/favicon.ico">
+    <link rel="canonical" href="http://www.lostintransaction.com/blog/2014/04/17/generating-a-vanity-address/">
+    <link rel="next" href="/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">
+
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/pygments.css">
+    <link rel="stylesheet" type="text/css" href="/css/scribble.css">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
+    <!-- Feeds -->
+    <link ref="alternate" type="application/atom+xml"
+          href="/feeds/all.atom.xml" title="Atom Feed">
+    <link ref="alternate" type="application/rss+xml"
+          href="/feeds/all.rss.xml" title="RSS Feed">
+    <!-- JS -->
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-48721117-3']);
+      _gaq.push(['_setDomainName', 'www.lostintransaction.com']);
+      _gaq.push(['_trackPageview']);
+      setTimeout(function(){_gaq.push(['_trackEvent', '30_seconds', 'read'])}, 30000); // http://drawingablank.me/blog/fix-your-bounce-rate.html
+      (function() {
+          var ga = document.createElement('script');
+          ga.type = 'text/javascript'; ga.async = true;
+          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- A standard Twitter Bootstrap nav bar -->
+    <header class="navbar navbar-default navbar-inverse"
+            role="banner">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button"
+                  class="navbar-toggle"
+                  data-toggle="collapse"
+                  data-target=".our-nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a href="/index.html" class="navbar-brand">Lost in Transaction</a>
+        </div>
+        <div class="collapse navbar-collapse our-nav-collapse"
+             role="navigation">
+          <ul class="nav navbar-nav">
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                Tags <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="/index.html">All Posts</a></li>
+
+<li><a href="/tags/Andreas-Antonopoulos.html">Andreas Antonopoulos</a></li>
+
+<li><a href="/tags/Base58Check.html">Base58Check</a></li>
+
+<li><a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a></li>
+
+<li><a href="/tags/Bitcoin-wallets.html">Bitcoin wallets</a></li>
+
+<li><a href="/tags/C.html">C</a></li>
+
+<li><a href="/tags/Dorian-Nakamoto.html">Dorian Nakamoto</a></li>
+
+<li><a href="/tags/elliptic-curve.html">elliptic curve</a></li>
+
+<li><a href="/tags/FFI.html">FFI</a></li>
+
+<li><a href="/tags/hashes.html">hashes</a></li>
+
+<li><a href="/tags/MultiBit.html">MultiBit</a></li>
+
+<li><a href="/tags/OpenSSL.html">OpenSSL</a></li>
+
+<li><a href="/tags/PGP.html">PGP</a></li>
+
+<li><a href="/tags/private-key.html">private key</a></li>
+
+<li><a href="/tags/public-key.html">public key</a></li>
+
+<li><a href="/tags/Racket.html">Racket</a></li>
+
+<li><a href="/tags/RIPEMD160.html">RIPEMD160</a></li>
+
+<li><a href="/tags/SHA256.html">SHA256</a></li>
+
+<li><a href="/tags/signatures.html">signatures</a></li>
+
+<li><a href="/tags/WIF.html">WIF</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="/About.html">About</a>
+            </li> 
+            <li><a href="/feeds/all.atom.xml">Atom</a></li>
+            <li><a href="/feeds/all.rss.xml">RSS</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <div class="row">
+
+        <!-- Main column -->
+        <div id="content" class="col-md-12">
+
+
+
+
+
+
+<article>
+
+ <header>
+
+  <h1>Generating a Vanity Address</h1>
+
+  <p class="date-and-tags">
+   <time datetime="2014-04-17" pubdate="true">2014-04-17</time> :: <span class="tags"><a href="/tags/Bitcoin-addresses.html">Bitcoin addresses</a>, <a href="/tags/private-key.html">private key</a>, <a href="/tags/WIF.html">WIF</a>, <a href="/tags/MultiBit.html">MultiBit</a>, <a href="/tags/Racket.html">Racket</a></span></p>
+  </header>
+
+
+ <blockquote>
+
+  <p>This post is currently in DRAFT form and will likely be edited in the future.</p></blockquote>
+
+
+ <p>It a <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address">previous series of posts</a>, we figured out how to derive a Bitcoin public address from a private key. What can we do with this new knowledge? Let&rsquo;s generate a bunch of addresses! Specifically, we&rsquo;ll create a &ldquo;vanity&rdquo; address generator.</p>
+
+
+ <p>Bitcoin addresses are typically generated randomly. A Bitcoin <a href="https://en.bitcoin.it/wiki/Vanitygen" title="Vanitygen">vanity address</a>, however, is one that has a prefix specified by the user. Of course, you don&rsquo;t want to trust a third party to create a private key for you, so let&rsquo;s generate our own. (Yes, I know that <code>vanitygen</code> is open source but it&rsquo;s still more fun to roll our own!) As usual, I&rsquo;ll be using <a href="http://racket-lang.org">Racket</a>.</p>
+
+
+ <p>First, we need to generate a random private key. Bitcoin private keys are 32 bytes long so we generate 32 random bytes:</p>
+
+
+ <div class="brush: racket">
+
+  <table class="sourcetable">
+
+   <tbody>
+
+    <tr>
+
+     <td class="linenos">
+
+      <div class="linenodiv">
+
+       <pre>1
+2
+3
+4
+5</pre></div></td>
+
+     <td class="code">
+
+      <div class="source">
+
+       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">random-byte</span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._random))" style="color: inherit">random</a> </span><span class="mi">256</span><span class="p">))</span>
+
+<span class="c1">;; generates raw 32 byte <a href="http://docs.racket-lang.org/reference/createclass.html#(form._((lib._racket/private/class-internal..rkt)._private))" style="color: inherit">private</a> <a href="http://docs.racket-lang.org/teachpack/2htdpPlanet_Cute_Images.html#(def._((lib._2htdp/planetcute..rkt)._key))" style="color: inherit">key</a> (in hex)</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">random-priv-key</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">bytes-&gt;hex-string</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/procedures.html#(def._((lib._racket/private/base..rkt)._apply))" style="color: inherit">apply</a> </span><span class="nv"><a href="http://docs.racket-lang.org/reference/bytestrings.html#(def._((quote._~23~25kernel)._bytes))" style="color: inherit">bytes</a></span> <span class="p">(</span><span class="nf"><a href="http://docs.racket-lang.org/reference/for.html#(form._((lib._racket/private/base..rkt)._for/list))" style="color: inherit">for/list</a></span> <span class="p">([</span><span class="nf">i</span> <span class="mi">32</span><span class="p">])</span> <span class="p">(</span><span class="nf">random-byte</span><span class="p">)))))</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+
+ <blockquote>
+
+  <p>WARNING #1: Racket&rsquo;s <code>random</code> function is  <a href="http://docs.racket-lang.org/reference/generic-numbers.html?q=make-pseudo-random-generator#%28def._%28%28quote._~23~25kernel%29._make-pseudo-random-generator%29%29" title="Racket docs: make-pseudo-random-generator">seeded with the system time</a> and is thus not  <a href="https://cwe.mitre.org/data/definitions/337.html">sufficiently random</a>. If  generating wallets for real-world applications, use a  <a href="http://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator" title="Wikipedia: Cryptographically secure pseudorandom number generator">cryptographically secure source of randomness</a> like  <code>/dev/random</code>.</p></blockquote>
+
+
+ <blockquote>
+
+  <p>WARNING #2:  <a href="https://en.bitcoin.it/wiki/Private_key#Range_of_valid_private_keys" title="Range of valid private keys">Not every 32 byte number is a valid private key</a> but  I&rsquo;m assuming that it&rsquo;s sufficiently unlikely that we&rsquo;ll randomly  generate an invalid key.</p></blockquote>
+
+
+ <p>Once we have a private key, we need to convert to <a href="https://en.bitcoin.it/wiki/WIF" title="Wallet import format">wallet import format (WIF)</a>. To do this we need to decide if we want a compressed or uncompressed address. Mostly everyone uses compressed addresses these days so we&rsquo;ll go with compressed. The format for a compressed WIF private key is:</p>
+
+
+ <p> 0x80 + 32 byte raw private key + 0x10 + 4 byte checksum</p>
+
+
+ <p>To create a WIF private key we append <code>0x80</code> to the front of our randomly generated private key to indicate &ldquo;mainnet&rdquo; (as opposed to &ldquo;testnet&rdquo;) and we append <code>0x01</code> to the end to indicate compression. We then compute a checksum for this string and append that to the end of the string. A checksum is the first 4 bytes of a double SHA&ndash;256 hash, as we <a href="www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" title="Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)">previously figured out</a>.</p>
+
+
+ <p>Here&rsquo;s a Racket function <code>priv-key-&gt;wif/compressed</code> to convert a raw private key to wallet import format. We use <code>add-checksum</code> from <a href="www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" title="Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)">a previous post</a>.</p>
+
+
+ <div class="brush: racket">
+
+  <table class="sourcetable">
+
+   <tbody>
+
+    <tr>
+
+     <td class="linenos">
+
+      <div class="linenodiv">
+
+       <pre>1
+2
+3
+4
+5</pre></div></td>
+
+     <td class="code">
+
+      <div class="source">
+
+       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">add-mainnet80</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-append))" style="color: inherit">string-append</a> </span><span class="s">"80"</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">))</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">add-compression-flag</span> <span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span><span class="p">)</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-append))" style="color: inherit">string-append</a> </span><span class="nv"><a href="http://docs.racket-lang.org/syntax/Library_Syntax_Classes_and_Literal_Sets.html#(form._((lib._syntax/parse..rkt)._str))" style="color: inherit">str</a></span> <span class="s">"01"</span><span class="p">))</span>
+<span class="c1">;; converts raw priv <a href="http://docs.racket-lang.org/teachpack/2htdpPlanet_Cute_Images.html#(def._((lib._2htdp/planetcute..rkt)._key))" style="color: inherit">key</a> (in hex) to wif (in base58)</span>
+<span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">priv-key-&gt;wif/compressed</span> <span class="nv">priv</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">hex-str-&gt;base58-str</span> <span class="p">(</span><span class="nf">add-checksum</span> <span class="p">(</span><span class="nf">add-compression-flag</span> <span class="p">(</span><span class="nf">add-mainnet80</span> <span class="nv">priv</span><span class="p">)))))</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+
+ <p>We can use the functions we defined, and <code>wif-&gt;addr</code> <a href="www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" title="Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)">from a previous post</a>, which converts a WIF private key to an address, to generate a random address. To get a vanity address, we check if the prefix of the generated address matches a specified substring (all Bitcoin addresses start with &lsquo;1&rsquo;, so prefix here means the substring after the &lsquo;1&rsquo;).</p>
+
+
+ <p>The following Racket function <code>get-vanity-addr</code> repeatedly generates a random private key, converts it to an address, and checks if the prefix of the address matches the specified &ldquo;vanity&rdquo; substring. If no matching address is found after the specified number of <code>tries</code> (default is 1,000,000 tries), the function gives up. Otherwise, the function returns the raw private key, the WIF private key, and the public address.</p>
+
+
+ <div class="brush: racket">
+
+  <table class="sourcetable">
+
+   <tbody>
+
+    <tr>
+
+     <td class="linenos">
+
+      <div class="linenodiv">
+
+       <pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td>
+
+     <td class="code">
+
+      <div class="source">
+
+       <pre><span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="p">(</span><span class="nf">get-vanity-addr</span> <span class="nv"><a href="http://docs.racket-lang.org/reference/creatingunits.html#(form._((lib._racket/unit..rkt)._prefix))" style="color: inherit">prefix</a></span> <span class="kd">#:tries</span> <span class="p">[</span><span class="nf">tries</span> <span class="mi">1000000</span><span class="p">])</span>
+  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">prefix1</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-append))" style="color: inherit">string-append</a> </span><span class="s">"1"</span> <span class="nv"><a href="http://docs.racket-lang.org/reference/creatingunits.html#(form._((lib._racket/unit..rkt)._prefix))" style="color: inherit">prefix</a></span><span class="p">))</span>
+  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/define.html#(form._((lib._racket/private/base..rkt)._define))" style="color: inherit">define</a> </span><span class="nv">prefix-len</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string-length))" style="color: inherit">string-length</a> </span><span class="nv">prefix1</span><span class="p">))</span>
+  <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/let.html#(form._((lib._racket/private/letstx-scheme..rkt)._let))" style="color: inherit">let</a> </span><span class="nv">loop</span> <span class="p">([</span><span class="nf">n</span> <span class="nv">tries</span><span class="p">])</span>
+    <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((quote._~23~25kernel)._if))" style="color: inherit">if</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/number-types.html#(def._((quote._~23~25kernel)._zero~3f))" style="color: inherit">zero?</a> </span><span class="nv">n</span><span class="p">)</span>
+    <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/Writing.html#(def._((quote._~23~25kernel)._printf))" style="color: inherit">printf</a> </span><span class="s">"\nCouldn't find matching address <a href="http://docs.racket-lang.org/web-server/templates.html#(form._((lib._web-server/templates..rkt)._in))" style="color: inherit">in</a> <a href="http://docs.racket-lang.org/reference/strings.html#(def._((lib._racket/format..rkt)._~7ea))" style="color: inherit">~a</a> tries\n"</span> <span class="nv">tries</span><span class="p">)</span>
+    <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/let.html#(form._((lib._racket/private/letstx-scheme..rkt)._let*))" style="color: inherit">let*</a> </span><span class="p">([</span><span class="nf">priv</span> <span class="p">(</span><span class="nf">random-priv-key</span><span class="p">)]</span>
+           <span class="p">[</span><span class="nf">priv/wif</span> <span class="p">(</span><span class="nf">priv-key-&gt;wif/compressed</span> <span class="nv">priv</span><span class="p">)]</span>
+           <span class="p">[</span><span class="nf">addr</span> <span class="p">(</span><span class="nf">wif-&gt;addr</span> <span class="nv">priv/wif</span><span class="p">)])</span>
+      <span class="p">(</span><span class="k"><a href="http://docs.racket-lang.org/reference/if.html#(form._((quote._~23~25kernel)._if))" style="color: inherit">if</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._string~3d~3f))" style="color: inherit">string=?</a> </span><span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/strings.html#(def._((quote._~23~25kernel)._substring))" style="color: inherit">substring</a> </span><span class="nv">addr</span> <span class="mi">0</span> <span class="nv">prefix-len</span><span class="p">)</span> <span class="nv">prefix1</span><span class="p">)</span>
+          <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/values.html#(def._((quote._~23~25kernel)._values))" style="color: inherit">values</a> </span><span class="nv">priv</span> <span class="nv">priv/wif</span> <span class="nv">addr</span><span class="p">)</span>
+          <span class="p">(</span><span class="nf">loop</span> <span class="p">(</span><span class="nb"><a href="http://docs.racket-lang.org/reference/generic-numbers.html#(def._((quote._~23~25kernel)._sub1))" style="color: inherit">sub1</a> </span><span class="nv">n</span><span class="p">)))))))</span>
+</pre></div>
+</td></tr></tbody></table>
+</div>
+
+
+ <p>Let&rsquo;s try it. I specify a prefix of &ldquo;11&rdquo;, so the function tries to find an address with three leading &rsquo;1&rsquo;s:</p>
+
+
+ <pre><code>$ racket
+Welcome to Racket v6.0.0.3.
+-&gt; (require "vanity.rkt")
+-&gt; (get-vanity-addr "11")
+Address found! -----------------------------------------------
+private key: 286a5cdfb346648b902fe30c46e2f44246d9071ab5ddcf2fb6101a657cbc18de
+private key (WIF): KxaGocHndfhXzPGdrDTfr6EDvnNfbdZwdxcX7xtjL6UnERFZhtkZ
+public address: 111ksvuJkfkFef8krFpsUeKDrCSedKpxM
+</code></pre>
+
+
+ <p>We found an address! To check that it&rsquo;s an address, I sent some BTC to the address to confirm. Lo and hehold, <a href="https://blockchain.info/address/111ksvuJkfkFef8krFpsUeKDrCSedKpxM" title="blockchain.info">the transactions appear in the blockchain</a>!</p>
+
+
+ <p>Next I imported the WIF private key into MultiBit, to see if I could spend the received BTC. MultiBit requires that the key be accompanied by a time in UTC format and saved to a file so here&rsquo;s the contents of the file I created and imported:</p>
+
+
+ <pre><code>KxaGocHndfhXzPGdrDTfr6EDvnNfbdZwdxcX7xtjL6UnERFZhtkZ 2014-04-15T06:12:28Z</code></pre>
+
+
+ <p><a href="https://blockchain.info/address/111ksvuJkfkFef8krFpsUeKDrCSedKpxM" title="blockchain.info">Checking the blockchain again</a>, we can see that sending BTC from our generated address worked as well!</p>
+
+
+ <h3 id="software">Software</h3>
+
+
+ <p>All the code from this post <a href="http://www.lostintransaction.com/code/vanity.rkt">is available here</a>. In this post, I&rsquo;m using Racket 6.0.0.3 running in Debian 7.0 and MultiBit 0.5.17 running in Windows 7 64-bit.</p>
+
+ <footer>
+
+  <script type="text/javascript">
+      !function(d,s,id){
+          var js,fjs=d.getElementsByTagName(s)[0];
+          if(!d.getElementById(id)){
+              js=d.createElement(s);
+              js.id=id;
+              js.src="//platform.twitter.com/widgets.js";
+              fjs.parentNode.insertBefore(js,fjs);
+          }
+      }(document,"script","twitter-wjs");
+    </script>
+    <a class="twitter-share-button" data-dnt="true" data-url="http://www.lostintransaction.com/blog/2014/04/17/generating-a-vanity-address/" href="https://twitter.com/share">
+      "Tweet"</a>
+
+  <script src="https://apis.google.com/js/plusone.js" type="text/javascript"></script>
+
+  <g:plusone href="http://www.lostintransaction.com/blog/2014/04/17/generating-a-vanity-address/" size="medium"></g:plusone>
+
+  <script type="text/javascript">
+      var disqus_shortname = 'lostintransaction';
+      (function() {
+          var dsq = document.createElement('script');
+          dsq.type = 'text/javascript';
+          dsq.async = true;
+          dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+      })();
+    </script>
+
+  <div id="disqus_thread"></div>
+
+  <ul class="pager">
+
+
+   <li class="next">
+      <a href="/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/"><em>Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)</em> &rarr;</a>
+    </li>
+    </ul>
+  </footer>
+</article>
+        </div>
+      </div>
+      <footer>
+        <hr />
+        <p>Lost in Transaction: A neophyte explores Bitcoin.</p>
+        <p><a href="https://twitter.com/sixconfirms"
+              class="twitter-follow-button"
+              data-show-count="false"
+              data-lang="en">
+             "Follow sixconfirms"
+           </a>
+           <script type="text/javascript">
+             !function(d,s,id){
+                 var js,fjs=d.getElementsByTagName(s)[0];
+                 if(!d.getElementById(id)){
+                     js=d.createElement(s);
+                     js.id=id;
+                     js.src="//platform.twitter.com/widgets.js";
+                     fjs.parentNode.insertBefore(js,fjs);
+                 }
+             }(document,"script","twitter-wjs");
+           </script></p>
+        <p>Site generated
+        by <a href="https://github.com/greghendershott/frog">Frog</a>,
+        the <strong>fr</strong>ozen bl<strong>og</strong> tool.
+        Using <a href="http://twitter.github.com/bootstrap/index.html">Bootstrap</a>.</p>
+<!--        <p><em>Your legal notice here</em>.</p>-->
+<!--        <p><em></em></p>-->
+        <p><a href="bitcoin:18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS">18kk6eoa8SvE1TCbfC67ToLfof4vfvNnPS</a></p>
+      </footer>
+    </div>
+    <!-- </body> JS -->
+    <script type="text/javascript" src="//code.jquery.com/jquery.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+  </body>
+</html>

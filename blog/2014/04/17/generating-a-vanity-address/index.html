@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Generating a Vanity Address</title>
-    <meta name="description" content="This post is currently in DRAFT form and will likely be edited in the future. It a previous series of posts, we figured out how to derive a Bitcoin public address from a private key. What can we do with this new knowledge? Let's generate a bunch of addresses! Specifically, we'll create a &quot;vanity&quot; address generator. ...">
+    <meta name="description" content="It a previous series of posts, we figured out how to derive a Bitcoin public address from a private key. What should we do with this new knowledge? Let's generate a bunch of addresses! Specifically, we'll create a &quot;vanity&quot; address generator. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="Bitcoin addresses, private key, WIF, MultiBit, Racket">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -134,18 +134,13 @@
   </header>
 
 
- <blockquote>
-
-  <p>This post is currently in DRAFT form and will likely be edited in the future.</p></blockquote>
+ <p>It a <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address">previous series of posts</a>, we figured out how to derive a Bitcoin public address from a private key. What should we do with this new knowledge? Let&rsquo;s generate a bunch of addresses! Specifically, we&rsquo;ll create a &ldquo;vanity&rdquo; address generator.</p>
 
 
- <p>It a <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address">previous series of posts</a>, we figured out how to derive a Bitcoin public address from a private key. What can we do with this new knowledge? Let&rsquo;s generate a bunch of addresses! Specifically, we&rsquo;ll create a &ldquo;vanity&rdquo; address generator.</p>
+ <p>Most Bitcoin wallets generate addresses randomly. A Bitcoin <a href="https://en.bitcoin.it/wiki/Vanitygen" title="Vanitygen">vanity address</a>, however, is one that has a prefix specified by the user. Of course, you don&rsquo;t want to trust a third party to create a private key for you, so let&rsquo;s generate our own. (Yes, I know that <code>vanitygen</code> is open source and has tons more features but it&rsquo;s still more fun to roll our own!) As usual, I&rsquo;ll be using <a href="http://racket-lang.org">Racket</a>.</p>
 
 
- <p>Bitcoin addresses are typically generated randomly. A Bitcoin <a href="https://en.bitcoin.it/wiki/Vanitygen" title="Vanitygen">vanity address</a>, however, is one that has a prefix specified by the user. Of course, you don&rsquo;t want to trust a third party to create a private key for you, so let&rsquo;s generate our own. (Yes, I know that <code>vanitygen</code> is open source but it&rsquo;s still more fun to roll our own!) As usual, I&rsquo;ll be using <a href="http://racket-lang.org">Racket</a>.</p>
-
-
- <p>First, we need to generate a random private key. Bitcoin private keys are 32 bytes long so we generate 32 random bytes:</p>
+ <p>First, we need to generate a random private key. Bitcoin private keys are 32 bytes long.</p>
 
 
  <div class="brush: racket">
@@ -182,24 +177,24 @@
 
  <blockquote>
 
-  <p>WARNING #1: Racket&rsquo;s <code>random</code> function is  <a href="http://docs.racket-lang.org/reference/generic-numbers.html?q=make-pseudo-random-generator#%28def._%28%28quote._~23~25kernel%29._make-pseudo-random-generator%29%29" title="Racket docs: make-pseudo-random-generator">seeded with the system time</a> and is thus not  <a href="https://cwe.mitre.org/data/definitions/337.html">sufficiently random</a>. If  generating wallets for real-world applications, use a  <a href="http://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator" title="Wikipedia: Cryptographically secure pseudorandom number generator">cryptographically secure source of randomness</a> like  <code>/dev/random</code>.</p></blockquote>
+  <p>WARNING #1: Racket&rsquo;s <code>random</code> function is  <a href="http://docs.racket-lang.org/reference/generic-numbers.html?q=make-pseudo-random-generator#%28def._%28%28quote._~23~25kernel%29._make-pseudo-random-generator%29%29" title="Racket docs: make-pseudo-random-generator">seeded with the system time</a> and is thus not  <a href="https://cwe.mitre.org/data/definitions/337.html">completely random</a>. When  generating addresses for real-world usage, use a  <a href="http://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator" title="Wikipedia: Cryptographically secure pseudorandom number generator">cryptographically secure source of randomness</a> like  <code>/dev/random</code>.</p></blockquote>
 
 
  <blockquote>
 
-  <p>WARNING #2:  <a href="https://en.bitcoin.it/wiki/Private_key#Range_of_valid_private_keys" title="Range of valid private keys">Not every 32 byte number is a valid private key</a> but  I&rsquo;m assuming that it&rsquo;s sufficiently unlikely that we&rsquo;ll randomly  generate an invalid key.</p></blockquote>
+  <p>WARNING #2:  <a href="https://en.bitcoin.it/wiki/Private_key#Range_of_valid_private_keys" title="Range of valid private keys">Not every 32 byte number is a valid private key</a>. But  here I assume that it&rsquo;s sufficiently unlikely that I&rsquo;ll randomly  generate an invalid key, so I ignore this issue.</p></blockquote>
 
 
- <p>Once we have a private key, we need to convert to <a href="https://en.bitcoin.it/wiki/WIF" title="Wallet import format">wallet import format (WIF)</a>. To do this we need to decide if we want a compressed or uncompressed address. Mostly everyone uses compressed addresses these days so we&rsquo;ll go with compressed. The format for a compressed WIF private key is:</p>
+ <p>Once we have a private key, we need to convert to <a href="https://en.bitcoin.it/wiki/WIF" title="Wallet import format">wallet import format (WIF)</a>. To do this we need to decide if we want a compressed or uncompressed address. These days most addresses in use are compressed so we&rsquo;ll go with compressed. The format for a compressed WIF private key is:</p>
 
 
- <p> 0x80 + 32 byte raw private key + 0x10 + 4 byte checksum</p>
+ <pre><code>0x80 + 32 byte raw private key + 0x10 + 4 byte checksum</code></pre>
 
 
- <p>To create a WIF private key we append <code>0x80</code> to the front of our randomly generated private key to indicate &ldquo;mainnet&rdquo; (as opposed to &ldquo;testnet&rdquo;) and we append <code>0x01</code> to the end to indicate compression. We then compute a checksum for this string and append that to the end of the string. A checksum is the first 4 bytes of a double SHA&ndash;256 hash, as we <a href="www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" title="Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)">previously figured out</a>.</p>
+ <p>To create a WIF private key we append <code>0x80</code> to the front of our randomly generated raw private key to indicate &ldquo;mainnet&rdquo; (as opposed to &ldquo;testnet&rdquo;) and we append <code>0x01</code> to the end to indicate compression. We then compute a checksum for this string and append that to the end of the string. A checksum is the first 4 bytes of a double SHA&ndash;256 hash, as we <a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" title="Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)">saw previously</a>.</p>
 
 
- <p>Here&rsquo;s a Racket function <code>priv-key-&gt;wif/compressed</code> to convert a raw private key to wallet import format. We use <code>add-checksum</code> from <a href="www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" title="Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)">a previous post</a>.</p>
+ <p>Here&rsquo;s a Racket function <code>priv-key-&gt;wif/compressed</code> to convert a raw private key to wallet import format. We use <code>add-checksum</code> from <a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" title="Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)">a previous post</a>.</p>
 
 
  <div class="brush: racket">
@@ -234,7 +229,7 @@
 </div>
 
 
- <p>We can use the functions we defined, and <code>wif-&gt;addr</code> <a href="www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" title="Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)">from a previous post</a>, which converts a WIF private key to an address, to generate a random address. To get a vanity address, we check if the prefix of the generated address matches a specified substring (all Bitcoin addresses start with &lsquo;1&rsquo;, so prefix here means the substring after the &lsquo;1&rsquo;).</p>
+ <p>To generate a random address, we use the functions defined in this post, and <code>wif-&gt;addr</code> <a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" title="Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)">from a previous post</a>, which converts a WIF private key to an address. To get a vanity address, we check if the prefix of the generated address matches a specified substring (all Bitcoin addresses start with &lsquo;1&rsquo;, so prefix here means the substring after the &lsquo;1&rsquo;).</p>
 
 
  <p>The following Racket function <code>get-vanity-addr</code> repeatedly generates a random private key, converts it to an address, and checks if the prefix of the address matches the specified &ldquo;vanity&rdquo; substring. If no matching address is found after the specified number of <code>tries</code> (default is 1,000,000 tries), the function gives up. Otherwise, the function returns the raw private key, the WIF private key, and the public address.</p>
@@ -300,22 +295,22 @@ public address: 111ksvuJkfkFef8krFpsUeKDrCSedKpxM
 </code></pre>
 
 
- <p>We found an address! To check that it&rsquo;s an address, I sent some BTC to the address to confirm. Lo and hehold, <a href="https://blockchain.info/address/111ksvuJkfkFef8krFpsUeKDrCSedKpxM" title="blockchain.info">the transactions appear in the blockchain</a>!</p>
+ <p>We found an address! To check that it&rsquo;s a valid address, I sent some BTC to the address to confirm. Lo and behold, <a href="https://blockchain.info/address/111ksvuJkfkFef8krFpsUeKDrCSedKpxM" title="blockchain.info">the transactions appear in the blockchain</a>!</p>
 
 
- <p>Next I imported the WIF private key into MultiBit, to see if I could spend the received BTC. MultiBit requires that the key be accompanied by a time in UTC format and saved to a file so here&rsquo;s the contents of the file I created and imported:</p>
+ <p>Next I imported the WIF private key into MultiBit. MultiBit requires that the key be accompanied by a time in UTC format and saved to a file so here&rsquo;s the contents of the file I created and imported into MultiBit:</p>
 
 
  <pre><code>KxaGocHndfhXzPGdrDTfr6EDvnNfbdZwdxcX7xtjL6UnERFZhtkZ 2014-04-15T06:12:28Z</code></pre>
 
 
- <p><a href="https://blockchain.info/address/111ksvuJkfkFef8krFpsUeKDrCSedKpxM" title="blockchain.info">Checking the blockchain again</a>, we can see that sending BTC from our generated address worked as well!</p>
+ <p>To make sure the import succeeded, I spent the BTC that I just received. <a href="https://blockchain.info/address/111ksvuJkfkFef8krFpsUeKDrCSedKpxM" title="blockchain.info">Checking the blockchain again</a>, we can see that sending BTC from our generated address worked as well!</p>
 
 
  <h3 id="software">Software</h3>
 
 
- <p>All the code from this post <a href="http://www.lostintransaction.com/code/vanity.rkt">is available here</a>. In this post, I&rsquo;m using Racket 6.0.0.3 running in Debian 7.0 and MultiBit 0.5.17 running in Windows 7 64-bit.</p>
+ <p>All the code from this post <a href="http://www.lostintransaction.com/code/vanity.rkt">is available here</a>. In this post, I&rsquo;m using Racket 6.0.0.3 running in Debian 7.0, and MultiBit 0.5.17 running in Windows 7 64-bit.</p>
 
  <footer>
 

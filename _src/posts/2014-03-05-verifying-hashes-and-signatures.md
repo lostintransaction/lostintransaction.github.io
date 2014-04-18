@@ -26,7 +26,7 @@ various different inputs to the same number, but for certain
 collision is so small that we can treat the hash function's output as
 a unique identifier for the given input. The [SHA-1][sha1]
 cryptographic hash function maps inputs to 160-bit numbers (40
-hexadecial digits). Here's the SHA-1 hash (computed with Microsoft's
+hexadecimal digits). Here's the SHA-1 hash (computed with Microsoft's
 FCIV program) of the `"Hello world"` example from the MultiBit
 tutorial:
 
@@ -62,7 +62,8 @@ though, to get the same hash from the tutorial. Here I use a
     //
     33ab5639bfd8e7b95eb1d8d0b87781d4ffea4d5d example.txt
 	
-[It looks like I'm not the only person to notice the discrepancy][so].
+The output now matches the
+tutorial. [It looks like I'm not the only person to notice the discrepancy][so].
 
 [so]: http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in
 "Bitcoin StackExchange"
@@ -140,13 +141,13 @@ This is where [digital signatures][digsig] can help. Briefly, to prove
 that a file was not tampered with, the distributor of the file "signs"
 the file with a secret key that only they know. The distributor then
 posts the file, the signature, and a public key that is calculated
-from the private key. The downloader then uses the public key and
+from the private key. A downloader then uses the public key and
 signature to verify the downloaded file.
 
 In a secure signature system, it's impossible to determine the private
-key from the public key. Also, the verification process is only
-successful if the downloaded file was originally signed with the
-private key, which is only known by the distributor of the file. In
+key from the public key. Also, the verification process is
+successful only if the downloaded file was originally signed with the
+private key, which is known only by the distributor of the file. In
 other words, in a secure system, it's computationally impossible to
 forge a valid signature without knowledge of the private key.
 
@@ -175,7 +176,13 @@ verify MultiBit's signature.
 
 1. First we download [GnuPG][gnupg], [for Windows][gpgwin],
    specifically Gpg4win-Vanilla, version 2.2.1. Of course we first
-   check the hash for a match.
+   check the hash for a match. Here's the hash
+   [from the download page](http://www.gpg4win.org/download.html):
+   
+        Gpg4win with GnuPG component only: 
+        SHA1 checksum: 6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac
+
+    And here's the hash of the file I downloaded:
 
         $ sha1deep64 gpg4win-vanilla-2.2.1.exe
         6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac  gpg4win-vanilla-2.2.1.exe
@@ -220,3 +227,8 @@ signatures, however, the likelihood that it is fake does down.
 [gpghash]: http://gpg4win.org/download.html "Gpg4win download and hashes"
 [multibitsig]: https://multibit.org/releases/multibit-0.5.17/multibit-0.5.17-windows-setup.exe.asc "MultiBit signature file"
 [wot]: http://en.wikipedia.org/wiki/Web_of_trust "web of trust Wikipedia entry"
+
+### Software
+
+In this post, I'm using MultiBit 0.5.17, GnuPG for Windows 2.2.1,
+Racket 6.0.0.3, and Windows 7 64-bt.

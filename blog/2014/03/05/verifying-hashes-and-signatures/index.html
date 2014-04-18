@@ -146,7 +146,7 @@
  <h4 id="a-first-example"><em>A first example</em></h4>
 
 
- <p>A hash function maps its input to a number. Any hash function may map various different inputs to the same number, but for certain <a href="http://en.wikipedia.org/wiki/Cryptographic_hash_function" title="cryptographic hash function Wikipedia entry"><em>cryptographic</em> hash functions</a>, the probability of collision is so small that we can treat the hash function&rsquo;s output as a unique identifier for the given input. The <a href="http://en.wikipedia.org/wiki/SHA-1" title="SHA-1 Wikipedia entry">SHA&ndash;1</a> cryptographic hash function maps inputs to 160-bit numbers (40 hexadecial digits). Here&rsquo;s the SHA&ndash;1 hash (computed with Microsoft&rsquo;s FCIV program) of the <code>"Hello world"</code> example from the MultiBit tutorial:</p>
+ <p>A hash function maps its input to a number. Any hash function may map various different inputs to the same number, but for certain <a href="http://en.wikipedia.org/wiki/Cryptographic_hash_function" title="cryptographic hash function Wikipedia entry"><em>cryptographic</em> hash functions</a>, the probability of collision is so small that we can treat the hash function&rsquo;s output as a unique identifier for the given input. The <a href="http://en.wikipedia.org/wiki/SHA-1" title="SHA-1 Wikipedia entry">SHA&ndash;1</a> cryptographic hash function maps inputs to 160-bit numbers (40 hexadecimal digits). Here&rsquo;s the SHA&ndash;1 hash (computed with Microsoft&rsquo;s FCIV program) of the <code>"Hello world"</code> example from the MultiBit tutorial:</p>
 
 
  <pre><code>$ echo "Hello world" &gt; example.txt
@@ -196,7 +196,7 @@ $ fciv -sha1 example.txt
 </code></pre>
 
 
- <p><a href="http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in" title="Bitcoin StackExchange">It looks like I&rsquo;m not the only person to notice the discrepancy</a>.</p>
+ <p>The output now matches the tutorial. <a href="http://bitcoin.stackexchange.com/questions/14041/multibit-error-or-at-least-confusion-in-how-to-check-digital-signatures-in" title="Bitcoin StackExchange">It looks like I&rsquo;m not the only person to notice the discrepancy</a>.</p>
 
 
  <h4 id="computing-sha256"><em>Computing SHA&ndash;256</em></h4>
@@ -260,10 +260,10 @@ eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha1deep64.exe
  <p>Verifying the hash only ensures that nothing happened to the file during the download. For example, you can be pretty sure that no one intercepted your download and then sent you a hacked version. But what if the website you downloaded from was hacked in the first place, so both the file and the hash were fake?</p>
 
 
- <p>This is where <a href="http://en.wikipedia.org/wiki/Digital_signature" title="digital signature Wikipedia entry">digital signatures</a> can help. Briefly, to prove that a file was not tampered with, the distributor of the file &ldquo;signs&rdquo; the file with a secret key that only they know. The distributor then posts the file, the signature, and a public key that is calculated from the private key. The downloader then uses the public key and signature to verify the downloaded file.</p>
+ <p>This is where <a href="http://en.wikipedia.org/wiki/Digital_signature" title="digital signature Wikipedia entry">digital signatures</a> can help. Briefly, to prove that a file was not tampered with, the distributor of the file &ldquo;signs&rdquo; the file with a secret key that only they know. The distributor then posts the file, the signature, and a public key that is calculated from the private key. A downloader then uses the public key and signature to verify the downloaded file.</p>
 
 
- <p>In a secure signature system, it&rsquo;s impossible to determine the private key from the public key. Also, the verification process is only successful if the downloaded file was originally signed with the private key, which is only known by the distributor of the file. In other words, in a secure system, it&rsquo;s computationally impossible to forge a valid signature without knowledge of the private key.</p>
+ <p>In a secure signature system, it&rsquo;s impossible to determine the private key from the public key. Also, the verification process is successful only if the downloaded file was originally signed with the private key, which is known only by the distributor of the file. In other words, in a secure system, it&rsquo;s computationally impossible to forge a valid signature without knowledge of the private key.</p>
 
 
  <h5 id="note">NOTE:</h5>
@@ -285,7 +285,12 @@ eec0c765124b014c824db8759300f36b4a62b74ff81dfa68f77440389bb68d29  sha1deep64.exe
 
   <li>
 
-   <p>First we download <a href="http://www.gnupg.org/" title="GnuPG">GnuPG</a>, <a href="http://www.gnupg.org/" title="GnuPG for Windows">for Windows</a>,  specifically Gpg4win-Vanilla, version 2.2.1. Of course we first  check the hash for a match.</p>
+   <p>First we download <a href="http://www.gnupg.org/" title="GnuPG">GnuPG</a>, <a href="http://www.gnupg.org/" title="GnuPG for Windows">for Windows</a>,  specifically Gpg4win-Vanilla, version 2.2.1. Of course we first  check the hash for a match. Here&rsquo;s the hash  <a href="http://www.gpg4win.org/download.html">from the download page</a>:</p>
+
+   <pre><code>Gpg4win with GnuPG component only: 
+SHA1 checksum: 6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac</code></pre>
+
+   <p>And here&rsquo;s the hash of the file I downloaded:</p>
 
    <pre><code>$ sha1deep64 gpg4win-vanilla-2.2.1.exe
 6d229b03ec2dcbb54a40f7590d108dc0cbcb5aac  gpg4win-vanilla-2.2.1.exe</code></pre></li>
@@ -320,6 +325,12 @@ Primary key fingerprint: 299C 423C 672F 47F4 756A  6BA4 C197 2AED 79F7 C572
 
 
  <p>The warning means that we have never seen Jim&rsquo;s public key, and nor has anyone that we trust (the <code>gpg</code> program keeps track of people we trust, which is no one at the moment). This key server uses the <a href="http://en.wikipedia.org/wiki/Web_of_trust" title="web of trust Wikipedia entry">public consensus confirmation strategy</a> described above. Here, a person&rsquo;s public key can be signed by others and in this way, these other people vouch that this is indeed Jim&rsquo;s key. Of course, it could still be that lots of people have teamed up to deceive you, and have signed a fake version of Jim&rsquo;s key. As the key accumulates more signatures, however, the likelihood that it is fake does down.</p>
+
+
+ <h3 id="software">Software</h3>
+
+
+ <p>In this post, I&rsquo;m using MultiBit 0.5.17, GnuPG for Windows 2.2.1, Racket 6.0.0.3, and Windows 7 64-bt.</p>
 
  <footer>
 

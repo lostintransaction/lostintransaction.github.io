@@ -4,8 +4,8 @@
 
 In a previous post, we
 [derived a Bitcoin public key from a private key][lit:pubfrompriv]. This
-post explores how to convert that public key into a Bitcoin address
-(in hexadecimal notation). I'll be using
+post explores how to convert that public key into a (hexadecimal)
+Bitcoin address. I'll be using
 [the Racket language](http://racket-lang.org) to help me.
 
 <!-- more -->
@@ -22,7 +22,7 @@ To convert from a public key to a Bitcoin address, we need an
 implementation of the [SHA-256][wiki:sha] and
 [RIPEMD-160][wiki:ripemd] hash functions. Racket doesn't come with
 these functions but we can easily call to OpenSSL's implementation of
-these hash functions via Racket's C [FFI][racketffi].
+these functions via Racket's C [FFI][racketffi].
 
 [racketffi]: http://docs.racket-lang.org/foreign/index.html "Racket FFI"
 [wiki:sha]: http://en.wikipedia.org/wiki/SHA-2 "Wikipedia: SHA-2"
@@ -31,7 +31,7 @@ these hash functions via Racket's C [FFI][racketffi].
 Conveniently, the standard Racket distribution already defines
 [a hook into the `libcrypto` library][pltgit:libcrypto], also named
 `libcrypto`. Racket comes with wrapper functions for some `libcrypto`
-C functions, but not `SHA256` or `RIPEMD160` so we'll create those.
+C functions, but not `SHA256` or `RIPEMD160` so let's create those.
 
 [pltgit:libcrypto]: https://github.com/plt/racket/blob/master/racket/collects/openssl/libcrypto.rkt "Racket source: libcrypto.rkt"
 [racket:ffilib]: http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=ffi-lib#%28def._%28%28lib._ffi%2Funsafe..rkt%29._ffi-lib%29%29 "Racket docs: ffi-lib"
@@ -88,7 +88,7 @@ library.
 [racket:fun]: http://docs.racket-lang.org/foreign/foreign_procedures.html?q=_fun#%28form._%28%28lib._ffi%2Funsafe..rkt%29.__fun%29%29 "Racket docs: _fun"
 [openssl:sha256const]: http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133 "OpenSSL source: crypto/sha/sha.h"
 
-Similarly, here's the definition for a Racket `ripemd160` function:
+Similarly, here's a definition for a Racket `ripemd160` function:
 
 ```racket
 (define RIPEMD160-DIGEST-LEN 20) ; bytes
@@ -127,7 +127,7 @@ from the Bitcoin wiki example:
 
 The hashes are all in hexdecimal form so we extend our hash
 functions to convert to and from hex strings (`bytes->hex-string` and
-`hex-string->bytes` are Racket built-in functions):
+`hex-string->bytes` are built-in Racket functions):
 
 ```racket
 (define (sha256/hex input)
@@ -157,14 +157,14 @@ represents the last printed result):
 	"010966776006953d5567439e5e39f86a0d273bee"
 	-> (string-append "00" ^)
 	"00010966776006953d5567439e5e39f86a0d273bee"
-	-> (define hash160+version ^)
+	-> (define version0+hash160 ^)
 	-> (sha256/hex ^)
 	"445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
 	-> (sha256/hex ^)
 	"d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
 	-> (substring ^ 0 8) ; checksum
 	"d61967f6"
-	-> (string-append hash160+version ^)
+	-> (string-append version0+hash160 ^)
 	"00010966776006953d5567439e5e39f86a0d273beed61967f6"
 	   
 The final result is the Bitcoin address from the example, in

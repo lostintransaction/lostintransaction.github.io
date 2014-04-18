@@ -15,7 +15,7 @@
    <name>The Unknown Author</name></author>
   <content type="html">
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=FFI&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F15%2Fcomputing-a-bitcoin-address-part-2-public-key-to-hex-address%2F" height="1" width="1" /&gt;
- &lt;p&gt;In a previous post, we &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key"&gt;derived a Bitcoin public key from a private key&lt;/a&gt;. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&amp;rsquo;ll be using &lt;a href="http://racket-lang.org"&gt;the Racket language&lt;/a&gt; to help me.&lt;/p&gt;
+ &lt;p&gt;In a previous post, we &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key"&gt;derived a Bitcoin public key from a private key&lt;/a&gt;. This post explores how to convert that public key into a (hexadecimal) Bitcoin address. I&amp;rsquo;ll be using &lt;a href="http://racket-lang.org"&gt;the Racket language&lt;/a&gt; to help me.&lt;/p&gt;
  &lt;blockquote&gt;
   &lt;p&gt;This is the second post in a four-part series titled &amp;ldquo;Computing a Bitcoin Address&amp;rdquo;. Here are all the articles in the series:&lt;/p&gt;
   &lt;ul&gt;
@@ -23,8 +23,8 @@
    &lt;li&gt;Part 2: &lt;a href="http://www.lostintransaction.com/blog/2014/03/15/computing-a-bitcoin-address-part-2-public-key-to-hex-address/"&gt;Public Key to (Hex) Address&lt;/a&gt; (this post)&lt;/li&gt;
    &lt;li&gt;Part 3: &lt;a href="http://www.lostintransaction.com/blog/2014/03/18/computing-a-bitcoin-address-part-3-base58check-encoding/"&gt;Base58Check Encoding&lt;/a&gt;&lt;/li&gt;
    &lt;li&gt;Part 4: &lt;a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/"&gt;Wallet Import Format (WIF)&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/blockquote&gt;
- &lt;p&gt;To convert from a public key to a Bitcoin address, we need an implementation of the &lt;a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2"&gt;SHA&amp;ndash;256&lt;/a&gt; and &lt;a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD"&gt;RIPEMD&amp;ndash;160&lt;/a&gt; hash functions. Racket doesn&amp;rsquo;t come with these functions but we can easily call to OpenSSL&amp;rsquo;s implementation of these hash functions via Racket&amp;rsquo;s C &lt;a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI"&gt;FFI&lt;/a&gt;.&lt;/p&gt;
- &lt;p&gt;Conveniently, the standard Racket distribution already defines &lt;a href="https://github.com/plt/racket/blob/master/racket/collects/openssl/libcrypto.rkt" title="Racket source: libcrypto.rkt"&gt;a hook into the &lt;code&gt;libcrypto&lt;/code&gt; library&lt;/a&gt;, also named &lt;code&gt;libcrypto&lt;/code&gt;. Racket comes with wrapper functions for some &lt;code&gt;libcrypto&lt;/code&gt; C functions, but not &lt;code&gt;SHA256&lt;/code&gt; or &lt;code&gt;RIPEMD160&lt;/code&gt; so we&amp;rsquo;ll create those.&lt;/p&gt;
+ &lt;p&gt;To convert from a public key to a Bitcoin address, we need an implementation of the &lt;a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2"&gt;SHA&amp;ndash;256&lt;/a&gt; and &lt;a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD"&gt;RIPEMD&amp;ndash;160&lt;/a&gt; hash functions. Racket doesn&amp;rsquo;t come with these functions but we can easily call to OpenSSL&amp;rsquo;s implementation of these functions via Racket&amp;rsquo;s C &lt;a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI"&gt;FFI&lt;/a&gt;.&lt;/p&gt;
+ &lt;p&gt;Conveniently, the standard Racket distribution already defines &lt;a href="https://github.com/plt/racket/blob/master/racket/collects/openssl/libcrypto.rkt" title="Racket source: libcrypto.rkt"&gt;a hook into the &lt;code&gt;libcrypto&lt;/code&gt; library&lt;/a&gt;, also named &lt;code&gt;libcrypto&lt;/code&gt;. Racket comes with wrapper functions for some &lt;code&gt;libcrypto&lt;/code&gt; C functions, but not &lt;code&gt;SHA256&lt;/code&gt; or &lt;code&gt;RIPEMD160&lt;/code&gt; so let&amp;rsquo;s create those.&lt;/p&gt;
  &lt;p&gt;Here&amp;rsquo;s the header for the &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"&gt;&lt;code&gt;SHA256&lt;/code&gt; C function&lt;/a&gt;:&lt;/p&gt;
  &lt;pre class="brush: C"&gt;&lt;code&gt;unsigned char *SHA256( const unsigned char *d, size_t n, unsigned char *md );&lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;We use the Racket &lt;a href="http://docs.racket-lang.org/foreign/Loading_Foreign_Libraries.html?q=get-ffi-obj#%28def._%28%28lib._ffi%2Funsafe..rkt%29._get-ffi-obj%29%29" title="Racket docs: get-ffi-obj"&gt;&lt;code&gt;get-ffi-obj&lt;/code&gt;&lt;/a&gt; function to create a Racket wrapper for &lt;code&gt;SHA256&lt;/code&gt;. Here&amp;rsquo;s a Racket &lt;code&gt;sha256&lt;/code&gt; function that calls the C &lt;code&gt;SHA256&lt;/code&gt; function:&lt;/p&gt;
@@ -45,7 +45,7 @@
    &lt;p&gt;The second argument is the length of the input byte array. The &lt;code&gt;=&lt;/code&gt; and the expression following it describe how to calculate this argument automatically. Thus a caller of &lt;code&gt;sha256&lt;/code&gt; does not provide this argument.&lt;/p&gt;&lt;/li&gt;
   &lt;li&gt;
    &lt;p&gt;The third argument is the output byte array. The &lt;code&gt;o&lt;/code&gt; indicates a return pointer and is followed by the expected length of the output array, which should be 32 bytes here. We define a constant &lt;code&gt;SHA256-DIGEST-LEN&lt;/code&gt; which is analogous to &lt;a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133" title="OpenSSL source: crypto/sha/sha.h"&gt;the &lt;code&gt;SHA256_DIGEST_LENGTH&lt;/code&gt; constant&lt;/a&gt; in the C library.&lt;/p&gt;&lt;/li&gt;&lt;/ol&gt;
- &lt;p&gt;Similarly, here&amp;rsquo;s the definition for a Racket &lt;code&gt;ripemd160&lt;/code&gt; function:&lt;/p&gt;
+ &lt;p&gt;Similarly, here&amp;rsquo;s a definition for a Racket &lt;code&gt;ripemd160&lt;/code&gt; function:&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define RIPEMD160-DIGEST-LEN 20) ; bytes
 
 ; from crypto/ripemd/ripemd.h:
@@ -67,7 +67,7 @@
   &lt;li&gt;SHA&amp;ndash;256: &lt;code&gt;445C7A8007A93D8733188288BB320A8FE2DEBD2AE1B47F0F50BC10BAE845C094&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;SHA&amp;ndash;256 (checksum is first 4 bytes): &lt;code&gt;D61967F63C7DD183914A4AE452C9F6AD5D462CE3D277798075B107615C1A8A30&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;step 4 result + checksum = (hex) address: &lt;code&gt;00010966776006953D5567439E5E39F86A0D273BEED61967F6&lt;/code&gt;&lt;/li&gt;&lt;/ol&gt;
- &lt;p&gt;The hashes are all in hexdecimal form so we extend our hash functions to convert to and from hex strings (&lt;code&gt;bytes-&amp;gt;hex-string&lt;/code&gt; and &lt;code&gt;hex-string-&amp;gt;bytes&lt;/code&gt; are Racket built-in functions):&lt;/p&gt;
+ &lt;p&gt;The hashes are all in hexdecimal form so we extend our hash functions to convert to and from hex strings (&lt;code&gt;bytes-&amp;gt;hex-string&lt;/code&gt; and &lt;code&gt;hex-string-&amp;gt;bytes&lt;/code&gt; are built-in Racket functions):&lt;/p&gt;
  &lt;pre class="brush: racket"&gt;&lt;code&gt;(define (sha256/hex input)
   (bytes-&amp;gt;hex-string (sha256 (hex-string-&amp;gt;bytes input))))
   
@@ -84,14 +84,14 @@ Welcome to Racket v6.0.0.3.
 "010966776006953d5567439e5e39f86a0d273bee"
 -&amp;gt; (string-append "00" ^)
 "00010966776006953d5567439e5e39f86a0d273bee"
--&amp;gt; (define hash160+version ^)
+-&amp;gt; (define version0+hash160 ^)
 -&amp;gt; (sha256/hex ^)
 "445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
 -&amp;gt; (sha256/hex ^)
 "d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
 -&amp;gt; (substring ^ 0 8) ; checksum
 "d61967f6"
--&amp;gt; (string-append hash160+version ^)
+-&amp;gt; (string-append version0+hash160 ^)
 "00010966776006953d5567439e5e39f86a0d273beed61967f6"
    &lt;/code&gt;&lt;/pre&gt;
  &lt;p&gt;The final result is the Bitcoin address from the example, in hexadecimal format. The Bitcoin wiki article performs one more step to convert to &lt;a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding"&gt;Base58Check encoding&lt;/a&gt;, which is the standard representation for Bitcoin addresses. We&amp;rsquo;ll look at Base58Check encoding in the next post!&lt;/p&gt;

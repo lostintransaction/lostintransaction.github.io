@@ -4,7 +4,7 @@
 
     <meta charset="utf-8">
     <title>Computing a Bitcoin Address, Part 2: Public Key to (Hex) Address</title>
-    <meta name="description" content="In a previous post, we derived a Bitcoin public key from a private key. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I'll be using the Racket language to help me. ...">
+    <meta name="description" content="In a previous post, we derived a Bitcoin public key from a private key. This post explores how to convert that public key into a (hexadecimal) Bitcoin address. I'll be using the Racket language to help me. ...">
     <meta name="author"      content="The Unknown Blogger">
     <meta name="keywords"    content="public key, Bitcoin addresses, hashes, SHA256, RIPEMD160, OpenSSL, C, Racket, FFI">
     <meta name="viewport"    content="width=device-width, initial-scale=1.0">
@@ -134,7 +134,7 @@
   </header>
 
 
- <p>In a previous post, we <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">derived a Bitcoin public key from a private key</a>. This post explores how to convert that public key into a Bitcoin address (in hexadecimal notation). I&rsquo;ll be using <a href="http://racket-lang.org">the Racket language</a> to help me.</p>
+ <p>In a previous post, we <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">derived a Bitcoin public key from a private key</a>. This post explores how to convert that public key into a (hexadecimal) Bitcoin address. I&rsquo;ll be using <a href="http://racket-lang.org">the Racket language</a> to help me.</p>
 
 
  <blockquote>
@@ -152,10 +152,10 @@
    <li>Part 4: <a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/">Wallet Import Format (WIF)</a></li></ul></blockquote>
 
 
- <p>To convert from a public key to a Bitcoin address, we need an implementation of the <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a> hash functions. Racket doesn&rsquo;t come with these functions but we can easily call to OpenSSL&rsquo;s implementation of these hash functions via Racket&rsquo;s C <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a>.</p>
+ <p>To convert from a public key to a Bitcoin address, we need an implementation of the <a href="http://en.wikipedia.org/wiki/SHA-2" title="Wikipedia: SHA-2">SHA&ndash;256</a> and <a href="http://en.wikipedia.org/wiki/RIPEMD" title="Wikipedia: RIPEMD">RIPEMD&ndash;160</a> hash functions. Racket doesn&rsquo;t come with these functions but we can easily call to OpenSSL&rsquo;s implementation of these functions via Racket&rsquo;s C <a href="http://docs.racket-lang.org/foreign/index.html" title="Racket FFI">FFI</a>.</p>
 
 
- <p>Conveniently, the standard Racket distribution already defines <a href="https://github.com/plt/racket/blob/master/racket/collects/openssl/libcrypto.rkt" title="Racket source: libcrypto.rkt">a hook into the <code>libcrypto</code> library</a>, also named <code>libcrypto</code>. Racket comes with wrapper functions for some <code>libcrypto</code> C functions, but not <code>SHA256</code> or <code>RIPEMD160</code> so we&rsquo;ll create those.</p>
+ <p>Conveniently, the standard Racket distribution already defines <a href="https://github.com/plt/racket/blob/master/racket/collects/openssl/libcrypto.rkt" title="Racket source: libcrypto.rkt">a hook into the <code>libcrypto</code> library</a>, also named <code>libcrypto</code>. Racket comes with wrapper functions for some <code>libcrypto</code> C functions, but not <code>SHA256</code> or <code>RIPEMD160</code> so let&rsquo;s create those.</p>
 
 
  <p>Here&rsquo;s the header for the <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l155" title="OpenSSL source: crypto/sha/sha.h"><code>SHA256</code> C function</a>:</p>
@@ -247,7 +247,7 @@
    <p>The third argument is the output byte array. The <code>o</code> indicates a return pointer and is followed by the expected length of the output array, which should be 32 bytes here. We define a constant <code>SHA256-DIGEST-LEN</code> which is analogous to <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/sha/sha.h;h=8a6bf4bbbb1dbef37869fc162ce1c2cacfebeb1d;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l133" title="OpenSSL source: crypto/sha/sha.h">the <code>SHA256_DIGEST_LENGTH</code> constant</a> in the C library.</p></li></ol>
 
 
- <p>Similarly, here&rsquo;s the definition for a Racket <code>ripemd160</code> function:</p>
+ <p>Similarly, here&rsquo;s a definition for a Racket <code>ripemd160</code> function:</p>
 
 
  <div class="brush: racket">
@@ -318,7 +318,7 @@
   <li>step 4 result + checksum = (hex) address: <code>00010966776006953D5567439E5E39F86A0D273BEED61967F6</code></li></ol>
 
 
- <p>The hashes are all in hexdecimal form so we extend our hash functions to convert to and from hex strings (<code>bytes-&gt;hex-string</code> and <code>hex-string-&gt;bytes</code> are Racket built-in functions):</p>
+ <p>The hashes are all in hexdecimal form so we extend our hash functions to convert to and from hex strings (<code>bytes-&gt;hex-string</code> and <code>hex-string-&gt;bytes</code> are built-in Racket functions):</p>
 
 
  <div class="brush: racket">
@@ -366,14 +366,14 @@ Welcome to Racket v6.0.0.3.
 "010966776006953d5567439e5e39f86a0d273bee"
 -&gt; (string-append "00" ^)
 "00010966776006953d5567439e5e39f86a0d273bee"
--&gt; (define hash160+version ^)
+-&gt; (define version0+hash160 ^)
 -&gt; (sha256/hex ^)
 "445c7a8007a93d8733188288bb320a8fe2debd2ae1b47f0f50bc10bae845c094"
 -&gt; (sha256/hex ^)
 "d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30"
 -&gt; (substring ^ 0 8) ; checksum
 "d61967f6"
--&gt; (string-append hash160+version ^)
+-&gt; (string-append version0+hash160 ^)
 "00010966776006953d5567439e5e39f86a0d273beed61967f6"
    </code></pre>
 

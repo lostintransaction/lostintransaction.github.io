@@ -32,6 +32,7 @@
 (define (ripemd160/hex input)
   (bytes->hex-string (ripemd160 (hex-string->bytes input))))
 
+;; to run these tests, use cmd "raco test crypto.rkt"
 (module+ test
   (require (prefix-in r: rackunit))
   (define-syntax-rule (check-hex-equal? x y) 

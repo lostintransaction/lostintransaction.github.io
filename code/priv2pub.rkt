@@ -44,6 +44,7 @@
    [else (printf "Please only provide one input.\n")]))
       
 
+;; run these tests with cmd "raco test priv2pub.rkt"
 (module+ test
   (require (prefix-in r: rackunit))
   (define-syntax-rule (check-hex-equal? x y)

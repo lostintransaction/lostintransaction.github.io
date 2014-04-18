@@ -309,10 +309,10 @@
  <p>The function assumes that the input private key is in hex, and returned public key is in hex as well. I had to first convert the private key to <code>BIGNUM</code>, which is OpenSSL&rsquo;s number representation for arbitrary precision arithmetic. The computed public key is an OpenSSL <code>EC_POINT</code> data structure, which represents a curve coordinate. The curve coordinate is converted back to hex using <code>EC_POINT_point2hex</code>. <a href="https://en.bitcoin.it/wiki/Elliptic_Curve_Digital_Signature_Algorithm" title="Bitcoin Wiki: Elliptic Curve Digital Signature Algorithm">Public keys can either be compressed or uncompressed</a>, and the format of the output of <code>priv2pub</code> depends on the <code>form</code> input parameter, <a href="http://git.openssl.org/gitweb/?p=openssl.git;a=blob;f=crypto/ec/ec.h;h=dfe8710d330954bb1762a5fe13d655ac7a5f01be;hb=46ebd9e3bb623d3c15ef2203038956f3f7213620#l104" title="crypto/ec/ec.h">which can be one of three values</a>.</p>
 
 
- <p>To test this function, I found a sample public/private key pair from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses">this Bitcoin wiki article</a>. The private key from the article is <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code> and the public key is <code>0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code>. The public key begins with <code>0x04</code> <a href="http://www.secg.org/collateral/sec1.pdf" title="SEC: Elliptic Curve Cryptography">so we know it&rsquo;s in uncompressed form</a> and is 65 bytes long (see ANSI X9.62 for more details).</p>
+ <p>To test this function, I found a sample public/private key pair from <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: technical explanation of addresses">this Bitcoin wiki article</a>. The private key from the article is <code>18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725</code> and the public key is <code>0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6</code>. The public key begins with <code>0x04</code> <a href="http://www.secg.org/collateral/sec1.pdf" title="SEC: Elliptic Curve Cryptography">so we know it&rsquo;s in uncompressed form (see section 2.3.3)</a> and is 65 bytes long (see ANSI X9.62 for more details).</p>
 
 
- <p>I used the following main function to test if <code>priv2pub</code> can compute the public key with the private key from the example:</p>
+ <p>I used the following <code>main</code> function to test if <code>priv2pub</code> can compute the public key using the private key from the example:</p>
 
 
  <div class="brush: c">
@@ -370,7 +370,7 @@ $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
  <p>Success!</p>
 
 
- <p>Let&rsquo;s try another example. I generated a private key with <a href="https://www.bitaddress.org">bitaddress.org</a>, <code>5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe</code>, but it&rsquo;s in <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a> and not hex. We&rsquo;ll deal with Base58 encoding later so for now I went to the &ldquo;Wallet Details&rdquo; tab at <a href="https://www.bitaddress.org">bitaddress.org</a>, entered the base58 key, and got back that the private key in hex is <code>4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61</code> and public key is <code>0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117</code>. Let&rsquo;s check what our code says:</p>
+ <p>Let&rsquo;s try another example. I generated a private key with <a href="https://www.bitaddress.org">bitaddress.org</a>, <code>5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe</code>, but it&rsquo;s in <a href="https://en.bitcoin.it/wiki/Base58Check_encoding" title="Bitcoin wiki: Base58Check encoding">Base58Check encoding</a> and not hex. We&rsquo;ll deal with Base58 encoding later so for now I went to the &ldquo;Wallet Details&rdquo; tab at <a href="https://www.bitaddress.org">bitaddress.org</a>, entered the base58 key, and found that the private key in hex is <code>4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61</code> and the public key is <code>0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117</code>. Let&rsquo;s check what our code says:</p>
 
 
  <pre><code>$ ./priv2pub 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
@@ -549,7 +549,7 @@ $ ./priv2pub 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725
 </div>
 
 
- <p>This creates a Racket function <code>priv2pub_bytes</code> where the first argument is a (Racket) string, the second is an int indicating whether the output should be in compressed or uncompressed form, and the third is the output buffer. A pointer to the output buffer is also returned by the function. We make the size the output buffer equal to the uncompressed form since that is the maximum size.</p>
+ <p>This creates a Racket function <code>priv2pub_bytes</code> where the first argument is a (Racket) string, the second is an integer indicating whether the output should be in compressed or uncompressed form, and the third is the output buffer. A pointer to the output buffer is also returned by the function. We make the size the output buffer equal to the uncompressed form since that is the maximum size.</p>
 
 
  <p>Let&rsquo;s make things easier to use with a couple more functions:</p>

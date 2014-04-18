@@ -122,11 +122,12 @@ article is
 `18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725` and
 the public key is
 `0450863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B23522CD470243453A299FA9E77237716103ABC11A1DF38855ED6F2EE187E9C582BA6`. The
-public key begins with `0x04` [so we know it's in uncompressed form][sec]
-and is 65 bytes long (see ANSI X9.62 for more details).
+public key begins with `0x04`
+[so we know it's in uncompressed form (see section 2.3.3)][sec] and is
+65 bytes long (see ANSI X9.62 for more details).
 
-I used the following main function to test if `priv2pub` can compute
-the public key with the private key from the example:
+I used the following `main` function to test if `priv2pub` can compute
+the public key using the private key from the example:
 
 [sec]: http://www.secg.org/collateral/sec1.pdf "SEC: Elliptic Curve Cryptography"
 
@@ -154,7 +155,17 @@ Success!
 
 [bwiki:address]: https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses "Bitcoin wiki: technical explanation of addresses"
 
-Let's try another example. I generated a private key with [bitaddress.org](https://www.bitaddress.org), `5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe`, but it's in [Base58Check encoding][bwiki:base58] and not hex. We'll deal with Base58 encoding later so for now I went to the "Wallet Details" tab at [bitaddress.org](https://www.bitaddress.org), entered the base58 key, and got back that the private key in hex is `4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61` and public key is `0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117`. Let's check what our code says:
+Let's try another example. I generated a private key with
+[bitaddress.org](https://www.bitaddress.org),
+`5JQZaZrYCbJ1Kb96vFBMEefrQGuNfHSqbHbviC3URUNGJ27frFe`, but it's in
+[Base58Check encoding][bwiki:base58] and not hex. We'll deal with
+Base58 encoding later so for now I went to the "Wallet Details" tab at
+[bitaddress.org](https://www.bitaddress.org), entered the base58 key,
+and found that the private key in hex is
+`4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61` and the
+public key is
+`0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117`. Let's
+check what our code says:
 
     $ ./priv2pub 4DD3D47E491C5D34F9540EBF3444E3D6675015A46B61AF37B4EB7F17DDDF4E61
 	0492EDC09A7311C2AB83EF3D133331D7B73117902BB391D9DAC3BE261547F571E171F16775DDA6D09A6AAF1F3F6E6AA3CFCD854DCAA6AED0FA7AF9A5ED9965E117
@@ -247,11 +258,11 @@ for individual functions in the library. We use the Racket
 ```
 
 This creates a Racket function `priv2pub_bytes` where the first
-argument is a (Racket) string, the second is an int indicating whether
-the output should be in compressed or uncompressed form, and the third
-is the output buffer. A pointer to the output buffer is also returned
-by the function. We make the size the output buffer equal to the
-uncompressed form since that is the maximum size.
+argument is a (Racket) string, the second is an integer indicating
+whether the output should be in compressed or uncompressed form, and
+the third is the output buffer. A pointer to the output buffer is also
+returned by the function. We make the size the output buffer equal to
+the uncompressed form since that is the maximum size.
 
 Let's make things easier to use with a couple more functions:
 

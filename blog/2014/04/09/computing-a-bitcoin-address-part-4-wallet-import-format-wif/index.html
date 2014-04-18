@@ -155,7 +155,7 @@
  <h3 id="from-private-key-to-public-address">From Private Key to Public Address</h3>
 
 
- <p>Let&rsquo;s consolidate the code from the previous posts to create one function that performs all the steps to convert a private key to a public address. First we create some helper functions:</p>
+ <p>Let&rsquo;s consolidate the code from the previous posts to create one function that performs all the steps to convert a private key (in hex) to a public address (in Base58Check). First we create some helper functions:</p>
 
 
  <div class="brush: racket">
@@ -202,9 +202,9 @@
 
   <li><code>add-version0</code>: prepends <code>0x00</code> to a hex string</li>
 
-  <li><code>compute-checksum</code>: computes checksum (first 4 bytes of a double SHA&ndash;245 hash) of its input</li>
+  <li><code>compute-checksum</code>: computes the checksum (first 4 bytes of a double SHA&ndash;245 hash) of its input</li>
 
-  <li><code>add-checksum</code>: computes a checksum for its input and appends that checksum to the end of the input</li></ul>
+  <li><code>add-checksum</code>: computes the checksum for its input and appends that checksum to the end of the input</li></ul>
 
 
  <p>Here&rsquo;s a function <code>priv-key-&gt;addr</code> that converts a private key (in hex) to a public address (in Base58Check):</p>
@@ -246,7 +246,7 @@
 </div>
 
 
- <p>We use Racket&rsquo;s <code>compose</code> function, which strings together a series of functions. The functions are called in the reverse order in which they are listed, so <code>priv-key-&gt;addr</code> first calls <code>priv-key-&gt;pub-key</code> on its input, then takes that results and give it to <code>hash160/hex</code>, and so on.</p>
+ <p>We use Racket&rsquo;s <code>compose</code> function, which strings together a series of functions. The functions are called in the reverse order in which they are listed, so <code>priv-key-&gt;addr</code> first calls <code>priv-key-&gt;pub-key</code> on its input, then takes that result and gives it to <code>hash160/hex</code>, and so on.</p>
 
 
  <p>Let&rsquo;s test our function on <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: Bitcoin addresses">this Bitcoin wiki example</a>:</p>
@@ -302,7 +302,7 @@ L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe` 2014-03-10T06:12:28Z
   <li>public address: <code>1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j</code></li></ul>
 
 
- <p>The key is in base&ndash;58 so we need convert to hex first.</p>
+ <p>The key is in base&ndash;58 so we need to first convert it to hex.</p>
 
 
  <pre><code>$ racket
@@ -325,7 +325,7 @@ Welcome to Racket v6.0.0.3.
   <li>in <a href="https://en.bitcoin.it/wiki/Private_key">&ldquo;compressed&rdquo; form</a>.</li></ol>
 
 
- <p>&ldquo;Compressed&rdquo; is in quotes because the private key itself is not compressed, but rather has a flag that indicates that the public key should be compressed. Here&rsquo;s the relevant details of Wallet Import Format:</p>
+ <p>&ldquo;Compressed&rdquo; is in quotes because the private key itself is not compressed, but rather has a flag that indicates that the public key should be compressed. Here&rsquo;s the relevant details of the Wallet Import Format (WIF):</p>
 
 
  <p>&ldquo;Uncompressed&rdquo; WIF private key:</p>
@@ -459,7 +459,7 @@ Welcome to Racket v6.0.0.3.
 </code></pre>
 
 
- <p>We can also try on the uncompressed WIF private key, which according to <a href="https://www.bitaddress.org">bitaddress.org</a>, is <code>5KDwznXNT8sJbhtYheFNB1ho9Yb69hfJGgmTkW9cNVBr7LxFEje</code>.</p>
+ <p>We can also try on the &ldquo;uncompressed&rdquo; version of the same private key, which according to <a href="https://www.bitaddress.org">bitaddress.org</a>, is <code>5KDwznXNT8sJbhtYheFNB1ho9Yb69hfJGgmTkW9cNVBr7LxFEje</code>.</p>
 
 
  <pre><code>-&gt; (define wif/uncomp "5KDwznXNT8sJbhtYheFNB1ho9Yb69hfJGgmTkW9cNVBr7LxFEje")
@@ -512,22 +512,20 @@ Welcome to Racket v6.0.0.3.
 </div>
 
 
- <p>To verify that we properly extract the raw private key, let&rsquo;s check the hash160 (using <code>hash160/hex</code> defined above) of our running example, which <a href="https://blockchain.info/address/1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j" title="blockchain.info 1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j">blockchain.info reports to be</a> <code>a62bc20c511af7160a6150a72042b3fff8a86646</code>. The <code>^</code> token in the <a href="http://docs.racket-lang.org/xrepl/index.html">Racket XREPL</a> is bound to the last printed value.</p>
+ <p>To verify that our funtion properly extracts the raw private key, let&rsquo;s take our MultiBit-generated private key <code>L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe</code> and compute the hash160 value (using <code>hash160/hex</code> defined above). <a href="https://blockchain.info/address/1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j" title="blockchain.info 1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j">According to blockchain.info</a>, the hash160 value should be <code>a62bc20c511af7160a6150a72042b3fff8a86646</code>. The <code>^</code> token in the <a href="http://docs.racket-lang.org/xrepl/index.html">Racket XREPL</a> is bound to the last printed value.</p>
 
 
- <pre><code>$ racket
-Welcome to Racket v6.0.0.3.
--&gt; (require "priv2addr.rkt" "priv2pub.rkt")
--&gt; (define wif "L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe")
--&gt; (wif-&gt;priv-key wif)
+ <pre><code>$ racket Welcome to Racket v6.0.0.3.  -&gt; (require "priv2addr.rkt"
+"priv2pub.rkt") -&gt; (define wif
+"L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe") -&gt;
+(wif-&gt;priv-key wif)
 "B96CA0C6390D4734C80A44ECD4ACEF21E2886BA250EC1D8CF461F1C94FAE6EA9"
 -&gt; (priv-key-&gt;pub-key/compressed ^)
 "036eef34887c91e2ed2815de2192bd541867708bb1c7434cd571073ddecaaafc42"
--&gt; (hash160/hex ^)
-"a62bc20c511af7160a6150a72042b3fff8a86646"</code></pre>
+-&gt; (hash160/hex ^) "a62bc20c511af7160a6150a72042b3fff8a86646"</code></pre>
 
 
- <p>Note that here we know that the compression flag in the WIF private key is set so we use <code>priv-key-&gt;pub-key/compressed</code>, <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">defined in a previous post</a>, to get the compressed public key.</p>
+ <p>Since the private key begins with <code>L</code>, we know that the compression flag is set so we use <code>priv-key-&gt;pub-key/compressed</code>, <a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key">defined in a previous post</a>, to get the compressed public key, which we give to <code>hash160/hex</code> to get the hash160 value.</p>
 
 
  <p>For step 3, we already defined <code>priv-key-&gt;addr</code> above, which computes an uncompressed address, so we just need a version that computes a compressed address. Here&rsquo;s <code>priv-key-&gt;addr/compressed</code>, which uses <code>priv-key-&gt;pub-key/compressed</code>:</p>

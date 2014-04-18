@@ -23,8 +23,9 @@ corresponding address.
 ### From Private Key to Public Address
 
 Let's consolidate the code from the previous posts to create one
-function that performs all the steps to convert a private key to a
-public address. First we create some helper functions:
+function that performs all the steps to convert a private key (in hex)
+to a public address (in Base58Check). First we create some helper
+functions:
 
 ```racket
 (define (hash160/hex hstr) (ripemd160/hex (sha256/hex hstr)))
@@ -40,8 +41,8 @@ public address. First we create some helper functions:
 on an input hex string
 * `sha256x2/hex`: performs SHA-256 twice on an input hex string
 * `add-version0`: prepends `0x00` to a hex string
-* `compute-checksum`: computes checksum (first 4 bytes of a double SHA-245 hash) of its input
-* `add-checksum`: computes a checksum for its input and appends that checksum to the end of the input
+* `compute-checksum`: computes the checksum (first 4 bytes of a double SHA-245 hash) of its input
+* `add-checksum`: computes the checksum for its input and appends that checksum to the end of the input
 
 Here's a function `priv-key->addr` that converts a private key (in hex) to a public address (in Base58Check):
 
@@ -58,7 +59,7 @@ Here's a function `priv-key->addr` that converts a private key (in hex) to a pub
 We use Racket's `compose` function, which strings together a series of
 functions. The functions are called in the reverse order in which they
 are listed, so `priv-key->addr` first calls `priv-key->pub-key` on its
-input, then takes that results and give it to `hash160/hex`, and so
+input, then takes that result and gives it to `hash160/hex`, and so
 on. 
 
 Let's test our function on [this Bitcoin wiki example][bwiki:addr]:
@@ -105,7 +106,7 @@ address.
 * private key: `L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe`
 * public address: `1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j`
 
-The key is in base-58 so we need convert to hex first.
+The key is in base-58 so we need to first convert it to hex.
 
 	$ racket
 	Welcome to Racket v6.0.0.3.
@@ -126,8 +127,8 @@ is
 
 "Compressed" is in quotes because the private key itself is not
 compressed, but rather has a flag that indicates that the public key
-should be compressed. Here's the relevant details of Wallet Import
-Format:
+should be compressed. Here's the relevant details of the Wallet Import
+Format (WIF):
 
 "Uncompressed" WIF private key:
 
@@ -195,8 +196,8 @@ Let's try these functions on our example:
 	-> (wif-checksum-ok? wif/comp)
 	#t
 	
-We can also try on the uncompressed WIF private key, which according
-to [bitaddress.org](https://www.bitaddress.org), is
+We can also try on the "uncompressed" version of the same private key,
+which according to [bitaddress.org](https://www.bitaddress.org), is
 `5KDwznXNT8sJbhtYheFNB1ho9Yb69hfJGgmTkW9cNVBr7LxFEje`.
 
     -> (define wif/uncomp "5KDwznXNT8sJbhtYheFNB1ho9Yb69hfJGgmTkW9cNVBr7LxFEje")
@@ -219,30 +220,30 @@ prefixes and checksums from the WIF private key:
 (define (wif->priv-key wif) (substring (base58-str->hex-str wif) 2 66))
 ```
 
-To verify that we properly extract the raw private key, let's check
-the hash160 (using `hash160/hex` defined above) of our running
-example, which [blockchain.info reports to be][blockchain]
+To verify that our funtion properly extracts the raw private key,
+let's take our MultiBit-generated private key
+`L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe` and compute the
+hash160 value (using `hash160/hex` defined above).
+[According to blockchain.info][blockchain], the hash160 value should be
 `a62bc20c511af7160a6150a72042b3fff8a86646`. The `^` token in the
 [Racket XREPL](http://docs.racket-lang.org/xrepl/index.html) is bound
 to the last printed value.
 
 [blockchain]: https://blockchain.info/address/1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j "blockchain.info 1G9dbCmxtbaBQACVgcHWHJgyr8ZNCiVL9j"
 
-    $ racket
-    Welcome to Racket v6.0.0.3.
-    -> (require "priv2addr.rkt" "priv2pub.rkt")
-	-> (define wif "L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe")
-	-> (wif->priv-key wif)
-	"B96CA0C6390D4734C80A44ECD4ACEF21E2886BA250EC1D8CF461F1C94FAE6EA9"
-	-> (priv-key->pub-key/compressed ^)
-	"036eef34887c91e2ed2815de2192bd541867708bb1c7434cd571073ddecaaafc42"
-	-> (hash160/hex ^)
-	"a62bc20c511af7160a6150a72042b3fff8a86646"
+    $ racket Welcome to Racket v6.0.0.3.  -> (require "priv2addr.rkt"
+    "priv2pub.rkt") -> (define wif
+    "L3S9k3w3gMj2gBUWvPQQTC74giRTjQU3EEXF51f17qQskgJsF7Qe") ->
+    (wif->priv-key wif)
+    "B96CA0C6390D4734C80A44ECD4ACEF21E2886BA250EC1D8CF461F1C94FAE6EA9"
+    -> (priv-key->pub-key/compressed ^)
+    "036eef34887c91e2ed2815de2192bd541867708bb1c7434cd571073ddecaaafc42"
+    -> (hash160/hex ^) "a62bc20c511af7160a6150a72042b3fff8a86646"
 
-Note that here we know that the compression flag in the WIF private
-key is set so we use `priv-key->pub-key/compressed`,
+Since the private key begins with `L`, we know that the compression
+flag is set so we use `priv-key->pub-key/compressed`,
 [defined in a previous post][LiT:priv2pub], to get the compressed
-public key.
+public key, which we give to `hash160/hex` to get the hash160 value.
 
 For step 3, we already defined `priv-key->addr` above, which computes
 an uncompressed address, so we just need a version that computes a

@@ -88,7 +88,7 @@ after the '1').
 
 The following Racket function `get-vanity-addr` repeatedly generates a
 random private key, converts it to an address, and checks if the
-prefix of the address matches the specified "vanity" substring. If no
+prefix of the address matches the input "vanity" substring. If no
 matching address is found after the specified number of `tries`
 (default is 1,000,000 tries), the function gives up. Otherwise, the
 function returns the raw private key, the WIF private key, and the

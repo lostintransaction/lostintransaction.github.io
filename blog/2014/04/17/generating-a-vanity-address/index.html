@@ -232,7 +232,7 @@
  <p>To generate a random address, we use the functions defined in this post, and <code>wif-&gt;addr</code> <a href="http://www.lostintransaction.com/blog/2014/04/09/computing-a-bitcoin-address-part-4-wallet-import-format-wif/" title="Computing a Bitcoin Address, Part 4: Wallet Import Format (WIF)">from a previous post</a>, which converts a WIF private key to an address. To get a vanity address, we check if the prefix of the generated address matches a specified substring (all Bitcoin addresses start with &lsquo;1&rsquo;, so prefix here means the substring after the &lsquo;1&rsquo;).</p>
 
 
- <p>The following Racket function <code>get-vanity-addr</code> repeatedly generates a random private key, converts it to an address, and checks if the prefix of the address matches the specified &ldquo;vanity&rdquo; substring. If no matching address is found after the specified number of <code>tries</code> (default is 1,000,000 tries), the function gives up. Otherwise, the function returns the raw private key, the WIF private key, and the public address.</p>
+ <p>The following Racket function <code>get-vanity-addr</code> repeatedly generates a random private key, converts it to an address, and checks if the prefix of the address matches the input &ldquo;vanity&rdquo; substring. If no matching address is found after the specified number of <code>tries</code> (default is 1,000,000 tries), the function gives up. Otherwise, the function returns the raw private key, the WIF private key, and the public address.</p>
 
 
  <div class="brush: racket">

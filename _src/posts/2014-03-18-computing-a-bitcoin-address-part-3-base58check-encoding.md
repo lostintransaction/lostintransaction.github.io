@@ -128,7 +128,7 @@ base-10 number to base-58. The `num->base58-str.v0` function
 repeatedly performs `modulo 58` and integer division operations on the
 given number --- the `quotient/remainder` Racket function conveniently
 performs both these operations in one step. Passing the `modulo`
-result (ie the remainder `r`) to `num->base58-char` gives in the next
+result (ie the remainder `r`) to `num->base58-char` gives the next
 base-58 digit and the division result (ie the quotient `q`) is used in
 the next `loop` iteration. The end result of the `loop` is a list of
 base-58 digits. The digits are computed in reverse order so they are
@@ -136,7 +136,7 @@ reversed before converting back to a string.
 
 Let's test our code. Following
 [the same example from the Bitcoin wiki][bwiki:addr], the hex address
-`00010966776006953D5567439E5E39F86A0D273BEED61967F6` is
+`00010966776006953D5567439E5E39F86A0D273BEED61967F6` should be
 `16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM` in Base58Check.
 
     $ racket
@@ -150,7 +150,7 @@ out that the leading zeros in a hex string matter when the string is
 viewed as a Bitcoin address. But when we converted to base-10, the
 leading zeros got dropped since they don't matter for numbers.
 
-To complete the base-58 conversion, following the Bitcoin reference
+To fix the base-58 conversion, following the Bitcoin reference
 code, we count the number of leading zeros in the hex string and add
 one leading '1' character to the base-58 address for each leading zero
 *byte* in the hex string, ie, we add one leading base-58 '1' per two
@@ -245,7 +245,7 @@ strings so the result is always byte-aligned.
   (string-append leading-zeros hex-str/no-leading-zeros))
 ```
 
-And trying it on our [example][bwik:addr] returns the expected results
+And trying it on our [example][bwiki:addr] returns the expected results
 (the `^` token in the
 [Racket Extended REPL](http://docs.racket-lang.org/xrepl/index.html)
 is bound to the last printed value):

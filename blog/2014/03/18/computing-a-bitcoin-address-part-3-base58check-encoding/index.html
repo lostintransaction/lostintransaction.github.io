@@ -304,10 +304,10 @@ Welcome to Racket v6.0.0.3.
 </div>
 
 
- <p>The <code>hex-str-&gt;base58-str.v0</code> function first converts its hex string input to a base&ndash;10 number using the previously defined <code>hex-str-&gt;num</code>. It then calls <code>num-&gt;base58-str.v0</code> to convert the base&ndash;10 number to base&ndash;58. The <code>num-&gt;base58-str.v0</code> function repeatedly performs <code>modulo 58</code> and integer division operations on the given number &mdash; the <code>quotient/remainder</code> Racket function conveniently performs both these operations in one step. Passing the <code>modulo</code> result (ie the remainder <code>r</code>) to <code>num-&gt;base58-char</code> gives in the next base&ndash;58 digit and the division result (ie the quotient <code>q</code>) is used in the next <code>loop</code> iteration. The end result of the <code>loop</code> is a list of base&ndash;58 digits. The digits are computed in reverse order so they are reversed before converting back to a string.</p>
+ <p>The <code>hex-str-&gt;base58-str.v0</code> function first converts its hex string input to a base&ndash;10 number using the previously defined <code>hex-str-&gt;num</code>. It then calls <code>num-&gt;base58-str.v0</code> to convert the base&ndash;10 number to base&ndash;58. The <code>num-&gt;base58-str.v0</code> function repeatedly performs <code>modulo 58</code> and integer division operations on the given number &mdash; the <code>quotient/remainder</code> Racket function conveniently performs both these operations in one step. Passing the <code>modulo</code> result (ie the remainder <code>r</code>) to <code>num-&gt;base58-char</code> gives the next base&ndash;58 digit and the division result (ie the quotient <code>q</code>) is used in the next <code>loop</code> iteration. The end result of the <code>loop</code> is a list of base&ndash;58 digits. The digits are computed in reverse order so they are reversed before converting back to a string.</p>
 
 
- <p>Let&rsquo;s test our code. Following <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses">the same example from the Bitcoin wiki</a>, the hex address <code>00010966776006953D5567439E5E39F86A0D273BEED61967F6</code> is <code>16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM</code> in Base58Check.</p>
+ <p>Let&rsquo;s test our code. Following <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses">the same example from the Bitcoin wiki</a>, the hex address <code>00010966776006953D5567439E5E39F86A0D273BEED61967F6</code> should be <code>16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM</code> in Base58Check.</p>
 
 
  <pre><code>$ racket
@@ -320,7 +320,7 @@ Welcome to Racket v6.0.0.3.
  <p>Our initial attempt produces the wrong answer! What happened? It turns out that the leading zeros in a hex string matter when the string is viewed as a Bitcoin address. But when we converted to base&ndash;10, the leading zeros got dropped since they don&rsquo;t matter for numbers.</p>
 
 
- <p>To complete the base&ndash;58 conversion, following the Bitcoin reference code, we count the number of leading zeros in the hex string and add one leading &lsquo;1&rsquo; character to the base&ndash;58 address for each leading zero <em>byte</em> in the hex string, ie, we add one leading base&ndash;58 &lsquo;1&rsquo; per two leading hex &rsquo;0&rsquo;s. Here&rsquo;s an updated conversion function:</p>
+ <p>To fix the base&ndash;58 conversion, following the Bitcoin reference code, we count the number of leading zeros in the hex string and add one leading &lsquo;1&rsquo; character to the base&ndash;58 address for each leading zero <em>byte</em> in the hex string, ie, we add one leading base&ndash;58 &lsquo;1&rsquo; per two leading hex &rsquo;0&rsquo;s. Here&rsquo;s an updated conversion function:</p>
 
 
  <div class="brush: racket">
@@ -541,7 +541,7 @@ Welcome to Racket v6.0.0.3.
 </div>
 
 
- <p>And trying it on our [example][bwik:addr] returns the expected results (the <code>^</code> token in the <a href="http://docs.racket-lang.org/xrepl/index.html">Racket Extended REPL</a> is bound to the last printed value):</p>
+ <p>And trying it on our <a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Technical background of version 1 Bitcoin addresses">example</a> returns the expected results (the <code>^</code> token in the <a href="http://docs.racket-lang.org/xrepl/index.html">Racket Extended REPL</a> is bound to the last printed value):</p>
 
 
  <pre><code>$ racket

@@ -189,4 +189,4 @@ Welcome to Racket v6.0.0.3.
 "15YzfXwEg5STm3GtEh87LAyzNbpVpdx5eN"
 &lt;/code&gt;&lt;/pre&gt;
  &lt;h3 id="software"&gt;Software&lt;/h3&gt;
- &lt;p&gt;All the code from this post &lt;a href="http://www.lostintransaction.com/code/priv2addr.rkt"&gt;is available here&lt;/a&gt;. In this post, I&amp;rsquo;m using Racket 6.0.0.3, running in Debian 7.0.&lt;/p&gt;&lt;/html&gt;</description></item></channel></rss>
+ &lt;p&gt;All the code from this post &lt;a href="http://www.lostintransaction.com/code/priv2addr.rkt"&gt;is available here&lt;/a&gt;. In this post, I&amp;rsquo;m using Racket 6.0.0.3 running in Debian 7.0, and MultiBit 0.5.17 running in Windows 7 64-bit.&lt;/p&gt;&lt;/html&gt;</description></item></channel></rss>

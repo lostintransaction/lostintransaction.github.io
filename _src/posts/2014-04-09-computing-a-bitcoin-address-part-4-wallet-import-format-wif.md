@@ -299,4 +299,5 @@ Let's test that our code gives the expected results:
 
 All the code from this post
 [is available here](http://www.lostintransaction.com/code/priv2addr.rkt).
-In this post, I'm using Racket 6.0.0.3, running in Debian 7.0.
+In this post, I'm using Racket 6.0.0.3 running in Debian 7.0, and
+MultiBit 0.5.17 running in Windows 7 64-bit.

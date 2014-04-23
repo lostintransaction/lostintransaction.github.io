@@ -177,12 +177,12 @@
 
  <blockquote>
 
-  <p>WARNING #1: Racket&rsquo;s <code>random</code> function is  <a href="http://docs.racket-lang.org/reference/generic-numbers.html?q=make-pseudo-random-generator#%28def._%28%28quote._~23~25kernel%29._make-pseudo-random-generator%29%29" title="Racket docs: make-pseudo-random-generator">seeded with the system time</a> and is thus not  <a href="https://cwe.mitre.org/data/definitions/337.html">completely random</a>. When  generating addresses for real-world usage, use a  <a href="http://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator" title="Wikipedia: Cryptographically secure pseudorandom number generator">cryptographically secure source of randomness</a> like  <code>/dev/random</code>.</p></blockquote>
+  <p>WARNING #1: Racket&rsquo;s <code>random</code> function is  <a href="http://docs.racket-lang.org/reference/generic-numbers.html?q=make-pseudo-random-generator#%28def._%28%28quote._~23~25kernel%29._make-pseudo-random-generator%29%29" title="Racket docs: make-pseudo-random-generator">seeded with the system time</a> and is thus not  <a href="https://cwe.mitre.org/data/definitions/337.html">completely random</a>. I  believe something like <code>/dev/random</code> is a more  <a href="http://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator" title="Wikipedia: Cryptographically secure pseudorandom number generator">cryptographically secure source of randomness</a>, when  generating addresses for real-world use.</p></blockquote>
 
 
  <blockquote>
 
-  <p>WARNING #2:  <a href="https://en.bitcoin.it/wiki/Private_key#Range_of_valid_private_keys" title="Range of valid private keys">Not every 32 byte number is a valid private key</a>. But  here I assume that it&rsquo;s sufficiently unlikely that I&rsquo;ll randomly  generate an invalid key, so I ignore this issue.</p></blockquote>
+  <p>WARNING #2:  <a href="https://en.bitcoin.it/wiki/Private_key#Range_of_valid_private_keys" title="Range of valid private keys">Not every 32 byte number is a valid private key</a>. I  assume that it&rsquo;s sufficiently unlikely that I&rsquo;ll randomly generate  an invalid key, so I ignore this issue here.</p></blockquote>
 
 
  <p>Once we have a private key, we need to convert to <a href="https://en.bitcoin.it/wiki/WIF" title="Wallet import format">wallet import format (WIF)</a>. To do this we need to decide if we want a compressed or uncompressed address. These days most addresses in use are compressed so we&rsquo;ll go with compressed. The format for a compressed WIF private key is:</p>

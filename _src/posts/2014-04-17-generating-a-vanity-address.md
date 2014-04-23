@@ -34,18 +34,18 @@ are 32 bytes long.
 
 > WARNING #1: Racket's `random` function is
   [seeded with the system time][docs:pseudo] and is thus not
-  [completely random](https://cwe.mitre.org/data/definitions/337.html). When
-  generating addresses for real-world usage, use a
-  [cryptographically secure source of randomness][wiki:pseudo] like
-  `/dev/random`.
+  [completely random](https://cwe.mitre.org/data/definitions/337.html). I
+  believe something like `/dev/random` is a more
+  [cryptographically secure source of randomness][wiki:pseudo], when
+  generating addresses for real-world use.
 
 [docs:pseudo]: http://docs.racket-lang.org/reference/generic-numbers.html?q=make-pseudo-random-generator#%28def._%28%28quote._~23~25kernel%29._make-pseudo-random-generator%29%29 "Racket docs: make-pseudo-random-generator"
 [wiki:pseudo]: http://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator "Wikipedia: Cryptographically secure pseudorandom number generator"
 
 > WARNING #2:
-  [Not every 32 byte number is a valid private key][bwiki:priv]. But
-  here I assume that it's sufficiently unlikely that I'll randomly
-  generate an invalid key, so I ignore this issue.
+  [Not every 32 byte number is a valid private key][bwiki:priv]. I
+  assume that it's sufficiently unlikely that I'll randomly generate
+  an invalid key, so I ignore this issue here.
 
 [bwiki:priv]: https://en.bitcoin.it/wiki/Private_key#Range_of_valid_private_keys "Range of valid private keys"
 

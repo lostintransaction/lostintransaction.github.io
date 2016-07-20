@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
- <title type="text">Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'elliptic curve'</title>
+ <title type="text">Lost in Transaction: A beginner explores Bitcoin: Posts tagged 'elliptic curve'</title>
  <link rel="self" href="http://www.lostintransaction.com/feeds/elliptic-curve.atom.xml" />
  <link href="http://www.lostintransaction.com/tags/elliptic-curve.html" />
  <id>urn:http-www-lostintransaction-com:-tags-elliptic-curve-html</id>
@@ -12,7 +12,7 @@
   <published>2014-03-14T05:28:01Z</published>
   <updated>2014-03-14T05:28:01Z</updated>
   <author>
-   <name>The Unknown Author</name></author>
+   <name>Nakamaworkhereanymore</name></author>
   <content type="html">
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=elliptic-curve&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F14%2Fcomputing-a-bitcoin-address-part-1-private-to-public-key%2F" height="1" width="1" /&gt;
  &lt;p&gt;I&amp;rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to transform a Bitcoin private key to a public address.&lt;/p&gt;

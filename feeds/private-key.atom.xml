@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
- <title type="text">Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'private key'</title>
+ <title type="text">Lost in Transaction: A beginner explores Bitcoin: Posts tagged 'private key'</title>
  <link rel="self" href="http://www.lostintransaction.com/feeds/private-key.atom.xml" />
  <link href="http://www.lostintransaction.com/tags/private-key.html" />
  <id>urn:http-www-lostintransaction-com:-tags-private-key-html</id>
@@ -12,7 +12,7 @@
   <published>2014-04-17T03:43:06Z</published>
   <updated>2014-04-17T03:43:06Z</updated>
   <author>
-   <name>The Unknown Author</name></author>
+   <name>Nakamaworkhereanymore</name></author>
   <content type="html">
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=private-key&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F04%2F17%2Fgenerating-a-vanity-address%2F" height="1" width="1" /&gt;
  &lt;p&gt;It a &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address"&gt;previous series of posts&lt;/a&gt;, we figured out how to derive a Bitcoin public address from a private key. What should we do with this new knowledge? Let&amp;rsquo;s generate a bunch of addresses! Specifically, we&amp;rsquo;ll create a &amp;ldquo;vanity&amp;rdquo; address generator.&lt;/p&gt;
@@ -73,7 +73,7 @@ public address: 111ksvuJkfkFef8krFpsUeKDrCSedKpxM
   <published>2014-04-09T03:02:03Z</published>
   <updated>2014-04-09T03:02:03Z</updated>
   <author>
-   <name>The Unknown Author</name></author>
+   <name>Nakamaworkhereanymore</name></author>
   <content type="html">
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=private-key&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F04%2F09%2Fcomputing-a-bitcoin-address-part-4-wallet-import-format-wif%2F" height="1" width="1" /&gt;
  &lt;p&gt;In previous posts, we figured out how to compute a Bitcoin address from a private key and we tested our code with an &lt;a href="https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses" title="Bitcoin wiki: Bitcoin addresses"&gt;example from the Bitcoin wiki&lt;/a&gt;. In this post we try to convert a private key from a real wallet (MultiBit) to its corresponding address.&lt;/p&gt;
@@ -259,7 +259,7 @@ Welcome to Racket v6.0.0.3.
   <published>2014-03-14T05:28:01Z</published>
   <updated>2014-03-14T05:28:01Z</updated>
   <author>
-   <name>The Unknown Author</name></author>
+   <name>Nakamaworkhereanymore</name></author>
   <content type="html">
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=private-key&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F14%2Fcomputing-a-bitcoin-address-part-1-private-to-public-key%2F" height="1" width="1" /&gt;
  &lt;p&gt;I&amp;rsquo;ve been wondering how Bitcoin addresses are generated. This post and the ones following will explore, step by step, how to transform a Bitcoin private key to a public address.&lt;/p&gt;

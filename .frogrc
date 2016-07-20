@@ -1,8 +1,8 @@
 # Required: Should NOT end in trailing slash.
 scheme/host = http://www.lostintransaction.com
 
-title = Lost in Transaction: A neophyte explores Bitcoin
-author = The Unknown Author
+title = Lost in Transaction: A beginner explores Bitcoin
+author = Nakamaworkhereanymore
 
 # Whether to show the count of posts next to each tag in sidebar
 show-tag-counts? = true

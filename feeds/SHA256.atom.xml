@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
- <title type="text">Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'SHA256'</title>
+ <title type="text">Lost in Transaction: A beginner explores Bitcoin: Posts tagged 'SHA256'</title>
  <link rel="self" href="http://www.lostintransaction.com/feeds/SHA256.atom.xml" />
  <link href="http://www.lostintransaction.com/tags/SHA256.html" />
  <id>urn:http-www-lostintransaction-com:-tags-SHA256-html</id>
@@ -12,7 +12,7 @@
   <published>2014-03-15T04:09:45Z</published>
   <updated>2014-03-15T04:09:45Z</updated>
   <author>
-   <name>The Unknown Author</name></author>
+   <name>Nakamaworkhereanymore</name></author>
   <content type="html">
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=SHA256&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F15%2Fcomputing-a-bitcoin-address-part-2-public-key-to-hex-address%2F" height="1" width="1" /&gt;
  &lt;p&gt;In a previous post, we &lt;a href="http://www.lostintransaction.com/blog/2014/03/14/computing-a-bitcoin-address-part-1-private-to-public-key/" title="Computing a Bitcoin Address, Part 1: Private to Public Key"&gt;derived a Bitcoin public key from a private key&lt;/a&gt;. This post explores how to convert that public key into a (hexadecimal) Bitcoin address. I&amp;rsquo;ll be using &lt;a href="http://racket-lang.org"&gt;the Racket language&lt;/a&gt; to help me.&lt;/p&gt;

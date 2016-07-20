@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
- <title type="text">Lost in Transaction: A neophyte explores Bitcoin: Posts tagged 'Dorian Nakamoto'</title>
+ <title type="text">Lost in Transaction: A beginner explores Bitcoin: Posts tagged 'Dorian Nakamoto'</title>
  <link rel="self" href="http://www.lostintransaction.com/feeds/Dorian-Nakamoto.atom.xml" />
  <link href="http://www.lostintransaction.com/tags/Dorian-Nakamoto.html" />
  <id>urn:http-www-lostintransaction-com:-tags-Dorian-Nakamoto-html</id>
@@ -12,7 +12,7 @@
   <published>2014-03-07T18:52:52Z</published>
   <updated>2014-03-07T18:52:52Z</updated>
   <author>
-   <name>The Unknown Author</name></author>
+   <name>Nakamaworkhereanymore</name></author>
   <content type="html">
 &lt;html&gt;&lt;img src="http://www.lostintransaction.com/img/1x1.gif?utm_source=Dorian-Nakamoto&amp;amp;utm_medium=Atom&amp;amp;utm_campaign=%2Fblog%2F2014%2F03%2F07%2Fverifying-andreas-s-fundraising-for-dorian-message%2F" height="1" width="1" /&gt;
  &lt;p&gt;Today, Andreas M. Antonopoulos, Chief Security Officer of Blockchain.info, started a &lt;a href="http://www.reddit.com/r/Bitcoin/comments/1ztjmg/andreas_im_fundraising_for_dorian_nakamoto/" title="Dorian fundraiser message on Reddit"&gt;fundraiser&lt;/a&gt; for Dorian Nakamoto, the guy who&amp;rsquo;s being harassed by the media due to Newsweek&amp;rsquo;s recent article about Satoshi Nakamoto. To prove that the message is not fake, Andreas &lt;a href="http://pastebin.com/4MHvpaeN" title="Dorian fundraiser message on Pastebin"&gt;signed the message&lt;/a&gt; with his public key. Since I&amp;rsquo;ve &lt;a href="http://www.lostintransaction.com/blog/2014/03/05/verifying-hashes-and-signatures/" title="Post: Verifying Hashes and Signatures"&gt;recently been playing with digital signatures&lt;/a&gt;, this seemed like a great chance to explore some more. Let&amp;rsquo;s try to to verify the message.&lt;/p&gt;
